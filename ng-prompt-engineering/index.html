@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>吴恩达 ChatGPT Prompt Engineering 提示词工程</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;background:#f3f4f6;color:#242424;line-height:1.8}
+a{color:#0052d9;text-decoration:none}a:hover{text-decoration:underline;color:#003cab}
+.header{background:linear-gradient(135deg,#001a45 0%,#0052d9 60%,#0077ff 100%);color:white;padding:52px 32px;text-align:center}
+.header h1{font-size:22px;font-weight:700;max-width:800px;margin:0 auto;letter-spacing:0.5px}
+.header .sub{font-size:13px;opacity:.85;margin-top:12px;max-width:700px;margin-left:auto;margin-right:auto}
+.stats{display:flex;justify-content:center;gap:28px;margin-top:18px;flex-wrap:wrap}
+.stats .s{font-size:12px;opacity:.8}.stats .s strong{font-size:18px;color:#66b1ff;display:block}
+.container{max-width:1000px;margin:0 auto;padding:24px}
+.content{background:white;border-radius:10px;padding:32px 36px;margin-top:20px;border:1px solid #e5e6eb;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
+.content h1{font-size:22px;color:#0052d9;margin:36px 0 16px;padding-bottom:10px;border-bottom:2px solid #0052d9;font-weight:700}
+.content h1:first-child{margin-top:0}
+.content h2{font-size:18px;color:#242424;margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid #e5e6eb;font-weight:600}
+.content h3{font-size:15px;color:#0052d9;margin:20px 0 8px;font-weight:600}
+.content p{font-size:14px;color:#4b4b4b;margin:8px 0}
+.content ul,.content ol{padding-left:22px;margin:8px 0}
+.content li{font-size:14px;color:#4b4b4b;margin:4px 0}
+.content strong{color:#242424}
+.content em{color:#0052d9;font-style:normal}
+.content blockquote{background:#edf4ff;border-left:4px solid #0052d9;padding:12px 18px;margin:12px 0;border-radius:0 8px 8px 0;font-size:14px;color:#003cab}
+.content blockquote p{color:#003cab;margin:4px 0}
+.content hr{border:none;border-top:1px solid #e5e6eb;margin:28px 0}
+.content table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+.content th{background:#edf4ff;text-align:left;padding:10px 14px;font-weight:600;color:#0052d9;border-bottom:1px solid #d4e3fc}
+.content td{padding:10px 14px;border-bottom:1px solid #f0f1f2;color:#4b4b4b}
+.content tr:hover td{background:#f5f9ff}
+.content pre{background:#0d1b2a;border-radius:8px;padding:14px 18px;margin:10px 0;font-family:"SF Mono",Consolas,monospace;font-size:12.5px;line-height:1.6;overflow-x:auto;color:#c9d1d9}
+.content code{font-family:"SF Mono",Consolas,monospace;font-size:12.5px;background:#edf4ff;padding:2px 6px;border-radius:4px;color:#0052d9}
+.content pre code{background:none;padding:0;color:#c9d1d9}
+.footer{text-align:center;padding:30px 0;color:#8f959e;font-size:12px}</style>
+</head>
+<body>
+<div class="header">
+<h1>吴恩达 ChatGPT Prompt Engineering 提示词工程</h1>
+<div class="sub">DeepLearning.AI × OpenAI | <a href="https://www.bilibili.com/video/BV1173jzNELG/" target="_blank" style="color:#66b1ff">B站 BV1173jzNELG</a> | 10集约1.5小时</div>
+<div class="stats">
+<div class="s"><strong>10</strong>集视频</div>
+<div class="s"><strong>2</strong>大原则</div>
+<div class="s"><strong>10</strong>专有名词</div>
+<div class="s"><strong>4</strong>大应用</div>
+</div>
+</div>
+<div class="container">
+<div class="content">
+<div style="margin:0 0 24px;padding:20px 24px;background:linear-gradient(135deg,#edf4ff 0%,#f0f7ff 50%,#f5f9ff 100%);border-radius:10px;border:1px solid #d4e3fc">
+<h2 id="_2">📖 内容综述</h2>
+<p>这门课的核心信息只有一句话：<strong>好的Prompt不是试出来的，是工程化设计出来的。</strong> 吴恩达和OpenAI的Isa Fulford用9集课讲清了一件事——掌握两大原则（清晰具体+给模型思考时间），然后通过迭代循环不断打磨，你就能让同一个模型的表现产生天壤之别。</p>
+<p>课程的递进逻辑很清晰：先学<strong>两大原则</strong>打基础，再用<strong>迭代开发</strong>掌握方法论，然后在<strong>四大应用</strong>（摘要/推理/转换/扩展）中实战练手，最后升级到<strong>多轮对话</strong>的聊天机器人。从单次Prompt到完整的对话系统，一步步递进。</p>
+
+</div>
+
+<hr />
+<h1 id="prompt">一、两大原则：Prompt设计的基本功</h1>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 课程核心框架: 两大原则 + 迭代 + 四大应用</p>
+<svg viewBox="0 0 700 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <defs><marker id="fw1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="20" y="8" width="210" height="40" rx="8" fill="#0052d9"/><text x="125" y="24" text-anchor="middle" font-size="10" fill="white" font-weight="700">原则1: 清晰具体</text><text x="125" y="40" text-anchor="middle" font-size="8" fill="#66b1ff">分隔符/结构化/条件/Few-shot</text>
+  <rect x="245" y="8" width="210" height="40" rx="8" fill="#1a6fe8"/><text x="350" y="24" text-anchor="middle" font-size="10" fill="white" font-weight="700">原则2: 给思考时间</text><text x="350" y="40" text-anchor="middle" font-size="8" fill="#a3d0ff">指定步骤/先推理再判断</text>
+  <rect x="470" y="8" width="210" height="40" rx="8" fill="#059669"/><text x="575" y="24" text-anchor="middle" font-size="10" fill="white" font-weight="700">方法: 迭代开发</text><text x="575" y="40" text-anchor="middle" font-size="8" fill="#a7f3d0">写→测→分析→改→循环</text>
+  <text x="350" y="66" text-anchor="middle" font-size="9" fill="#0052d9" font-weight="600">↓ 四大应用实战 ↓</text>
+  <rect x="20" y="76" width="150" height="28" rx="6" fill="#edf4ff" stroke="#0052d9"/><text x="95" y="94" text-anchor="middle" font-size="9" fill="#003cab" font-weight="600">摘要 Summarize</text>
+  <line x1="170" y1="90" x2="185" y2="90" stroke="#0052d9" stroke-width="1.5" marker-end="url(#fw1)"/>
+  <rect x="190" y="76" width="140" height="28" rx="6" fill="#edf4ff" stroke="#0052d9"/><text x="260" y="94" text-anchor="middle" font-size="9" fill="#003cab" font-weight="600">推理 Inferring</text>
+  <line x1="330" y1="90" x2="345" y2="90" stroke="#0052d9" stroke-width="1.5" marker-end="url(#fw1)"/>
+  <rect x="350" y="76" width="150" height="28" rx="6" fill="#edf4ff" stroke="#0052d9"/><text x="425" y="94" text-anchor="middle" font-size="9" fill="#003cab" font-weight="600">转换 Transform</text>
+  <line x1="500" y1="90" x2="515" y2="90" stroke="#0052d9" stroke-width="1.5" marker-end="url(#fw1)"/>
+  <rect x="520" y="76" width="150" height="28" rx="6" fill="#edf4ff" stroke="#0052d9"/><text x="595" y="94" text-anchor="middle" font-size="9" fill="#003cab" font-weight="600">扩展 Expanding</text>
+  <text x="350" y="124" text-anchor="middle" font-size="8" fill="#4b4b4b">读(压缩) → 理解(分析) → 转换(改形式) → 创造(生成新内容)</text>
+</svg></div>
+<h2 id="_3">原则一：编写清晰、具体的指令</h2>
+<p><strong>一句话</strong>：清晰 ≠ 简短。清晰意味着让模型毫无歧义地理解你要什么。</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 两大原则 + 四大应用递进</p>
+<svg viewBox="0 0 700 135" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <defs><marker id="pp1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="20" y="10" width="210" height="42" rx="8" fill="#0052d9"/>
+  <text x="125" y="28" text-anchor="middle" font-size="11" fill="white" font-weight="700">原则1: 清晰具体</text>
+  <text x="125" y="44" text-anchor="middle" font-size="8" fill="#66b1ff">分隔符/结构化/条件/Few-shot</text>
+  <rect x="245" y="10" width="210" height="42" rx="8" fill="#1a6fe8"/>
+  <text x="350" y="28" text-anchor="middle" font-size="11" fill="white" font-weight="700">原则2: 给思考时间</text>
+  <text x="350" y="44" text-anchor="middle" font-size="8" fill="#a3d0ff">指定步骤/先推理再判断</text>
+  <rect x="470" y="10" width="210" height="42" rx="8" fill="#059669"/>
+  <text x="575" y="28" text-anchor="middle" font-size="11" fill="white" font-weight="700">方法: 迭代开发</text>
+  <text x="575" y="44" text-anchor="middle" font-size="8" fill="#a7f3d0">写→测→分析→改→循环</text>
+  <text x="350" y="70" text-anchor="middle" font-size="9" fill="#0052d9" font-weight="600">↓ 四大应用（从简单到复杂） ↓</text>
+  <rect x="20" y="80" width="150" height="32" rx="6" fill="#edf4ff" stroke="#0052d9"/><text x="95" y="100" text-anchor="middle" font-size="10" fill="#003cab" font-weight="600">摘要 Summarize</text>
+  <line x1="170" y1="96" x2="185" y2="96" stroke="#0052d9" stroke-width="1.5" marker-end="url(#pp1)"/>
+  <rect x="190" y="80" width="140" height="32" rx="6" fill="#edf4ff" stroke="#0052d9"/><text x="260" y="100" text-anchor="middle" font-size="10" fill="#003cab" font-weight="600">推理 Inferring</text>
+  <line x1="330" y1="96" x2="345" y2="96" stroke="#0052d9" stroke-width="1.5" marker-end="url(#pp1)"/>
+  <rect x="350" y="80" width="150" height="32" rx="6" fill="#edf4ff" stroke="#0052d9"/><text x="425" y="100" text-anchor="middle" font-size="10" fill="#003cab" font-weight="600">转换 Transform</text>
+  <line x1="500" y1="96" x2="515" y2="96" stroke="#0052d9" stroke-width="1.5" marker-end="url(#pp1)"/>
+  <rect x="520" y="80" width="150" height="32" rx="6" fill="#edf4ff" stroke="#0052d9"/><text x="595" y="100" text-anchor="middle" font-size="10" fill="#003cab" font-weight="600">扩展 Expanding</text>
+  <text x="350" y="130" text-anchor="middle" font-size="8" fill="#4b4b4b">压缩信息 → 理解信息 → 转换格式 → 创造内容 | 难度递增、能力递增</text>
+</svg></div>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 清晰具体指令的四大策略</p>
+<svg viewBox="0 0 700 70" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="8" width="160" height="42" rx="8" fill="#0052d9"/><text x="90" y="26" text-anchor="middle" font-size="9" fill="white" font-weight="700">策略1: 分隔符</text><text x="90" y="40" text-anchor="middle" font-size="7" fill="#66b1ff">```/"""/---划定边界</text>
+  <rect x="180" y="8" width="160" height="42" rx="8" fill="#1a6fe8"/><text x="260" y="26" text-anchor="middle" font-size="9" fill="white" font-weight="700">策略2: 结构化输出</text><text x="260" y="40" text-anchor="middle" font-size="7" fill="#a3d0ff">要求JSON/HTML格式</text>
+  <rect x="350" y="8" width="160" height="42" rx="8" fill="#3380e6"/><text x="430" y="26" text-anchor="middle" font-size="9" fill="white" font-weight="700">策略3: 条件检查</text><text x="430" y="40" text-anchor="middle" font-size="7" fill="#a3d0ff">"如果...则...否则..."</text>
+  <rect x="520" y="8" width="170" height="42" rx="8" fill="#4d94ff"/><text x="605" y="26" text-anchor="middle" font-size="9" fill="white" font-weight="700">策略4: Few-shot</text><text x="605" y="40" text-anchor="middle" font-size="7" fill="#d4e3fc">给1-2个输入输出示例</text>
+  <text x="350" y="65" text-anchor="middle" font-size="8" fill="#4b4b4b">核心: 清晰≠简短 · 越具体越好 · 分隔符防止Prompt注入攻击</text>
+</svg></div>
+<h3 id="_4">四大策略</h3>
+<p><strong>策略1：使用分隔符</strong></p>
+<p>用 <code>` ` `</code>、<code>"""</code>、<code>&lt;&gt;</code>、<code>###</code> 等符号分隔指令和待处理文本：</p>
+<pre class="codehilite"><code>请总结以下用三重引号包裹的文本：
+&quot;&quot;&quot;
+这里是需要总结的长文本内容...
+&quot;&quot;&quot;
+</code></pre>
+
+<p><strong>为什么重要？</strong> 防止"提示注入"——如果不用分隔符，用户输入的文本可能包含"忘记之前的指令"这样的内容，模型会被误导。</p>
+<p><strong>策略2：要求结构化输出</strong></p>
+<p>明确要求JSON、HTML、表格等格式：</p>
+<pre class="codehilite"><code>请生成3本虚构书籍，以JSON格式输出，包含以下字段：
+book_id, title, author, genre
+</code></pre>
+
+<p><strong>策略3：条件判断</strong></p>
+<p>让模型先检查条件再执行：</p>
+<pre class="codehilite"><code>如果文本中包含操作步骤，请用编号列出。
+如果文本中没有操作步骤，请回复&quot;未提供步骤&quot;。
+</code></pre>
+
+<p><strong>策略4：少量示例（Few-Shot）</strong></p>
+<p>给1-2个示例让模型模仿风格：</p>
+<pre class="codehilite"><code>用一致的风格回答：
+孩子：教我什么是耐心。
+祖父：让河流雕刻出山谷的那种力量...
+孩子：教我什么是韧性。
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：分隔符是最简单但最有效的改进。很多"模型不听话"的问题，加个分隔符就解决了——因为模型终于能分清"哪是指令、哪是内容"。</p>
+</blockquote>
+<h2 id="_5">原则二：给模型足够的思考时间</h2>
+<p><strong>一句话</strong>：复杂问题不要让模型"脱口而出"，而是让它一步步推理。</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 给模型思考时间的两大策略</p>
+<svg viewBox="0 0 650 68" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;font-family:-apple-system,sans-serif">
+  <rect x="20" y="8" width="290" height="42" rx="8" fill="#0052d9"/><text x="165" y="26" text-anchor="middle" font-size="10" fill="white" font-weight="700">策略1: 指定完成步骤</text><text x="165" y="42" text-anchor="middle" font-size="7" fill="#66b1ff">"先翻译→再总结→再列人名→输出JSON"</text>
+  <rect x="330" y="8" width="300" height="42" rx="8" fill="#1a6fe8"/><text x="480" y="26" text-anchor="middle" font-size="10" fill="white" font-weight="700">策略2: 先自己解再判断</text><text x="480" y="42" text-anchor="middle" font-size="7" fill="#a3d0ff">"先算你的答案，再对比学生答案"</text>
+  <text x="325" y="65" text-anchor="middle" font-size="8" fill="#4b4b4b">让模型"慢慢想"而不是"脱口而出" → 准确率大幅提升</text>
+</svg></div>
+<h3 id="_6">两大策略</h3>
+<p><strong>策略1：指定完成步骤</strong></p>
+<pre class="codehilite"><code>请按以下步骤执行：
+第1步：用一句话概括以下文本。
+第2步：将概括翻译成法语。
+第3步：列出法语概括中的人名。
+第4步：输出包含&quot;法语摘要&quot;和&quot;名字数量&quot;的JSON。
+</code></pre>
+
+<p><strong>策略2：让模型先自己解题，再评判</strong></p>
+<p>课上的经典例子——<strong>太阳能发电站维护成本</strong>：
+- 学生把"10美元/平方英尺"的维护成本写成了"100x"（应该是"10x"）
+- 如果直接问模型"学生做对了吗"，模型可能匆忙说"对的"
+- 但如果先让模型自己解题，再对比学生的答案——模型就能准确发现错误</p>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：这就是"思维链"（Chain of Thought）的雏形。让模型展示推理过程，准确率会大幅提升。人类考试也是一样——先打草稿再答题，比直接写答案靠谱得多。</p>
+</blockquote>
+<hr />
+<h1 id="prompt_1">二、迭代式Prompt开发：方法论</h1>
+<p><strong>一句话</strong>：没有人能一次写出完美的Prompt。核心方法是：写→测→分析→改→再测，循环迭代。</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 迭代式Prompt开发循环</p>
+<svg viewBox="0 0 620 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:620px;font-family:-apple-system,sans-serif">
+  <defs><marker id="it3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="20" y="15" width="110" height="40" rx="8" fill="#0052d9"/><text x="75" y="36" text-anchor="middle" font-size="10" fill="white" font-weight="700">写Prompt</text><text x="75" y="50" text-anchor="middle" font-size="7" fill="#66b1ff">先有想法</text>
+  <line x1="130" y1="35" x2="155" y2="35" stroke="#0052d9" stroke-width="2" marker-end="url(#it3)"/>
+  <rect x="160" y="15" width="110" height="40" rx="8" fill="#1a6fe8"/><text x="215" y="36" text-anchor="middle" font-size="10" fill="white" font-weight="700">测试效果</text>
+  <line x1="270" y1="35" x2="295" y2="35" stroke="#0052d9" stroke-width="2" marker-end="url(#it3)"/>
+  <rect x="300" y="15" width="110" height="40" rx="8" fill="#3380e6"/><text x="355" y="36" text-anchor="middle" font-size="10" fill="white" font-weight="700">分析问题</text>
+  <line x1="410" y1="35" x2="435" y2="35" stroke="#0052d9" stroke-width="2" marker-end="url(#it3)"/>
+  <rect x="440" y="15" width="110" height="40" rx="8" fill="#4d94ff"/><text x="495" y="36" text-anchor="middle" font-size="10" fill="white" font-weight="700">改Prompt</text>
+  <path d="M495 55 L495 78 L75 78 L75 60" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#it3)"/>
+  <text x="285" y="75" text-anchor="middle" font-size="8" fill="#f59e0b" font-weight="600">循环直到满意</text>
+  <text x="310" y="96" text-anchor="middle" font-size="8" fill="#4b4b4b">椅子描述案例: 3轮迭代 → 从"太长"到"适合技术团队的精简版"</text>
+</svg></div>
+<h3 id="_7">椅子产品描述的迭代案例</h3>
+<p>这是课上最完整的迭代示例：</p>
+<p><strong>初始Prompt</strong>："根据产品说明书写一段营销描述"</p>
+<p><strong>问题1</strong>：生成文本太长（500字）
+→ <strong>改进</strong>：加约束"最多50个词"</p>
+<p><strong>问题2</strong>：关注了错误的细节（说了太多尺寸信息）
+→ <strong>改进</strong>：指定"侧重材料和技术细节，面向家具零售商"</p>
+<p><strong>问题3</strong>：需要表格形式
+→ <strong>改进</strong>：要求"用HTML表格输出，包含产品名、材料、尺寸"</p>
+<pre class="codehilite"><code>迭代循环：
+写初版Prompt → 测试输出 → 分析问题（太长？角度错？格式不对？）
+     ↑                              ↓
+     └──── 修改Prompt（应用两大原则） ←┘
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：Prompt不是"碰运气"，而是可以工程化的。就像软件开发一样——写代码、跑测试、找Bug、改代码——Prompt开发也是同样的迭代循环。</p>
+</blockquote>
+<hr />
+<h1 id="_8">三、四大应用实战</h1>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 四大应用能力递进</p>
+<svg viewBox="0 0 700 68" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <defs><marker id="ap3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="8" width="150" height="38" rx="8" fill="#0052d9"/><text x="85" y="26" text-anchor="middle" font-size="10" fill="white" font-weight="700">摘要</text><text x="85" y="40" text-anchor="middle" font-size="7" fill="#66b1ff">长文→短文 压缩</text>
+  <line x1="160" y1="27" x2="175" y2="27" stroke="#0052d9" stroke-width="2" marker-end="url(#ap3)"/>
+  <rect x="180" y="8" width="150" height="38" rx="8" fill="#1a6fe8"/><text x="255" y="26" text-anchor="middle" font-size="10" fill="white" font-weight="700">推理</text><text x="255" y="40" text-anchor="middle" font-size="7" fill="#a3d0ff">情感/主题/实体 理解</text>
+  <line x1="330" y1="27" x2="345" y2="27" stroke="#0052d9" stroke-width="2" marker-end="url(#ap3)"/>
+  <rect x="350" y="8" width="150" height="38" rx="8" fill="#3380e6"/><text x="425" y="26" text-anchor="middle" font-size="10" fill="white" font-weight="700">转换</text><text x="425" y="40" text-anchor="middle" font-size="7" fill="#a3d0ff">翻译/语法/HTML 改形式</text>
+  <line x1="500" y1="27" x2="515" y2="27" stroke="#0052d9" stroke-width="2" marker-end="url(#ap3)"/>
+  <rect x="520" y="8" width="165" height="38" rx="8" fill="#059669"/><text x="603" y="26" text-anchor="middle" font-size="10" fill="white" font-weight="700">扩展</text><text x="603" y="40" text-anchor="middle" font-size="7" fill="#a7f3d0">生成邮件/故事 创造内容</text>
+  <text x="350" y="62" text-anchor="middle" font-size="8" fill="#4b4b4b">读(理解) ←——————→ 写(创造) · Temperature=0(摘要)→0.7(扩展)</text>
+</svg></div>
+<h2 id="summarizing">应用一：文本摘要（Summarizing）</h2>
+<p><strong>关键技巧</strong>：用"提取"比"总结"更精准。</p>
+<pre class="codehilite"><code>从以下评论中提取与运输和发货相关的信息，限30字以内。
+</code></pre>
+
+<p><strong>课上例子</strong>：电商评论 → 分别为物流部门、定价部门、营销部门定制不同视角的摘要。</p>
+<table>
+<thead><tr><th>摘要技巧</th><th>做法</th><th>效果</th></tr></thead>
+<tbody>
+<tr><td><strong>限定字数</strong></td><td>"用30个词总结"</td><td>控制输出长度</td></tr>
+<tr><td><strong>限定视角</strong></td><td>"从物流部门的角度总结"</td><td>关注特定维度</td></tr>
+<tr><td><strong>提取vs摘要</strong></td><td>"提取关于价格的信息"</td><td>精准信息抽取</td></tr>
+</tbody>
+</table>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：摘要和提取(extract)是两回事。摘要是"用更短的话复述"，提取是"只拿出特定信息"。很多时候你以为需要摘要，实际上需要的是提取。</p>
+</blockquote>
+<h2 id="inferring">应用二：文本推理（Inferring）</h2>
+<p><strong>情感分析</strong>：</p>
+<pre class="codehilite"><code>判断以下评论的情感倾向，只回答&quot;正面&quot;或&quot;负面&quot;：
+</code></pre>
+
+<p><strong>信息提取</strong>：</p>
+<pre class="codehilite"><code>从评论中提取购买的商品和制造商，以JSON格式输出，
+键为&quot;Item&quot;和&quot;Brand&quot;。
+</code></pre>
+
+<p><strong>课上例子</strong>：台灯评论 → 判断正负面 → 识别具体情绪（满意、愤怒等，最多5种）→ 判断是否包含愤怒。</p>
+<table>
+<thead><tr><th>推理任务</th><th>Prompt示例</th><th>输出类型</th></tr></thead>
+<tbody>
+<tr><td><strong>情感分析</strong></td><td>"这条评论的情感是正面还是负面？"</td><td>正面/负面/中性</td></tr>
+<tr><td><strong>主题识别</strong></td><td>"这段文字涉及哪些主题？从列表中选"</td><td>标签列表</td></tr>
+<tr><td><strong>实体提取</strong></td><td>"提取文中的品牌名和价格"</td><td>结构化JSON</td></tr>
+<tr><td><strong>多任务并行</strong></td><td>"同时做情感分析+主题识别+实体提取"</td><td>一次性输出多维结果</td></tr>
+</tbody>
+</table>
+<h2 id="transforming">应用三：文本转换（Transforming）</h2>
+<ul>
+<li><strong>翻译</strong>：翻译成法语、西班牙语、甚至"英语海盗话"</li>
+<li><strong>语气调整</strong>：俚语 → 正式商务信函</li>
+<li><strong>格式转换</strong>：Python字典 → HTML表格</li>
+<li><strong>校对改写</strong>：检查拼写语法，按APA风格改写</li>
+</ul>
+<table>
+<thead><tr><th>转换任务</th><th>输入</th><th>输出</th><th>关键技巧</th></tr></thead>
+<tbody>
+<tr><td><strong>翻译</strong></td><td>英文邮件</td><td>中文邮件</td><td>指定"正式/口语"语气</td></tr>
+<tr><td><strong>语法修正</strong></td><td>有语法错误的文本</td><td>修正后的文本</td><td>"用markdown标注修改处"</td></tr>
+<tr><td><strong>格式转换</strong></td><td>JSON数据</td><td>HTML表格</td><td>给出目标格式的示例</td></tr>
+<tr><td><strong>语气调整</strong></td><td>随意的消息</td><td>正式商务邮件</td><td>指定目标读者</td></tr>
+</tbody>
+</table>
+<h2 id="expanding">应用四：文本扩展（Expanding）</h2>
+<p><strong>核心能力</strong>：根据少量输入生成长文本。</p>
+<p><strong>课上例子</strong>：根据客户评论自动生成回复邮件
+- 正面评论 → 致谢 + 邀请复购
+- 负面评论 → 道歉 + 建议联系客服</p>
+<p><strong>Temperature参数在这里登场</strong>：
+- T=0：每次生成同样的回复（确定性）
+- T=0.7~1.0：每次生成不同风格的回复（创意性）</p>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：四大应用的递进关系——摘要是"压缩信息"，推理是"深层理解"，转换是"改变形式"，扩展是"创造内容"。从理解到创造，难度逐步升级。</p>
+</blockquote>
+<hr />
+<blockquote>
+<p>💡 <strong>关键认知</strong>：扩展(Expanding)是最需要注意Temperature的场景。Temperature=0时输出千篇一律（适合摘要），但扩展需要适度创意，建议Temperature=0.7左右。课上演示了用低温和高温写同一封客服邮件，效果天差地别。</p>
+</blockquote>
+<h1 id="prompt_2">四、聊天机器人：从单次Prompt到多轮对话</h1>
+<p><strong>一句话</strong>：模型本身是无状态的——它不"记得"之前的对话。所谓的"记忆"是每次把完整对话历史重新发一遍。</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 聊天机器人: system/user/assistant三角色对话流</p>
+<svg viewBox="0 0 660 80" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:660px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="8" width="115" height="38" rx="8" fill="#0052d9"/><text x="68" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">System</text><text x="68" y="38" text-anchor="middle" font-size="7" fill="#66b1ff">"你是披萨店客服"</text>
+  <rect x="135" y="8" width="100" height="38" rx="8" fill="#1a6fe8"/><text x="185" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">User</text><text x="185" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">"我要点餐"</text>
+  <rect x="245" y="8" width="105" height="38" rx="8" fill="#3380e6"/><text x="298" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">Assistant</text><text x="298" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">"请问要什么?"</text>
+  <rect x="360" y="8" width="115" height="38" rx="8" fill="#1a6fe8"/><text x="418" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">User</text><text x="418" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">"大号玛格丽塔"</text>
+  <rect x="485" y="8" width="160" height="38" rx="8" fill="#3380e6"/><text x="565" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">Assistant</text><text x="565" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">"好的还需要什么?"</text>
+  <rect x="10" y="54" width="635" height="20" rx="4" fill="#f0f7ff" stroke="#d4e3fc"/><text x="328" y="68" text-anchor="middle" font-size="8" fill="#0052d9">每次调用都把完整history发给模型 · 模型没有记忆 · 靠Context维持连贯</text>
+</svg></div>
+<h3 id="_9">三种角色</h3>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>作用</th>
+<th>谁设定的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>system</strong></td>
+<td>AI的"人设"和行为准则</td>
+<td>开发者（用户看不到）</td>
+</tr>
+<tr>
+<td><strong>user</strong></td>
+<td>用户的消息</td>
+<td>用户</td>
+</tr>
+<tr>
+<td><strong>assistant</strong></td>
+<td>模型的回复</td>
+<td>模型生成</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">关键实现</h3>
+<p>每次API调用都要传完整的对话列表：</p>
+<pre class="codehilite"><code class="language-python">messages = [
+    {&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: &quot;你是友好的AI助手&quot;},
+    {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;你好&quot;},
+    {&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: &quot;你好呀！&quot;},
+    {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;我叫什么？&quot;}  # 需要靠历史记录
+]
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：模型不是真的"记住"了你——它只是每次都重新阅读完整的聊天记录。这就是为什么对话越长、Token消耗越多、成本越高的原因。也解释了为什么长对话后模型会"忘事"——因为历史太长被截断了。</p>
+</blockquote>
+<hr />
+<h1 id="_11">五、课程的隐含最佳实践</h1>
+<ol>
+<li><strong>始终用分隔符</strong>——最简单有效的改进</li>
+<li><strong>明确输出格式</strong>——让模型输出JSON/表格便于程序处理</li>
+<li><strong>提供1-2个示例</strong>——比长篇说明更有效</li>
+<li><strong>拆解复杂任务</strong>——一个复杂Prompt拆成多步</li>
+<li><strong>建立Prompt模板库</strong>——按场景分类存储，团队复用</li>
+<li><strong>用A/B测试验证</strong>——不凭感觉，用数据说话</li>
+</ol>
+<hr />
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 课程隐含的5条最佳实践</p>
+<svg viewBox="0 0 700 60" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="8" width="125" height="32" rx="6" fill="#0052d9"/><text x="73" y="28" text-anchor="middle" font-size="7" fill="white" font-weight="700">迭代优于完美</text>
+  <rect x="145" y="8" width="125" height="32" rx="6" fill="#1a6fe8"/><text x="208" y="28" text-anchor="middle" font-size="7" fill="white" font-weight="700">清晰优于简短</text>
+  <rect x="280" y="8" width="125" height="32" rx="6" fill="#3380e6"/><text x="343" y="28" text-anchor="middle" font-size="7" fill="white" font-weight="700">结构化输出</text>
+  <rect x="415" y="8" width="130" height="32" rx="6" fill="#4d94ff"/><text x="480" y="28" text-anchor="middle" font-size="7" fill="white" font-weight="700">分步>一步到位</text>
+  <rect x="555" y="8" width="135" height="32" rx="6" fill="#059669"/><text x="623" y="28" text-anchor="middle" font-size="7" fill="white" font-weight="700">承认幻觉存在</text>
+  <text x="350" y="55" text-anchor="middle" font-size="7" fill="#4b4b4b">吴恩达: "Prompt工程不是一次性任务，而是一个持续迭代的过程"</text>
+</svg></div>
+<h1 id="_12">六、核心洞察</h1>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 幻觉问题: LLM为什么会"一本正经地胡说"</p>
+<svg viewBox="0 0 650 80" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="8" width="190" height="42" rx="8" fill="#dc2626"/><text x="105" y="25" text-anchor="middle" font-size="9" fill="white" font-weight="700">问不存在的东西</text><text x="105" y="40" text-anchor="middle" font-size="7" fill="#fca5a5">"介绍XXX品牌的YYY产品"</text>
+  <rect x="215" y="8" width="200" height="42" rx="8" fill="#f59e0b"/><text x="315" y="25" text-anchor="middle" font-size="9" fill="white" font-weight="700">模型照样生成</text><text x="315" y="40" text-anchor="middle" font-size="7" fill="white">概率预测 ≠ 事实验证</text>
+  <rect x="430" y="8" width="200" height="42" rx="8" fill="#059669"/><text x="530" y="25" text-anchor="middle" font-size="9" fill="white" font-weight="700">缓解策略</text><text x="530" y="40" text-anchor="middle" font-size="7" fill="#a7f3d0">"先找相关信息，再回答"</text>
+  <text x="325" y="68" text-anchor="middle" font-size="7" fill="#0052d9" font-weight="600">核心方法: 让模型先检索(RAG) · 要求引用原文 · 设定"不知道就说不知道"</text>
+</svg></div>
+<h3 id="_13">幻觉问题</h3>
+<p>模型可能"一本正经地胡说八道"。对策：让模型先从文本中收集信息，再基于信息回答——而不是凭"记忆"生成。</p>
+<h3 id="_14">"提取"比"总结"好</h3>
+<p>使用关键词"提取"（extract）让模型聚焦特定信息范围，比笼统的"总结"（summarize）效果更好。</p>
+<h3 id="_15">从尝试走向工程化</h3>
+<p>Prompt不是"试试运气"，而是可复用、可标准化的工程产物。应建立模板库，按场景分类，用测试数据量化效果。</p>
+<hr />
+<h2 id="10">附录：专有名词速查（10个）</h2>
+<table>
+<thead>
+<tr>
+<th>名词</th>
+<th>全称</th>
+<th>一句话白话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt</td>
+<td>提示词</td>
+<td>发给模型的指令/问题</td>
+</tr>
+<tr>
+<td>Prompt Engineering</td>
+<td>提示词工程</td>
+<td>系统化设计Prompt以获得最佳输出</td>
+</tr>
+<tr>
+<td>Few-Shot</td>
+<td>少样本学习</td>
+<td>在Prompt中提供1-2个示例让模型模仿</td>
+</tr>
+<tr>
+<td>Zero-Shot</td>
+<td>零样本</td>
+<td>不给示例，直接让模型执行任务</td>
+</tr>
+<tr>
+<td>Chain of Thought</td>
+<td>思维链</td>
+<td>让模型展示推理步骤再给结论</td>
+</tr>
+<tr>
+<td>Prompt Injection</td>
+<td>提示注入</td>
+<td>恶意用户通过输入内容劫持模型指令</td>
+</tr>
+<tr>
+<td>Hallucination</td>
+<td>幻觉</td>
+<td>模型自信地编造不存在的事实</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>温度</td>
+<td>控制输出随机性的参数</td>
+</tr>
+<tr>
+<td>System Prompt</td>
+<td>系统提示</td>
+<td>定义AI人设和行为准则的隐藏指令</td>
+</tr>
+<tr>
+<td>Token</td>
+<td>词元</td>
+<td>模型处理文本的最小计费单位</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="footer">学习笔记由 WorkBuddy AI 助手整理 · 2026-04-11 · 通俗叙事风格 · 腾讯云商务蓝配色</div>
+</div>
+</body>
+</html>

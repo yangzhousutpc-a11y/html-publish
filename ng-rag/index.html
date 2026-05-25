@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>吴恩达 Building and Evaluating Advanced RAG</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;background:#f3f4f6;color:#242424;line-height:1.8}
+a{color:#0052d9;text-decoration:none}a:hover{text-decoration:underline;color:#003cab}
+.header{background:linear-gradient(135deg,#001a45 0%,#0052d9 60%,#0077ff 100%);color:white;padding:52px 32px;text-align:center}
+.header h1{font-size:22px;font-weight:700;max-width:800px;margin:0 auto;letter-spacing:0.5px}
+.header .sub{font-size:13px;opacity:.85;margin-top:12px;max-width:700px;margin-left:auto;margin-right:auto}
+.stats{display:flex;justify-content:center;gap:28px;margin-top:18px;flex-wrap:wrap}
+.stats .s{font-size:12px;opacity:.8}.stats .s strong{font-size:18px;color:#66b1ff;display:block}
+.container{max-width:1000px;margin:0 auto;padding:24px}
+.content{background:white;border-radius:10px;padding:32px 36px;margin-top:20px;border:1px solid #e5e6eb;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
+.content h1{font-size:22px;color:#0052d9;margin:36px 0 16px;padding-bottom:10px;border-bottom:2px solid #0052d9;font-weight:700}
+.content h1:first-child{margin-top:0}
+.content h2{font-size:18px;color:#242424;margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid #e5e6eb;font-weight:600}
+.content h3{font-size:15px;color:#0052d9;margin:20px 0 8px;font-weight:600}
+.content p{font-size:14px;color:#4b4b4b;margin:8px 0}
+.content ul,.content ol{padding-left:22px;margin:8px 0}
+.content li{font-size:14px;color:#4b4b4b;margin:4px 0}
+.content strong{color:#242424}
+.content em{color:#0052d9;font-style:normal}
+.content blockquote{background:#edf4ff;border-left:4px solid #0052d9;padding:12px 18px;margin:12px 0;border-radius:0 8px 8px 0;font-size:14px;color:#003cab}
+.content blockquote p{color:#003cab;margin:4px 0}
+.content hr{border:none;border-top:1px solid #e5e6eb;margin:28px 0}
+.content table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+.content th{background:#edf4ff;text-align:left;padding:10px 14px;font-weight:600;color:#0052d9;border-bottom:1px solid #d4e3fc}
+.content td{padding:10px 14px;border-bottom:1px solid #f0f1f2;color:#4b4b4b}
+.content tr:hover td{background:#f5f9ff}
+.content pre{background:#0d1b2a;border-radius:8px;padding:14px 18px;margin:10px 0;font-family:"SF Mono",Consolas,monospace;font-size:12.5px;line-height:1.6;overflow-x:auto;color:#c9d1d9}
+.content code{font-family:"SF Mono",Consolas,monospace;font-size:12.5px;background:#edf4ff;padding:2px 6px;border-radius:4px;color:#0052d9}
+.content pre code{background:none;padding:0;color:#c9d1d9}
+.footer{text-align:center;padding:30px 0;color:#8f959e;font-size:12px}</style>
+</head>
+<body>
+<div class="header">
+<h1>吴恩达 Building and Evaluating Advanced RAG</h1>
+<div class="sub">DeepLearning.AI | <a href="https://www.bilibili.com/video/BV1ECQ9B5EKe/" target="_blank" style="color:#66b1ff">B站 BV1ECQ9B5EKe</a> | 49集约4小时</div>
+<div class="stats">
+<div class="s"><strong>49</strong>集视频</div>
+<div class="s"><strong>6</strong>级升级路径</div>
+<div class="s"><strong>15</strong>专有名词</div>
+<div class="s"><strong>7</strong>大章节</div>
+</div>
+</div>
+<div class="container">
+<div class="content">
+<div style="margin:0 0 24px;padding:20px 24px;background:linear-gradient(135deg,#edf4ff 0%,#f0f7ff 50%,#f5f9ff 100%);border-radius:10px;border:1px solid #d4e3fc">
+<h2 id="_1">📖 内容综述</h2>
+<p>RAG（检索增强生成）解决了LLM最大的痛点：<strong>知识会过时、会幻觉、不懂你公司的内部文档</strong>。这门课教的不是"怎么做一个Demo版RAG"，而是"<strong>怎么从Demo升级到生产级</strong>"——核心方法是<strong>高级检索技术 + 自动化评估框架</strong>。</p>
+<p>课程按升级路径递进：先讲<strong>基础RAG流程</strong>（文档→分块→嵌入→检索→生成）让你知道全貌；然后深入<strong>分块策略</strong>（智能分块解决40%的检索故障）；再引入<strong>混合检索+重排序</strong>的"王炸组合"；接着讲<strong>查询扩展</strong>（HyDE/多查询/步回提示）优化用户查询；最后用<strong>三维评估框架</strong>（忠实度/相关性/正确性）量化系统表现。</p>
+<p>一句话概括：<strong>分好块、搜得全、排得准、评得住。</strong></p>
+
+</div>
+
+<hr />
+<h1 id="rag_1">一、为什么需要RAG？</h1>
+<p><strong>一句话</strong>：LLM的知识有截止日期、会幻觉、不懂你的私有数据——RAG让它在回答前先"查资料"，有据可依。</p>
+<table>
+<thead>
+<tr>
+<th>LLM的问题</th>
+<th>RAG的解决方案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>知识截止（不知道昨天发生的事）</td>
+<td>实时检索最新文档</td>
+</tr>
+<tr>
+<td>幻觉（编造事实）</td>
+<td>基于检索到的文档回答</td>
+</tr>
+<tr>
+<td>不懂私有数据（公司内部文档）</td>
+<td>接入企业知识库</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 为什么需要RAG? LLM的三大痛点</p>
+<svg viewBox="0 0 700 60" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="8" width="210" height="35" rx="6" fill="#dc2626"/><text x="115" y="30" text-anchor="middle" font-size="9" fill="white" font-weight="700">知识过时(训练截止日期)</text>
+  <rect x="235" y="8" width="220" height="35" rx="6" fill="#f59e0b"/><text x="345" y="30" text-anchor="middle" font-size="9" fill="white" font-weight="700">不知道你的私有数据</text>
+  <rect x="470" y="8" width="220" height="35" rx="6" fill="#0052d9"/><text x="580" y="30" text-anchor="middle" font-size="9" fill="white" font-weight="700">幻觉(一本正经胡说)</text>
+  <text x="350" y="58" text-anchor="middle" font-size="8" fill="#059669" font-weight="600">RAG的解法: 把最相关的文档段落塞进Context → 让模型"有据可依"</text>
+</svg></div>
+<h1 id="rag_2">二、基础RAG流程</h1>
+<pre class="codehilite"><code>【摄入阶段】
+文档 → 分块(Chunking) → 嵌入向量化(Embedding) → 存入向量数据库
+
+【检索阶段】
+用户查询 → 向量化 → 在向量数据库中搜索相似内容 → 取Top-K相关块
+
+【生成阶段】
+检索结果 + 查询 → 组成Prompt → LLM生成回答
+</code></pre>
+
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 RAG 基础流程图</p>
+
+<svg viewBox="0 0 700 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px">
+  <defs><marker id="r1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="30" width="90" height="50" rx="8" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="55" y="53" text-anchor="middle" font-size="10" fill="#003cab" font-weight="600">用户提问</text>
+  <line x1="100" y1="55" x2="125" y2="55" stroke="#0052d9" stroke-width="2" marker-end="url(#r1)"/>
+  <rect x="130" y="30" width="90" height="50" rx="8" fill="#0052d9"/>
+  <text x="175" y="53" text-anchor="middle" font-size="10" fill="white" font-weight="600">向量化</text>
+  <text x="175" y="68" text-anchor="middle" font-size="8" fill="#66b1ff">Query→向量</text>
+  <line x1="220" y1="55" x2="245" y2="55" stroke="#0052d9" stroke-width="2" marker-end="url(#r1)"/>
+  <rect x="250" y="20" width="120" height="70" rx="8" fill="#1a6fe8"/>
+  <text x="310" y="45" text-anchor="middle" font-size="10" fill="white" font-weight="600">向量数据库</text>
+  <text x="310" y="60" text-anchor="middle" font-size="8" fill="#a3d0ff">搜索相似文档</text>
+  <text x="310" y="75" text-anchor="middle" font-size="8" fill="#a3d0ff">返回Top-K</text>
+  <line x1="370" y1="55" x2="395" y2="55" stroke="#0052d9" stroke-width="2" marker-end="url(#r1)"/>
+  <rect x="400" y="25" width="140" height="60" rx="8" fill="#3380e6"/>
+  <text x="470" y="48" text-anchor="middle" font-size="10" fill="white" font-weight="600">LLM 生成</text>
+  <text x="470" y="63" text-anchor="middle" font-size="8" fill="#a3d0ff">文档+问题→回答</text>
+  <text x="470" y="78" text-anchor="middle" font-size="8" fill="#a3d0ff">有据可依 ✅</text>
+  <line x1="540" y1="55" x2="565" y2="55" stroke="#0052d9" stroke-width="2" marker-end="url(#r1)"/>
+  <rect x="570" y="30" width="110" height="50" rx="8" fill="#059669"/>
+  <text x="625" y="53" text-anchor="middle" font-size="10" fill="white" font-weight="600">精准回答</text>
+  <text x="625" y="68" text-anchor="middle" font-size="8" fill="#a7f3d0">基于文档生成</text>
+</svg>
+</div>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：基础RAG就像"开卷考试"——先从书里找到相关页，把这几页和题目一起给学生看，让学生据此作答。比"闭卷考试"（纯LLM）靠谱得多。</p>
+</blockquote>
+<hr />
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 基础RAG完整流程</p>
+<svg viewBox="0 0 700 75" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <defs><marker id="rg1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="12" width="80" height="35" rx="6" fill="#edf4ff" stroke="#0052d9"/><text x="50" y="34" text-anchor="middle" font-size="8" fill="#003cab" font-weight="600">用户提问</text>
+  <line x1="90" y1="29" x2="108" y2="29" stroke="#0052d9" stroke-width="1.5" marker-end="url(#rg1)"/>
+  <rect x="113" y="12" width="85" height="35" rx="6" fill="#0052d9"/><text x="156" y="34" text-anchor="middle" font-size="8" fill="white" font-weight="600">向量化</text>
+  <line x1="198" y1="29" x2="216" y2="29" stroke="#0052d9" stroke-width="1.5" marker-end="url(#rg1)"/>
+  <rect x="221" y="8" width="120" height="42" rx="6" fill="#1a6fe8"/><text x="281" y="26" text-anchor="middle" font-size="8" fill="white" font-weight="600">向量数据库</text><text x="281" y="40" text-anchor="middle" font-size="7" fill="#a3d0ff">搜索Top-K</text>
+  <line x1="341" y1="29" x2="359" y2="29" stroke="#0052d9" stroke-width="1.5" marker-end="url(#rg1)"/>
+  <rect x="364" y="8" width="140" height="42" rx="6" fill="#3380e6"/><text x="434" y="26" text-anchor="middle" font-size="8" fill="white" font-weight="600">LLM生成</text><text x="434" y="40" text-anchor="middle" font-size="7" fill="#a3d0ff">文档+问题→回答</text>
+  <line x1="504" y1="29" x2="522" y2="29" stroke="#0052d9" stroke-width="1.5" marker-end="url(#rg1)"/>
+  <rect x="527" y="12" width="95" height="35" rx="6" fill="#059669"/><text x="575" y="34" text-anchor="middle" font-size="8" fill="white" font-weight="600">精准回答 ✅</text>
+  <text x="350" y="68" text-anchor="middle" font-size="7" fill="#4b4b4b">核心: 不把所有文档塞进Context → 只检索最相关的Top-K段落 → 有据可依</text>
+</svg></div>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：RAG的核心洞察是——<strong>检索质量决定了生成质量</strong>。如果检索到的文档段落不相关，哪怕LLM再强也回答不好。这就是为什么RAG的80%精力应该花在"怎么检索得更准"上，而不是"换一个更强的LLM"。</p>
+</blockquote>
+<h1 id="40">三、分块策略：解决40%检索故障</h1>
+<h3 id="_2">分块参数的影响</h3>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>太小</th>
+<th>推荐值</th>
+<th>太大</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Chunk大小</strong></td>
+<td>100-200token（缺上下文）</td>
+<td><strong>300-500token</strong></td>
+<td>1000+token（引入噪声）</td>
+</tr>
+<tr>
+<td><strong>重叠(Overlap)</strong></td>
+<td>0（答案卡在边界）</td>
+<td><strong>~100token</strong></td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><strong>课上的关键数据</strong>：智能分块可以解决约<strong>40%</strong>的检索故障。</p>
+<h3 id="_3">三种分块策略</h3>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>原理</th>
+<th>推荐度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>固定大小</td>
+<td>按字符数切</td>
+<td>简单但粗暴</td>
+</tr>
+<tr>
+<td>语义分块</td>
+<td>按含义切</td>
+<td>效果好但成本高</td>
+</tr>
+<tr>
+<td><strong>递归分割</strong> ✅</td>
+<td>先按段落→再按句子→最后按字符</td>
+<td>主流选择</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：别小看100token的重叠——它防止了答案刚好被切断在两个chunk边界的情况。很多"明明有文档但检索不到"的问题，加个重叠就解决了。</p>
+</blockquote>
+<hr />
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 三种分块策略对比</p>
+<svg viewBox="0 0 700 70" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="8" width="210" height="40" rx="8" fill="#0052d9"/><text x="115" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">固定大小分块</text><text x="115" y="38" text-anchor="middle" font-size="7" fill="#66b1ff">简单暴力 · 可能切断语义</text>
+  <rect x="235" y="8" width="220" height="40" rx="8" fill="#1a6fe8"/><text x="345" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">递归字符分割(推荐)</text><text x="345" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">按段落→句子→字符逐级</text>
+  <rect x="470" y="8" width="220" height="40" rx="8" fill="#3380e6"/><text x="580" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">语义分块</text><text x="580" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">按语义相似度聚合 · 最智能</text>
+  <text x="350" y="64" text-anchor="middle" font-size="7" fill="#4b4b4b">分块质量决定检索质量 · 40%的检索故障源自分块不当 · 建议: chunk_size=512, overlap=50</text>
+</svg></div>
+<h1 id="_4">四、高级检索策略</h1>
+<p>基础RAG的检索太粗暴——直接向量搜索Top-K就完事。高级策略从四个方向优化：<strong>句子窗口</strong>（精准+上下文）、<strong>自动合并</strong>（碎片→完整段落）、<strong>混合检索</strong>（向量+关键词双保险）、<strong>重排序</strong>（Cross-Encoder精排）。</p>
+<h2 id="_5">句子窗口检索</h2>
+<p><strong>问题</strong>：基础RAG检索到的单个句子上下文不足。
+<strong>方案</strong>：检索最相关的句子，但返回它前后的完整段落作为"窗口"。</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 句子窗口检索: 精准定位+扩大上下文</p>
+<svg viewBox="0 0 700 80" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <defs><marker id="sw1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="10" width="150" height="42" rx="6" fill="#0052d9"/><text x="85" y="28" text-anchor="middle" font-size="9" fill="white" font-weight="700">Step1: 按句子检索</text><text x="85" y="42" text-anchor="middle" font-size="7" fill="#66b1ff">精准匹配(小chunk)</text>
+  <line x1="160" y1="31" x2="180" y2="31" stroke="#0052d9" stroke-width="2" marker-end="url(#sw1)"/>
+  <rect x="185" y="10" width="200" height="42" rx="6" fill="#1a6fe8"/><text x="285" y="28" text-anchor="middle" font-size="9" fill="white" font-weight="700">Step2: 扩大窗口</text><text x="285" y="42" text-anchor="middle" font-size="7" fill="#a3d0ff">匹配句±N句=完整上下文</text>
+  <line x1="385" y1="31" x2="405" y2="31" stroke="#0052d9" stroke-width="2" marker-end="url(#sw1)"/>
+  <rect x="410" y="10" width="170" height="42" rx="6" fill="#059669"/><text x="495" y="28" text-anchor="middle" font-size="9" fill="white" font-weight="700">Step3: 发给LLM</text><text x="495" y="42" text-anchor="middle" font-size="7" fill="#a7f3d0">小chunk检索+大chunk生成</text>
+  <text x="350" y="68" text-anchor="middle" font-size="7" fill="#4b4b4b">核心思路: 用小粒度搜索(精准) → 用大粒度生成(完整上下文) · 两全其美</text>
+</svg></div>
+<h2 id="_6">自动合并检索</h2>
+<p><strong>问题</strong>：文档切得太碎，信息碎片化。
+<strong>方案</strong>：构建树状文档结构（子节点=小chunk，父节点=合并文本）。当多个相邻子节点命中时，自动返回它们的父节点。</p>
+<pre class="codehilite"><code>文档树：
+       [父节点：完整段落]
+      /    |    |    \
+   [子1] [子2] [子3] [子4]
+
+如果子1、子2、子3都命中 → 自动返回父节点
+（实现&quot;细节&quot;和&quot;全貌&quot;的自动平衡）
+</code></pre>
+
+<h2 id="_7">混合检索：向量+关键词的"王炸"</h2>
+<p><strong>为什么单一检索会失效？</strong></p>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>擅长</th>
+<th>短板</th>
+<th>失效例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>纯向量</strong></td>
+<td>语义理解</td>
+<td>精确匹配差</td>
+<td>"X-2000处理器"、"Error 503"</td>
+</tr>
+<tr>
+<td><strong>纯BM25</strong></td>
+<td>关键词匹配</td>
+<td>语义理解差</td>
+<td>"不含糖的饮料"（否定逻辑）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>混合方案</strong>：同时跑两路搜索，用<strong>RRF算法</strong>融合结果。</p>
+<p><strong>RRF（倒数排序融合）</strong>：
+- 不依赖原始分数（因为两路分数量纲不同）
+- 仅基于排序位置：score = Σ 1/(60+rank)
+- 某文档在两个列表都排第1，得分最高</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 高级检索策略: 向量+关键词+重排序</p>
+<svg viewBox="0 0 700 68" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <defs><marker id="rg2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="8" width="155" height="38" rx="8" fill="#0052d9"/><text x="88" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">向量搜索</text><text x="88" y="38" text-anchor="middle" font-size="7" fill="#66b1ff">语义相似度匹配</text>
+  <text x="178" y="30" font-size="12" fill="#0052d9" font-weight="700">+</text>
+  <rect x="195" y="8" width="155" height="38" rx="8" fill="#1a6fe8"/><text x="273" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">关键词搜索</text><text x="273" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">BM25精确匹配</text>
+  <line x1="350" y1="27" x2="375" y2="27" stroke="#0052d9" stroke-width="2" marker-end="url(#rg2)"/>
+  <rect x="380" y="8" width="145" height="38" rx="8" fill="#3380e6"/><text x="453" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">混合检索</text><text x="453" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">"王炸"组合</text>
+  <line x1="525" y1="27" x2="550" y2="27" stroke="#0052d9" stroke-width="2" marker-end="url(#rg2)"/>
+  <rect x="555" y="8" width="135" height="38" rx="8" fill="#059669"/><text x="623" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">Cross-Encoder</text><text x="623" y="38" text-anchor="middle" font-size="7" fill="#a7f3d0">精排重排序</text>
+  <text x="350" y="62" text-anchor="middle" font-size="7" fill="#4b4b4b">粗筛(向量+关键词) → 融合 → 精排(Cross-Encoder) · 召回率和精确率双提升</text>
+</svg></div>
+<h2 id="cross-encoder">重排序：Cross-Encoder精排</h2>
+<p><strong>问题</strong>：混合检索提升了召回率，但Top-K中仍混杂无关内容。</p>
+<p><strong>方案</strong>：用Cross-Encoder对候选文档逐一精排。</p>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>策略</th>
+<th>数量</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>L1 粗筛</strong></td>
+<td>混合检索</td>
+<td>Top 20-50</td>
+<td>快速、便宜、召回全</td>
+</tr>
+<tr>
+<td><strong>L2 精排</strong></td>
+<td>Cross-Encoder</td>
+<td>Top 3-5</td>
+<td>慢但精准</td>
+</tr>
+</tbody>
+</table>
+<p><strong>课上数据</strong>：引入重排序后，正确chunk出现在前3的命中率从<strong>68%提升至89%</strong>。</p>
+<blockquote>
+<p>💡 <strong>关键认知</strong>："混合检索+重排序"是生产级RAG的王炸组合——混合检索解决"找得全"，重排序解决"排得准"。两者缺一不可。</p>
+</blockquote>
+<hr />
+<h3>基础RAG实现（LangChain示例）</h3>
+<pre class="codehilite"><code class="language-python">from langchain.document_loaders import PyPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import Chroma
+
+# 1. 加载文档
+loader = PyPDFLoader(&quot;公司手册.pdf&quot;)
+docs = loader.load()
+
+# 2. 分块（递归字符分割，推荐）
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=512,    # 每块512字符
+    chunk_overlap=50   # 相邻块重叠50字符
+)
+chunks = splitter.split_documents(docs)
+
+# 3. 向量化 + 存储
+db = Chroma.from_documents(chunks, OpenAIEmbeddings())
+
+# 4. 检索 + 生成
+results = db.similarity_search(&quot;公司的年假政策是什么？&quot;, k=3)
+# 将results注入LLM的Context → 生成精准回答
+</code></pre>
+<h1 id="_8">五、查询扩展与转换</h1>
+<h3 id="_9">多查询检索</h3>
+<p>用LLM生成查询的3个不同表述变体，分别检索后合并结果，提高召回率。</p>
+<h3 id="hyde">HyDE（假设文档嵌入）</h3>
+<p><strong>反直觉但有效</strong>：先让LLM生成一段"假设的答案文档"（即使可能有错），用它的向量去检索真实文档——因为短查询和长文档的语义空间不匹配，假设文档作为"桥梁"。</p>
+<h3 id="step-back">步回提示（Step-Back）</h3>
+<p>让LLM先"退一步"思考更抽象的问题，扩大检索范围获取更完整的背景信息。</p>
+<hr />
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 查询扩展三策略</p>
+<svg viewBox="0 0 700 60" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="8" width="210" height="35" rx="6" fill="#0052d9"/><text x="115" y="30" text-anchor="middle" font-size="9" fill="white" font-weight="700">多查询(Multi-Query)</text>
+  <rect x="235" y="8" width="220" height="35" rx="6" fill="#1a6fe8"/><text x="345" y="30" text-anchor="middle" font-size="9" fill="white" font-weight="700">HyDE(假设性答案)</text>
+  <rect x="470" y="8" width="220" height="35" rx="6" fill="#3380e6"/><text x="580" y="30" text-anchor="middle" font-size="9" fill="white" font-weight="700">Step-Back(抽象提问)</text>
+  <text x="350" y="58" text-anchor="middle" font-size="7" fill="#4b4b4b">本质: 用户的提问方式往往不是最佳检索query · 让LLM帮你改写/扩展query</text>
+</svg></div>
+<h1 id="rag_3">六、RAG评估三维框架</h1>
+<h3 id="_10">三个维度</h3>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>评估什么</th>
+<th>防止什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>上下文相关性</strong></td>
+<td>检索到的文档和问题相关吗？</td>
+<td>检索到无关文档</td>
+</tr>
+<tr>
+<td><strong>忠实度/依据性</strong></td>
+<td>回答是基于检索文档的吗？</td>
+<td>模型编造（幻觉）</td>
+</tr>
+<tr>
+<td><strong>答案相关性</strong></td>
+<td>回答解决了用户的问题吗？</td>
+<td>答非所问</td>
+</tr>
+</tbody>
+</table>
+<h3 id="trulens">评估工具：TruLens</h3>
+<pre class="codehilite"><code class="language-python">f_context_relevance = (
+    Feedback(provider.context_relevance_with_cot_reasons)
+    .on(Select.RecordCalls.retrieve.args.query)
+    .on(Select.RecordCalls.retrieve.rets)
+    .aggregate(numpy.mean)
+)
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：很多RAG系统只看"答案好不好"，忽视了"检索准不准"和"有没有幻觉"。三维评估才能全面把握——检索质量差但答案看起来对，可能只是模型靠"记忆"在回答，一换问题就露馅。</p>
+</blockquote>
+<hr />
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 RAG评估三维框架</p>
+<svg viewBox="0 0 650 60" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="8" width="195" height="35" rx="8" fill="#0052d9"/><text x="108" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">忠实度 Faithfulness</text><text x="108" y="36" text-anchor="middle" font-size="7" fill="#66b1ff">回答是否基于文档?</text>
+  <rect x="220" y="8" width="195" height="35" rx="8" fill="#1a6fe8"/><text x="318" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">相关性 Relevance</text><text x="318" y="36" text-anchor="middle" font-size="7" fill="#a3d0ff">检索的文档对不对?</text>
+  <rect x="430" y="8" width="200" height="35" rx="8" fill="#059669"/><text x="530" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">正确性 Correctness</text><text x="530" y="36" text-anchor="middle" font-size="7" fill="#a7f3d0">最终答案对不对?</text>
+</svg></div>
+<h1 id="rag_4">七、生产级RAG升级路径</h1>
+<pre class="codehilite"><code>Level 1: 基础RAG（固定分块+向量检索）
+    ↓ 解决~40%问题
+Level 2: 智能分块+元数据管理
+    ↓ 解决召回问题
+Level 3: 混合搜索（向量+BM25）
+    ↓ 解决精度问题
+Level 4: 重排序（Cross-Encoder）
+    ↓ 解决复杂查询
+Level 5: 高级检索（句窗/自动合并/查询扩展）
+    ↓ 解决安全问题
+Level 6: 护栏（阈值检查+冲突检测+约束指令）
+</code></pre>
+
+<p><strong>护栏机制</strong>：
+- 最高置信度 &lt; 0.6 → 拒绝回答，要求用户重新表述
+- 来源日期跨度大 → 自动添加"最新政策优先"警告
+- Prompt中明确要求"仅基于上下文回答，不足时说明"</p>
+<hr />
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 生产级RAG升级路径: 从基础到企业级</p>
+<svg viewBox="0 0 700 68" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <defs><marker id="up1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="8" width="125" height="38" rx="6" fill="#0052d9"/><text x="73" y="24" text-anchor="middle" font-size="8" fill="white" font-weight="700">基础RAG</text><text x="73" y="38" text-anchor="middle" font-size="6" fill="#66b1ff">能跑就行</text>
+  <line x1="135" y1="27" x2="153" y2="27" stroke="#0052d9" stroke-width="1.5" marker-end="url(#up1)"/>
+  <rect x="158" y="8" width="140" height="38" rx="6" fill="#1a6fe8"/><text x="228" y="24" text-anchor="middle" font-size="8" fill="white" font-weight="700">+高级分块</text><text x="228" y="38" text-anchor="middle" font-size="6" fill="#a3d0ff">递归/语义分割</text>
+  <line x1="298" y1="27" x2="316" y2="27" stroke="#0052d9" stroke-width="1.5" marker-end="url(#up1)"/>
+  <rect x="321" y="8" width="125" height="38" rx="6" fill="#3380e6"/><text x="384" y="24" text-anchor="middle" font-size="8" fill="white" font-weight="700">+混合检索</text><text x="384" y="38" text-anchor="middle" font-size="6" fill="#a3d0ff">向量+BM25</text>
+  <line x1="446" y1="27" x2="464" y2="27" stroke="#0052d9" stroke-width="1.5" marker-end="url(#up1)"/>
+  <rect x="469" y="8" width="100" height="38" rx="6" fill="#4d94ff"/><text x="519" y="24" text-anchor="middle" font-size="8" fill="white" font-weight="700">+重排序</text><text x="519" y="38" text-anchor="middle" font-size="6" fill="#d4e3fc">Cross-Encoder</text>
+  <line x1="569" y1="27" x2="587" y2="27" stroke="#0052d9" stroke-width="1.5" marker-end="url(#up1)"/>
+  <rect x="592" y="8" width="98" height="38" rx="6" fill="#059669"/><text x="641" y="24" text-anchor="middle" font-size="8" fill="white" font-weight="700">+评估体系</text><text x="641" y="38" text-anchor="middle" font-size="6" fill="#a7f3d0">三维指标监控</text>
+  <text x="350" y="62" text-anchor="middle" font-size="7" fill="#4b4b4b">每一步都能独立提升10-20%效果 · 叠加使用效果更佳</text>
+</svg></div>
+<h2 id="15">附录：专有名词速查（15个）</h2>
+<table>
+<thead>
+<tr>
+<th>名词</th>
+<th>全称</th>
+<th>一句话白话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RAG</td>
+<td>Retrieval Augmented Generation</td>
+<td>先检索文档再让LLM回答</td>
+</tr>
+<tr>
+<td>Chunking</td>
+<td>分块</td>
+<td>把长文档切成小块便于检索</td>
+</tr>
+<tr>
+<td>Embedding</td>
+<td>嵌入/向量化</td>
+<td>把文本转成数字向量</td>
+</tr>
+<tr>
+<td>Vector Database</td>
+<td>向量数据库</td>
+<td>存储和检索向量的专用数据库</td>
+</tr>
+<tr>
+<td>BM25</td>
+<td>Best Matching 25</td>
+<td>经典的关键词检索算法</td>
+</tr>
+<tr>
+<td>Cosine Similarity</td>
+<td>余弦相似度</td>
+<td>衡量两个向量"有多像"的指标</td>
+</tr>
+<tr>
+<td>Cross-Encoder</td>
+<td>交叉编码器</td>
+<td>将查询和文档联合编码精排的模型</td>
+</tr>
+<tr>
+<td>RRF</td>
+<td>Reciprocal Rank Fusion</td>
+<td>基于排名位置的结果融合算法</td>
+</tr>
+<tr>
+<td>HyDE</td>
+<td>Hypothetical Document Embeddings</td>
+<td>用假设文档的向量去检索真实文档</td>
+</tr>
+<tr>
+<td>TruLens</td>
+<td>-</td>
+<td>RAG评估框架</td>
+</tr>
+<tr>
+<td>Faithfulness</td>
+<td>忠实度</td>
+<td>回答是否严格基于检索到的文档</td>
+</tr>
+<tr>
+<td>Context Relevance</td>
+<td>上下文相关性</td>
+<td>检索到的文档和问题的匹配度</td>
+</tr>
+<tr>
+<td>Sentence Window</td>
+<td>句子窗口检索</td>
+<td>检索句子但返回其前后段落</td>
+</tr>
+<tr>
+<td>Auto-Merging</td>
+<td>自动合并检索</td>
+<td>多个子节点命中时自动返回父节点</td>
+</tr>
+<tr>
+<td>Overlap</td>
+<td>重叠</td>
+<td>相邻chunk之间共享的部分</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="footer">学习笔记由 WorkBuddy AI 助手整理 · 2026-04-11 · 通俗叙事风格 · 腾讯云商务蓝配色</div>
+</div>
+</body>
+</html>

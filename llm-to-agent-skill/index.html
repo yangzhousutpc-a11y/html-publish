@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>从 LLM 到 Agent Skill：一期视频打通底层逻辑</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;background:#f3f4f6;color:#242424;line-height:1.8}
+a{color:#0052d9;text-decoration:none}a:hover{text-decoration:underline;color:#003cab}
+.header{background:linear-gradient(135deg,#001a45 0%,#0052d9 60%,#0077ff 100%);color:white;padding:52px 32px;text-align:center}
+.header h1{font-size:22px;font-weight:700;max-width:800px;margin:0 auto;letter-spacing:0.5px}
+.header .sub{font-size:13px;opacity:.85;margin-top:12px;max-width:700px;margin-left:auto;margin-right:auto}
+.stats{display:flex;justify-content:center;gap:28px;margin-top:18px;flex-wrap:wrap}
+.stats .s{font-size:12px;opacity:.8}.stats .s strong{font-size:18px;color:#66b1ff;display:block}
+.container{max-width:1000px;margin:0 auto;padding:24px}
+.content{background:white;border-radius:10px;padding:32px 36px;margin-top:20px;border:1px solid #e5e6eb;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
+.content h1{font-size:22px;color:#0052d9;margin:36px 0 16px;padding-bottom:10px;border-bottom:2px solid #0052d9;font-weight:700}
+.content h1:first-child{margin-top:0}
+.content h2{font-size:18px;color:#242424;margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid #e5e6eb;font-weight:600}
+.content h3{font-size:15px;color:#0052d9;margin:20px 0 8px;font-weight:600}
+.content p{font-size:14px;color:#4b4b4b;margin:8px 0}
+.content ul,.content ol{padding-left:22px;margin:8px 0}
+.content li{font-size:14px;color:#4b4b4b;margin:4px 0}
+.content strong{color:#242424}
+.content em{color:#0052d9;font-style:normal}
+.content blockquote{background:#edf4ff;border-left:4px solid #0052d9;padding:12px 18px;margin:12px 0;border-radius:0 8px 8px 0;font-size:14px;color:#003cab}
+.content blockquote p{color:#003cab;margin:4px 0}
+.content hr{border:none;border-top:1px solid #e5e6eb;margin:28px 0}
+.content table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+.content th{background:#edf4ff;text-align:left;padding:10px 14px;font-weight:600;color:#0052d9;border-bottom:1px solid #d4e3fc}
+.content td{padding:10px 14px;border-bottom:1px solid #f0f1f2;color:#4b4b4b}
+.content tr:hover td{background:#f5f9ff}
+.content pre{background:#0d1b2a;border-radius:8px;padding:14px 18px;margin:10px 0;font-family:"SF Mono",Consolas,monospace;font-size:12.5px;line-height:1.6;overflow-x:auto;color:#c9d1d9}
+.content code{font-family:"SF Mono",Consolas,monospace;font-size:12.5px;background:#edf4ff;padding:2px 6px;border-radius:4px;color:#0052d9}
+.content pre code{background:none;padding:0;color:#c9d1d9}
+.footer{text-align:center;padding:30px 0;color:#8f959e;font-size:12px}</style>
+</head>
+<body>
+<div class="header">
+<h1>从 LLM 到 Agent Skill：一期视频打通底层逻辑</h1>
+<div class="sub">UP主: 马克的技术工作坊 | <a href="https://www.bilibili.com/video/BV1E7wtzaEdq/" target="_blank" style="color:#66b1ff;text-decoration:underline">B站 BV1E7wtzaEdq</a> | 约32分钟 | 8个核心概念完整链路</div>
+<div class="stats">
+<div class="s"><strong>32</strong>分钟</div>
+<div class="s"><strong>8</strong>核心概念</div>
+<div class="s"><strong>8</strong>专有名词</div>
+<div class="s"><strong>1</strong>递进链路</div>
+</div>
+</div>
+<div class="container">
+<div class="content">
+<div style="margin:0 0 24px;padding:20px 24px;background:linear-gradient(135deg,#edf4ff 0%,#f0f7ff 50%,#f5f9ff 100%);border-radius:10px;border:1px solid #d4e3fc">
+<h2 id="_1">📖 内容综述</h2>
+<p>这份笔记用一条完整的技术链路串起了AI领域最核心的8个概念：<strong>LLM → Token → Context → Prompt → Tool → MCP → Agent → Agent Skill</strong>。每个概念都不是孤立的知识点，而是上一个概念的自然延伸——LLM是大脑，Token是大脑处理信息的最小单位，Context是大脑的短期记忆，Prompt是和大脑说话的方式，Tool是给大脑装上手脚，MCP是让手脚通用的USB-C接口，Agent是大脑+手脚+自主循环的完整体，Skill则是把Agent的最佳实践沉淀成可复用的经验手册。</p>
+<p>从头看到尾，你会发现这8个概念就像搭积木一样，一层叠一层，最终搭出了一个能自主干活的AI助手。</p>
+
+</div>
+
+<hr />
+<h1 id="llm">一、LLM：超级文字接龙机</h1>
+<p><strong>一句话</strong>：大语言模型就是一个"文字接龙"高手——你给它开头几个字，它根据概率预测下一个最可能的字，一个接一个地"接龙"出完整的回答。</p>
+<h3 id="_2">它到底在做什么？</h3>
+<p>想象你在玩文字接龙游戏。你说"张三的视频"，然后模型开始预测：</p>
+<pre class="codehilite"><code>输入：&quot;张三的视频&quot;
+模型预测：怎么样 → 很 → 有 → 趣 → 。
+</code></pre>
+
+<p>每一步，模型都不是在"理解"你说的话，而是在计算"根据前面这些字，下一个字最可能是什么"。它看过了互联网上几千亿个词的语料，学会了语言的统计规律。</p>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 LLM "文字接龙" 预测流程</p>
+<svg viewBox="0 0 750 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:750px;font-family:-apple-system,sans-serif">
+  <defs>
+    <marker id="llm1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker>
+  </defs>
+  <!-- 输入 -->
+  <rect x="10" y="18" width="110" height="42" rx="8" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="65" y="36" text-anchor="middle" font-size="10" fill="#003cab" font-weight="600">用户输入</text>
+  <text x="65" y="52" text-anchor="middle" font-size="9" fill="#0052d9">"张三的视频"</text>
+  <line x1="120" y1="39" x2="145" y2="39" stroke="#0052d9" stroke-width="2" marker-end="url(#llm1)"/>
+  <!-- LLM大脑 -->
+  <rect x="150" y="10" width="130" height="58" rx="10" fill="#0052d9" stroke="#003cab" stroke-width="1.5"/>
+  <text x="215" y="32" text-anchor="middle" font-size="12" fill="white" font-weight="700">LLM 大脑</text>
+  <text x="215" y="50" text-anchor="middle" font-size="9" fill="#66b1ff">P("怎么样")=35%</text>
+  <text x="215" y="62" text-anchor="middle" font-size="9" fill="#66b1ff">P("好看")=28%...</text>
+  <line x1="280" y1="39" x2="305" y2="39" stroke="#0052d9" stroke-width="2" marker-end="url(#llm1)"/>
+  <!-- 逐步输出 -->
+  <rect x="310" y="15" width="50" height="48" rx="6" fill="#1a6fe8"/>
+  <text x="335" y="36" text-anchor="middle" font-size="13" fill="white" font-weight="700">怎</text>
+  <text x="335" y="52" text-anchor="middle" font-size="8" fill="#a3d0ff">35%</text>
+  <line x1="360" y1="39" x2="370" y2="39" stroke="#0052d9" stroke-width="1.5"/>
+  <rect x="374" y="15" width="50" height="48" rx="6" fill="#1a6fe8"/>
+  <text x="399" y="36" text-anchor="middle" font-size="13" fill="white" font-weight="700">么</text>
+  <text x="399" y="52" text-anchor="middle" font-size="8" fill="#a3d0ff">82%</text>
+  <line x1="424" y1="39" x2="434" y2="39" stroke="#0052d9" stroke-width="1.5"/>
+  <rect x="438" y="15" width="50" height="48" rx="6" fill="#1a6fe8"/>
+  <text x="463" y="36" text-anchor="middle" font-size="13" fill="white" font-weight="700">样</text>
+  <text x="463" y="52" text-anchor="middle" font-size="8" fill="#a3d0ff">91%</text>
+  <line x1="488" y1="39" x2="498" y2="39" stroke="#0052d9" stroke-width="1.5"/>
+  <rect x="502" y="15" width="50" height="48" rx="6" fill="#3380e6"/>
+  <text x="527" y="36" text-anchor="middle" font-size="13" fill="white" font-weight="700">很</text>
+  <text x="527" y="52" text-anchor="middle" font-size="8" fill="#a3d0ff">45%</text>
+  <line x1="552" y1="39" x2="562" y2="39" stroke="#0052d9" stroke-width="1.5"/>
+  <rect x="566" y="15" width="50" height="48" rx="6" fill="#3380e6"/>
+  <text x="591" y="36" text-anchor="middle" font-size="13" fill="white" font-weight="700">有</text>
+  <text x="591" y="52" text-anchor="middle" font-size="8" fill="#a3d0ff">62%</text>
+  <line x1="616" y1="39" x2="626" y2="39" stroke="#0052d9" stroke-width="1.5"/>
+  <rect x="630" y="15" width="50" height="48" rx="6" fill="#4d94ff"/>
+  <text x="655" y="36" text-anchor="middle" font-size="13" fill="white" font-weight="700">趣</text>
+  <text x="655" y="52" text-anchor="middle" font-size="8" fill="#d4e3fc">78%</text>
+  <line x1="680" y1="39" x2="690" y2="39" stroke="#0052d9" stroke-width="1.5"/>
+  <rect x="694" y="15" width="40" height="48" rx="6" fill="#059669"/>
+  <text x="714" y="36" text-anchor="middle" font-size="13" fill="white" font-weight="700">。</text>
+  <text x="714" y="52" text-anchor="middle" font-size="8" fill="#a7f3d0">EOS</text>
+  <!-- 说明 -->
+  <rect x="10" y="85" width="724" height="60" rx="8" fill="#f0f7ff" stroke="#d4e3fc"/>
+  <text x="375" y="105" text-anchor="middle" font-size="10" fill="#0052d9" font-weight="600">每一步都是一次独立的概率预测 — "接龙"并非理解语义，而是统计最可能的下一个Token</text>
+  <text x="375" y="122" text-anchor="middle" font-size="9" fill="#4b4b4b">概率越高→模型越"确信" | 最终输出 = 多次概率采样的拼接结果</text>
+  <text x="375" y="137" text-anchor="middle" font-size="9" fill="#4b4b4b">这就是为什么相同输入可能得到不同输出（概率≠100%）→ LLM的"创造力"和"幻觉"同源</text>
+</svg>
+</div>
+
+<h3 id="llm_1">LLM和普通程序有什么区别？</h3>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>传统程序</th>
+<th>LLM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工作方式</td>
+<td>按规则执行（if-else）</td>
+<td>按概率预测</td>
+</tr>
+<tr>
+<td>输出特点</td>
+<td>确定的</td>
+<td>每次可能不同</td>
+</tr>
+<tr>
+<td>知识来源</td>
+<td>程序员手写规则</td>
+<td>训练数据中学习</td>
+</tr>
+<tr>
+<td>能处理的任务</td>
+<td>特定任务</td>
+<td>几乎所有语言任务</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：LLM不是数据库，不是搜索引擎——它是一个概率函数。它的每一个输出都是"掷骰子"的结果，只不过这个骰子被训练得非常精准。这就是为什么它有时候会"一本正经地胡说八道"（幻觉）。</p>
+</blockquote>
+<hr />
+<h1 id="token">二、Token：模型眼中的"原子"</h1>
+<p><strong>一句话</strong>：Token是大模型处理文本的最小单位——不是字，不是词，而是分词器切出来的"碎片"。</p>
+<h3 id="llmtoken">从LLM到Token的递进</h3>
+<p>上一节说LLM是"一个字一个字地预测"，但准确地说，它是<strong>一个Token一个Token地预测</strong>。Token是模型能看到的最小颗粒。</p>
+<h3 id="token_1">Token ≠ 词，这是最常见的误区</h3>
+<pre class="codehilite"><code>英文：&quot;information&quot; → 可能被切成 [&quot;infor&quot;, &quot;mation&quot;] = 2个Token
+中文：&quot;我喜欢苹果&quot; → 可能被切成 [&quot;我&quot;, &quot;喜欢&quot;, &quot;苹果&quot;] = 3个Token
+</code></pre>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Token 分词对比 — 同一句话在模型眼中的"切法"</p>
+<svg viewBox="0 0 700 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <!-- 英文例子 -->
+  <text x="20" y="25" font-size="11" fill="#0052d9" font-weight="600">英文 "information"</text>
+  <rect x="20" y="35" width="180" height="36" rx="6" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="110" y="58" text-anchor="middle" font-size="13" fill="#003cab">information</text>
+  <text x="220" y="58" font-size="14" fill="#0052d9" font-weight="700">→</text>
+  <rect x="250" y="35" width="90" height="36" rx="6" fill="#0052d9"/>
+  <text x="295" y="58" text-anchor="middle" font-size="12" fill="white" font-weight="600">infor</text>
+  <text x="350" y="58" font-size="10" fill="#4b4b4b">+</text>
+  <rect x="365" y="35" width="100" height="36" rx="6" fill="#1a6fe8"/>
+  <text x="415" y="58" text-anchor="middle" font-size="12" fill="white" font-weight="600">mation</text>
+  <text x="490" y="58" font-size="11" fill="#059669" font-weight="600">= 2 Tokens</text>
+  <!-- 中文例子 -->
+  <text x="20" y="100" font-size="11" fill="#0052d9" font-weight="600">中文 "我喜欢苹果"</text>
+  <rect x="20" y="110" width="150" height="36" rx="6" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="95" y="133" text-anchor="middle" font-size="13" fill="#003cab">我喜欢苹果</text>
+  <text x="185" y="133" font-size="14" fill="#0052d9" font-weight="700">→</text>
+  <rect x="210" y="110" width="50" height="36" rx="6" fill="#0052d9"/>
+  <text x="235" y="133" text-anchor="middle" font-size="12" fill="white" font-weight="600">我</text>
+  <text x="268" y="133" font-size="10" fill="#4b4b4b">+</text>
+  <rect x="282" y="110" width="70" height="36" rx="6" fill="#1a6fe8"/>
+  <text x="317" y="133" text-anchor="middle" font-size="12" fill="white" font-weight="600">喜欢</text>
+  <text x="360" y="133" font-size="10" fill="#4b4b4b">+</text>
+  <rect x="374" y="110" width="70" height="36" rx="6" fill="#3380e6"/>
+  <text x="409" y="133" text-anchor="middle" font-size="12" fill="white" font-weight="600">苹果</text>
+  <text x="470" y="133" font-size="11" fill="#059669" font-weight="600">= 3 Tokens</text>
+  <!-- 底部说明 -->
+  <text x="350" y="170" text-anchor="middle" font-size="9" fill="#4b4b4b">Token ≠ 字，也 ≠ 词 — 是分词器(Tokenizer)按训练语料决定的切法 | 中文1字 ≈ 1.5~2 Tokens</text>
+</svg>
+</div>
+
+<h3 id="token_2">中英文Token换算（实用）</h3>
+<table>
+<thead>
+<tr>
+<th>语言</th>
+<th>换算关系</th>
+<th>意味着</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>英文</td>
+<td>1 Token ≈ 0.75个单词</td>
+<td>100个词 ≈ 133 Token</td>
+</tr>
+<tr>
+<td>中文</td>
+<td>1 Token ≈ 1.5-2个汉字</td>
+<td>100个字 ≈ 50-67 Token</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：模型的计费、Context长度限制、响应速度——全部以Token为单位。理解Token，后面所有概念才有根基。这也是为什么用中文提问比英文"更烧钱"的原因。</p>
+</blockquote>
+<hr />
+<h1 id="context">三、Context：模型的"短期记忆"</h1>
+<p><strong>一句话</strong>：Context就是每次发给模型的信息总和——包括你之前说的、系统预设的、工具返回的，统统打包成一大段文字扔给模型。</p>
+<h3 id="tokencontext">从Token到Context的递进</h3>
+<p>Token是信息的最小单位，那么一次对话中包含的所有Token加在一起，就构成了Context。模型就是在这个Context的范围内进行预测。</p>
+<h3 id="_3">为什么模型能"记住"之前的对话？</h3>
+<p><strong>答案：它根本不记得。</strong></p>
+<p>每次你发消息，系统都会把之前的完整对话历史重新发一遍给模型。模型"记住"对话的方式，就像你每次考试都要重新看一遍所有笔记。</p>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Context 的秘密 — 每次对话都是"重新打包"</p>
+<svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;font-family:-apple-system,sans-serif">
+  <defs>
+    <marker id="ctx1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker>
+  </defs>
+  <!-- 第1轮 -->
+  <text x="20" y="22" font-size="10" fill="#0052d9" font-weight="600">第1轮</text>
+  <rect x="20" y="30" width="130" height="28" rx="5" fill="#0052d9"/>
+  <text x="85" y="49" text-anchor="middle" font-size="10" fill="white">"你好"</text>
+  <line x1="150" y1="44" x2="170" y2="44" stroke="#0052d9" stroke-width="1.5" marker-end="url(#ctx1)"/>
+  <rect x="175" y="30" width="50" height="28" rx="5" fill="#059669"/>
+  <text x="200" y="49" text-anchor="middle" font-size="9" fill="white">LLM</text>
+  <!-- 第2轮 -->
+  <text x="20" y="82" font-size="10" fill="#0052d9" font-weight="600">第2轮</text>
+  <rect x="20" y="90" width="130" height="28" rx="5" fill="#d4e3fc" stroke="#0052d9"/>
+  <text x="85" y="109" text-anchor="middle" font-size="9" fill="#003cab">"你好" + "你好呀!"</text>
+  <rect x="160" y="90" width="130" height="28" rx="5" fill="#0052d9"/>
+  <text x="225" y="109" text-anchor="middle" font-size="9" fill="white">+ "我叫张三"</text>
+  <line x1="290" y1="104" x2="310" y2="104" stroke="#0052d9" stroke-width="1.5" marker-end="url(#ctx1)"/>
+  <rect x="315" y="90" width="50" height="28" rx="5" fill="#059669"/>
+  <text x="340" y="109" text-anchor="middle" font-size="9" fill="white">LLM</text>
+  <!-- 第3轮 -->
+  <text x="20" y="142" font-size="10" fill="#0052d9" font-weight="600">第3轮</text>
+  <rect x="20" y="150" width="160" height="28" rx="5" fill="#d4e3fc" stroke="#0052d9"/>
+  <text x="100" y="169" text-anchor="middle" font-size="8" fill="#003cab">"你好"+"你好呀!"+"我叫张三"+"你叫张三"</text>
+  <rect x="190" y="150" width="140" height="28" rx="5" fill="#0052d9"/>
+  <text x="260" y="169" text-anchor="middle" font-size="9" fill="white">+ "我叫什么？"</text>
+  <line x1="330" y1="164" x2="350" y2="164" stroke="#0052d9" stroke-width="1.5" marker-end="url(#ctx1)"/>
+  <rect x="355" y="150" width="50" height="28" rx="5" fill="#059669"/>
+  <text x="380" y="169" text-anchor="middle" font-size="9" fill="white">LLM</text>
+  <!-- 右侧说明 -->
+  <rect x="440" y="25" width="265" height="155" rx="8" fill="#f0f7ff" stroke="#d4e3fc"/>
+  <text x="572" y="50" text-anchor="middle" font-size="11" fill="#0052d9" font-weight="600">每轮对话的"真相"</text>
+  <text x="572" y="72" text-anchor="middle" font-size="9" fill="#4b4b4b">浅色 = 历史记录（重新发一遍）</text>
+  <text x="572" y="88" text-anchor="middle" font-size="9" fill="#4b4b4b">深色 = 当前新输入</text>
+  <text x="572" y="110" text-anchor="middle" font-size="10" fill="#dc2626" font-weight="600">模型没有"记忆"！</text>
+  <text x="572" y="128" text-anchor="middle" font-size="9" fill="#4b4b4b">每次都把历史打包重发</text>
+  <text x="572" y="144" text-anchor="middle" font-size="9" fill="#4b4b4b">历史越长→Token越多→越贵</text>
+  <text x="572" y="162" text-anchor="middle" font-size="9" fill="#4b4b4b">超出Window→早期记录被截断→"忘记"</text>
+</svg>
+</div>
+
+<pre class="codehilite"><code>第1轮：用户说&quot;你好&quot; → 发给模型 [&quot;你好&quot;]
+第2轮：用户说&quot;我叫张三&quot; → 发给模型 [&quot;你好&quot;, &quot;你好呀！&quot;, &quot;我叫张三&quot;]
+第3轮：用户说&quot;我叫什么？&quot; → 发给模型 [&quot;你好&quot;, &quot;你好呀！&quot;, &quot;我叫张三&quot;, &quot;你叫张三&quot;, &quot;我叫什么？&quot;]
+</code></pre>
+
+<h3 id="context-window">Context Window：记忆容量的上限</h3>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>Context Window</th>
+<th>大约能"记住"多少</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GPT-3.5</td>
+<td>4K/16K Token</td>
+<td>几页纸</td>
+</tr>
+<tr>
+<td>Claude 3</td>
+<td>200K Token</td>
+<td>一本小说</td>
+</tr>
+<tr>
+<td>GPT-4o</td>
+<td>128K Token</td>
+<td>半本小说</td>
+</tr>
+</tbody>
+</table>
+<p>超过上限怎么办？最早的对话记录会被"丢弃"——这就是长对话后模型"忘记"你说过的话的原因。</p>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：Context有上限，这直接引出了下一个问题——如果我想让模型知道公司内部的100页文档怎么办？答案就是RAG（检索增强生成）：不把所有文档塞进去，而是每次只把最相关的几段塞进Context。</p>
+</blockquote>
+<hr />
+<h1 id="prompt">四、Prompt：和模型"说话"的艺术</h1>
+<p><strong>一句话</strong>：Prompt就是你发给模型的指令。但指令分两种——System Prompt是开发者设定的"人设"，User Prompt是用户的具体问题。</p>
+<h3 id="contextprompt">从Context到Prompt的递进</h3>
+<p>Context是信息的容器，而Prompt是放进容器里最关键的那部分——它决定了模型会给你什么样的回答。</p>
+<h3 id="system-prompt-vs-user-prompt">System Prompt vs User Prompt</h3>
+<p><strong>视频中的"数学辅导机器人"例子</strong>：</p>
+<p><strong>不加System Prompt</strong>：</p>
+<pre class="codehilite"><code>用户：3x + 5 = 20，求x
+模型：x = 5（直接给答案，冰冷的数学回答）
+</code></pre>
+
+<p><strong>加上System Prompt后</strong>：</p>
+<pre class="codehilite"><code>System Prompt：&quot;你是一个耐心的数学辅导老师，要用通俗易懂的方式讲解，引导学生思考，而不是直接给答案。&quot;
+
+用户：3x + 5 = 20，求x
+模型：同学你看呀，我们先把等号两边的5挪走...（一步步引导）
+</code></pre>
+
+<p><strong>同一个模型，同一个问题，仅仅是换了一段System Prompt，输出就天壤之别。</strong></p>
+<h3 id="prompt_1">Prompt工程的四层架构</h3>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Prompt 四层架构图</p>
+<svg viewBox="0 0 700 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <!-- 四层同心 -->
+  <rect x="20" y="10" width="660" height="35" rx="6" fill="#0052d9"/>
+  <text x="350" y="28" text-anchor="middle" font-size="12" fill="white" font-weight="700">第1层 角色定义 — "你是资深工程师" — 设定身份和视角</text>
+  <text x="350" y="43" text-anchor="middle" font-size="8" fill="#66b1ff">← 决定了模型用什么"人格"来回答 →</text>
+  <rect x="60" y="52" width="580" height="35" rx="6" fill="#1a6fe8"/>
+  <text x="350" y="70" text-anchor="middle" font-size="12" fill="white" font-weight="700">第2层 任务描述 — "开发一个REST API" — 明确目标</text>
+  <text x="350" y="85" text-anchor="middle" font-size="8" fill="#a3d0ff">← 告诉模型具体要做什么 →</text>
+  <rect x="100" y="94" width="500" height="35" rx="6" fill="#3380e6"/>
+  <text x="350" y="112" text-anchor="middle" font-size="12" fill="white" font-weight="700">第3层 约束条件 — "使用OpenAPI规范" — 限制边界</text>
+  <text x="350" y="127" text-anchor="middle" font-size="8" fill="#a3d0ff">← 格式/风格/长度/技术栈等限制 →</text>
+  <rect x="140" y="136" width="420" height="30" rx="6" fill="#4d94ff"/>
+  <text x="350" y="155" text-anchor="middle" font-size="11" fill="white" font-weight="700">第4层 示例参考 — 给1-2个输入输出样例</text>
+</svg>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>作用</th>
+<th>例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>角色定义</strong></td>
+<td>设定身份</td>
+<td>"你是资深工程师"</td>
+</tr>
+<tr>
+<td><strong>任务描述</strong></td>
+<td>明确目标</td>
+<td>"开发一个API"</td>
+</tr>
+<tr>
+<td><strong>约束条件</strong></td>
+<td>限制格式/风格</td>
+<td>"使用OpenAPI规范"</td>
+</tr>
+<tr>
+<td><strong>示例参考</strong></td>
+<td>提供输入输出样本</td>
+<td>给出1-2个示例</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：好的Prompt就是"说话方式"的改变——无需改动模型参数，仅通过精心设计指令，就能让同一个模型表现出天壤之别。这就是为什么Prompt Engineering成为AI时代的核心技能。</p>
+</blockquote>
+<hr />
+<h1 id="tool">五、Tool：给模型装上"手脚"</h1>
+<p><strong>一句话</strong>：Tool就是模型能调用的外部函数——查天气、读文件、执行代码——让模型从"只会说"变成"能做事"。</p>
+<h3 id="prompttool">从Prompt到Tool的递进</h3>
+<p>Prompt让模型知道"要做什么"，但模型本身只会生成文字。查天气？它不知道真实天气。写文件？它没有文件系统。Tool解决的就是这个问题。</p>
+<h3 id="_4">天气查询的完整调用流程</h3>
+<p>这是视频中最经典的例子：</p>
+<pre class="codehilite"><code>① 用户：&quot;明天北京会下雨吗？&quot;
+② 模型思考：我需要查天气，调用 get_weather 工具
+③ 模型请求：get_weather(city=&quot;北京&quot;, date=&quot;明天&quot;)
+④ 系统执行：调用真实天气API，获得&quot;明天北京有雨，80%&quot;
+⑤ 结果返回给模型
+⑥ 模型回答：&quot;根据天气预报，明天北京有80%概率下雨，建议带伞。&quot;
+</code></pre>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Tool调用完整六步流程</p>
+<svg viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <defs><marker id="tl1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="12" width="80" height="35" rx="5" fill="#edf4ff" stroke="#0052d9"/><text x="50" y="27" text-anchor="middle" font-size="7" fill="#003cab" font-weight="600">①用户提问</text><text x="50" y="38" text-anchor="middle" font-size="6" fill="#0052d9">"明天下雨吗"</text>
+  <line x1="90" y1="29" x2="105" y2="29" stroke="#0052d9" stroke-width="1.5" marker-end="url(#tl1)"/>
+  <rect x="110" y="10" width="90" height="40" rx="5" fill="#0052d9"/><text x="155" y="27" text-anchor="middle" font-size="7" fill="white" font-weight="600">②模型思考</text><text x="155" y="38" text-anchor="middle" font-size="6" fill="#66b1ff">"需要查天气"</text>
+  <line x1="200" y1="29" x2="215" y2="29" stroke="#0052d9" stroke-width="1.5" marker-end="url(#tl1)"/>
+  <rect x="220" y="10" width="100" height="40" rx="5" fill="#1a6fe8"/><text x="270" y="27" text-anchor="middle" font-size="7" fill="white" font-weight="600">③请求调用</text><text x="270" y="38" text-anchor="middle" font-size="6" fill="#a3d0ff">get_weather(北京)</text>
+  <line x1="320" y1="29" x2="335" y2="29" stroke="#0052d9" stroke-width="1.5" marker-end="url(#tl1)"/>
+  <rect x="340" y="10" width="100" height="40" rx="5" fill="#3380e6"/><text x="390" y="27" text-anchor="middle" font-size="7" fill="white" font-weight="600">④系统执行</text><text x="390" y="38" text-anchor="middle" font-size="6" fill="#a3d0ff">真正调API</text>
+  <line x1="440" y1="29" x2="455" y2="29" stroke="#0052d9" stroke-width="1.5" marker-end="url(#tl1)"/>
+  <rect x="460" y="10" width="90" height="40" rx="5" fill="#4d94ff"/><text x="505" y="27" text-anchor="middle" font-size="7" fill="white" font-weight="600">⑤返回结果</text><text x="505" y="38" text-anchor="middle" font-size="6" fill="#d4e3fc">"有雨,80%"</text>
+  <line x1="550" y1="29" x2="565" y2="29" stroke="#0052d9" stroke-width="1.5" marker-end="url(#tl1)"/>
+  <rect x="570" y="10" width="120" height="40" rx="5" fill="#059669"/><text x="630" y="27" text-anchor="middle" font-size="7" fill="white" font-weight="600">⑥模型整合回答</text><text x="630" y="38" text-anchor="middle" font-size="6" fill="#a7f3d0">"明天有雨,带伞"</text>
+  <rect x="10" y="60" width="680" height="28" rx="5" fill="#f0f7ff" stroke="#d4e3fc"/>
+  <text x="350" y="74" text-anchor="middle" font-size="7" fill="#0052d9" font-weight="600">模型是"指挥官"(决策+参数选择) · 系统是"执行者"(真正调API) · 模型不碰真实数据</text>
+  <text x="350" y="84" text-anchor="middle" font-size="7" fill="#4b4b4b">这就是为什么模型"不知道今天天气"但"能帮你查天气" → Tool是能力的桥梁</text>
+</svg></div>
+<h3 id="json">工具描述的JSON格式</h3>
+<p>模型怎么知道有哪些工具可用？靠的是结构化的工具描述：</p>
+<pre class="codehilite"><code class="language-json">{
+  &quot;name&quot;: &quot;get_weather&quot;,
+  &quot;description&quot;: &quot;获取指定城市的天气预报&quot;,
+  &quot;inputSchema&quot;: {
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;properties&quot;: {
+      &quot;city&quot;: { &quot;type&quot;: &quot;string&quot; },
+      &quot;date&quot;: { &quot;type&quot;: &quot;string&quot; }
+    },
+    &quot;required&quot;: [&quot;city&quot;, &quot;date&quot;]
+  }
+}
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：模型是"指挥官"，不是"执行者"。它负责决策（"我要查天气"）和参数选择（"城市=北京"），但真正执行查询的是外部系统。Tool让模型从"知道"变成"能做"——没有Tool的LLM就像被困在书房里的人。</p>
+</blockquote>
+<hr />
+<h1 id="mcpaiusb-c">六、MCP：AI世界的USB-C接口</h1>
+<p><strong>一句话</strong>：MCP（Model Context Protocol）是工具的"万能转接头"——开发者只需写一次工具代码，就能在所有支持MCP的AI平台上使用。</p>
+<h3 id="toolmcp">从Tool到MCP的递进</h3>
+<p>Tool解决了"模型能用工具"的问题，但新问题来了——每个AI平台（ChatGPT、Claude、Gemini）调用工具的方式都不一样！MCP就是为了解决这个碎片化问题。</p>
+<h3 id="usb-c">USB-C比喻（视频核心比喻）</h3>
+<pre class="codehilite"><code>MCP之前 = 充电器碎片化时代
+├─ iPhone用Lightning
+├─ 某安卓用Micro USB
+└─ 另一个安卓用Type-C
+→ 每换一台手机就要买新线
+
+MCP之后 = USB-C统一时代
+└─ 所有设备统一用USB-C
+→ 一条线到处用
+</code></pre>
+
+<p>对应到AI领域：
+- <strong>MCP之前</strong>：给ChatGPT写一套工具集成代码，给Claude再写一套，给Gemini又写一套
+- <strong>MCP之后</strong>：写一次MCP Server，所有平台都能用</p>
+<h3 id="mcp">MCP的三层结构</h3>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>是什么</th>
+<th>例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MCP Host</strong></td>
+<td>支持MCP的AI应用</td>
+<td>Claude Desktop、Cursor、Cline</td>
+</tr>
+<tr>
+<td><strong>MCP Server</strong></td>
+<td>提供工具的程序</td>
+<td>天气服务、数据库服务</td>
+</tr>
+<tr>
+<td><strong>Tool</strong></td>
+<td>Server内部的具体功能</td>
+<td>get_weather、get_alerts</td>
+</tr>
+</tbody>
+</table>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 MCP 三层架构图</p>
+<svg viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px">
+  <defs><marker id="a2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="30" y="30" width="160" height="60" rx="10" fill="#0052d9" stroke="#003cab" stroke-width="1.5"/>
+  <text x="110" y="58" text-anchor="middle" font-size="14" fill="white" font-weight="700">MCP Host</text>
+  <text x="110" y="76" text-anchor="middle" font-size="9" fill="#66b1ff">Claude Desktop/Cursor/Cline</text>
+  <line x1="190" y1="60" x2="230" y2="60" stroke="#0052d9" stroke-width="2" marker-end="url(#a2)"/>
+  <text x="210" y="53" text-anchor="middle" font-size="8" fill="#0052d9">MCP协议</text>
+  <rect x="235" y="30" width="160" height="60" rx="10" fill="#1a6fe8" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="315" y="58" text-anchor="middle" font-size="14" fill="white" font-weight="700">MCP Server</text>
+  <text x="315" y="76" text-anchor="middle" font-size="9" fill="#a3d0ff">天气服务/数据库服务</text>
+  <line x1="395" y1="60" x2="435" y2="60" stroke="#0052d9" stroke-width="2" marker-end="url(#a2)"/>
+  <text x="415" y="53" text-anchor="middle" font-size="8" fill="#0052d9">包含</text>
+  <rect x="440" y="20" width="130" height="35" rx="8" fill="#4d94ff" stroke="#0052d9" stroke-width="1"/>
+  <text x="505" y="42" text-anchor="middle" font-size="11" fill="white" font-weight="600">Tool: get_weather</text>
+  <rect x="440" y="60" width="130" height="35" rx="8" fill="#4d94ff" stroke="#0052d9" stroke-width="1"/>
+  <text x="505" y="82" text-anchor="middle" font-size="11" fill="white" font-weight="600">Tool: get_alerts</text>
+  <rect x="100" y="120" width="400" height="55" rx="8" fill="#f0f7ff" stroke="#d4e3fc" stroke-width="1"/>
+  <text x="300" y="142" text-anchor="middle" font-size="11" fill="#0052d9" font-weight="600">USB-C比喻：Host是手机，Server是充电器，MCP是统一接口标准</text>
+  <text x="300" y="160" text-anchor="middle" font-size="10" fill="#4b4b4b">开发者只需写一次Server，所有支持MCP的Host都能用</text>
+</svg>
+</div>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：MCP的价值不在Tool本身，而在于<strong>统一标准</strong>。它让整个AI工具生态从"各自为战"变成"一次开发，到处可用"。MCP是连接Tool和AI平台的桥梁，而不是替代Tool。</p>
+</blockquote>
+<hr />
+<h1 id="agent">七、Agent：自主干活的智能体</h1>
+<p><strong>一句话</strong>：Agent = LLM + 工具 + 循环执行。它不是一问一答的聊天，而是"接到任务后自己拆解步骤、调用工具、直到完成目标"的自主执行者。</p>
+<h3 id="mcpagent">从MCP到Agent的递进</h3>
+<p>有了MCP，模型可以方便地使用各种工具。但问题是——谁来决定"什么时候用什么工具"？答案是Agent。Agent就是那个自主做决策的"人"。</p>
+<h3 id="_5">和普通对话的区别</h3>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>普通对话</th>
+<th>Agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>输入</td>
+<td>用户问题</td>
+<td>用户目标/任务</td>
+</tr>
+<tr>
+<td>输出</td>
+<td>一段回答</td>
+<td>完整的执行结果</td>
+</tr>
+<tr>
+<td>过程</td>
+<td>一次性回复</td>
+<td>多步骤循环执行</td>
+</tr>
+<tr>
+<td>自主性</td>
+<td>被动回应</td>
+<td>主动规划和执行</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_6">"下雨查伞店"的完整执行链</h3>
+<pre class="codehilite"><code>用户：&quot;明天下雨，帮我找个地方买伞&quot;
+
+Agent第1轮：
+  思考：我需要确认明天是否真的下雨
+  行动：调用 get_weather(&quot;当前城市&quot;)
+  观察：确认明天下雨
+
+Agent第2轮：
+  思考：下雨确认了，现在找附近的伞店
+  行动：调用 search_shops(&quot;雨伞&quot;, &quot;当前位置&quot;)
+  观察：找到3家伞店
+
+Agent第3轮：
+  思考：有伞店了，看看哪家在营业
+  行动：调用 check_hours(shop_id)
+  观察：XX店现在营业
+
+最终输出：&quot;明天确实会下雨。推荐XX伞店，现在营业，地址在...&quot;
+</code></pre>
+
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Agent "下雨查伞店" 完整执行链</p>
+<svg viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:750px">
+  <defs><marker id="a3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="20" width="130" height="45" rx="8" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="75" y="40" text-anchor="middle" font-size="11" fill="#003cab" font-weight="600">用户输入</text>
+  <text x="75" y="55" text-anchor="middle" font-size="9" fill="#0052d9">"明天下雨帮我买伞"</text>
+  <line x1="140" y1="42" x2="165" y2="42" stroke="#0052d9" stroke-width="2" marker-end="url(#a3)"/>
+  
+  <rect x="170" y="10" width="150" height="65" rx="8" fill="#0052d9" stroke="#003cab" stroke-width="1.5"/>
+  <text x="245" y="30" text-anchor="middle" font-size="10" fill="#66b1ff">第1轮</text>
+  <text x="245" y="45" text-anchor="middle" font-size="11" fill="white" font-weight="600">思考→查天气</text>
+  <text x="245" y="62" text-anchor="middle" font-size="9" fill="#a3d0ff">get_weather("北京")</text>
+  <line x1="320" y1="42" x2="345" y2="42" stroke="#0052d9" stroke-width="2" marker-end="url(#a3)"/>
+  
+  <rect x="350" y="10" width="150" height="65" rx="8" fill="#1a6fe8" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="425" y="30" text-anchor="middle" font-size="10" fill="#a3d0ff">第2轮</text>
+  <text x="425" y="45" text-anchor="middle" font-size="11" fill="white" font-weight="600">思考→找伞店</text>
+  <text x="425" y="62" text-anchor="middle" font-size="9" fill="#a3d0ff">search_shops("雨伞")</text>
+  <line x1="500" y1="42" x2="525" y2="42" stroke="#0052d9" stroke-width="2" marker-end="url(#a3)"/>
+  
+  <rect x="530" y="10" width="150" height="65" rx="8" fill="#3380e6" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="605" y="30" text-anchor="middle" font-size="10" fill="#a3d0ff">第3轮</text>
+  <text x="605" y="45" text-anchor="middle" font-size="11" fill="white" font-weight="600">思考→查营业</text>
+  <text x="605" y="62" text-anchor="middle" font-size="9" fill="#a3d0ff">check_hours(shop_id)</text>
+  
+  <line x1="605" y1="75" x2="605" y2="105" stroke="#0052d9" stroke-width="2" marker-end="url(#a3)"/>
+  <rect x="430" y="110" width="350" height="45" rx="8" fill="#059669" stroke="#047857" stroke-width="1.5"/>
+  <text x="605" y="133" text-anchor="middle" font-size="12" fill="white" font-weight="700">最终回答</text>
+  <text x="605" y="148" text-anchor="middle" font-size="9" fill="#a7f3d0">"推荐XX伞店，现在营业，地址在..."</text>
+  
+  <rect x="10" y="110" width="390" height="85" rx="8" fill="#f0f7ff" stroke="#d4e3fc" stroke-width="1"/>
+  <text x="205" y="132" text-anchor="middle" font-size="11" fill="#0052d9" font-weight="600">用户只说了一句话，Agent自主完成3轮决策</text>
+  <text x="205" y="152" text-anchor="middle" font-size="10" fill="#4b4b4b">每一轮：思考(Thought) → 行动(Action) → 观察(Observation)</text>
+  <text x="205" y="172" text-anchor="middle" font-size="10" fill="#4b4b4b">这就是Agent的"自主性"——从工具到助手的跨越</text>
+</svg>
+</div>
+<p><strong>关键发现</strong>：整个过程中，用户只说了一句话。是Agent自己决定要查天气、找伞店、确认营业——这就是"自主性"。</p>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：Agent的强大在于它的"自主循环"——不是我告诉它"先查天气再查伞店"，而是它自己意识到需要这样做。这就是从"工具"到"助手"的跨越。Agent = LLM(大脑) + Tool(手脚) + Loop(持续反馈)。</p>
+</blockquote>
+<hr />
+<h1 id="agent-skill">八、Agent Skill：可复用的经验手册</h1>
+<p><strong>一句话</strong>：Skill是Agent的"标准操作手册"——把特定领域的最佳实践（指令+脚本+参考资料）打包成一个可复用的文件夹，让Agent在任何场景下都能像专家一样工作。</p>
+<h3 id="agentskill">从Agent到Skill的递进</h3>
+<p>Agent能自主干活了，但每次都要从零开始写Prompt、定义工具。Skill就是把"经过验证的最佳实践"沉淀下来——下次遇到同类任务，直接加载Skill就行。</p>
+<h3 id="token_3">三层渐进式披露（Token经济学设计）</h3>
+<p>这是Skill最精妙的设计。为什么不把所有信息一次性扔给Agent？因为Context Window有限、Token要钱。所以Skill分三层按需加载：</p>
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>内容</th>
+<th>加载时机</th>
+<th>Token消耗</th>
+<th>类比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>元数据</strong></td>
+<td>Skill的名字和简介</td>
+<td>始终加载</td>
+<td>极少</td>
+<td>员工简历</td>
+</tr>
+<tr>
+<td><strong>指令</strong></td>
+<td>完整的SKILL.md正文</td>
+<td>选中后加载</td>
+<td>中等</td>
+<td>操作手册</td>
+</tr>
+<tr>
+<td><strong>资源</strong></td>
+<td>Reference文档+Script脚本</td>
+<td>按需加载</td>
+<td>可选</td>
+<td>参考附录</td>
+</tr>
+</tbody>
+</table>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Skill 三层渐进式披露机制</p>
+<svg viewBox="0 0 650 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px">
+  <rect x="30" y="15" width="590" height="55" rx="8" fill="#0052d9" stroke="#003cab" stroke-width="1.5"/>
+  <text x="325" y="38" text-anchor="middle" font-size="13" fill="white" font-weight="700">第1层：元数据（始终加载）</text>
+  <text x="325" y="58" text-anchor="middle" font-size="10" fill="#66b1ff">所有Skill的name+description · Token极少 · 像员工简历</text>
+  
+  <rect x="80" y="80" width="490" height="55" rx="8" fill="#1a6fe8" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="325" y="103" text-anchor="middle" font-size="13" fill="white" font-weight="700">第2层：指令（选中后加载）</text>
+  <text x="325" y="123" text-anchor="middle" font-size="10" fill="#a3d0ff">完整的skill.md正文 · Token中等 · 像操作手册</text>
+  
+  <rect x="130" y="145" width="390" height="50" rx="8" fill="#4d94ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="325" y="167" text-anchor="middle" font-size="13" fill="white" font-weight="700">第3层：资源（按需加载）</text>
+  <text x="325" y="184" text-anchor="middle" font-size="10" fill="#d4e3fc">Reference文档 + Script脚本 · 像参考附录</text>
+</svg>
+</div>
+<h3 id="skillmd">SKILL.md文件结构</h3>
+<pre class="codehilite"><code>my-skill/
+├── skill.md          ← 必须：元数据 + 指令正文
+├── references/       ← 可选：按条件加载的长文档
+│   └── 财务手册.md
+├── scripts/          ← 可选：可执行脚本
+│   └── upload.py
+└── examples/         ← 可选：输入输出样例
+</code></pre>
+
+<h3 id="_7">"出门清单助手"完整例子</h3>
+<p><strong>第一层（始终加载）</strong>：
+- name: travel-checklist
+- description: "根据行程生成出门清单"</p>
+<p><strong>第二层（选中后加载）</strong>：
+- 基础规则：根据目的地和季节生成清单
+- 例如：北京冬天 → "羽绒服、暖宝宝、保温杯"</p>
+<p><strong>第三层（按需加载）</strong>：
+- Reference：提到"商务会议" → 加载《商务着装规范.md》
+- Script：要求"发送到邮箱" → 执行 send_email.py</p>
+<h3 id="reference-vs-script">Reference vs Script的关键区别</h3>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Reference</th>
+<th>Script</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>本质</td>
+<td>读文件进Context</td>
+<td>跑代码，代码不进Context</td>
+</tr>
+<tr>
+<td>Token消耗</td>
+<td>有（与文件大小成正比）</td>
+<td>几乎为零（仅结果的Token）</td>
+</tr>
+<tr>
+<td>用途</td>
+<td>规章手册、知识库</td>
+<td>上传文件、API调用、自动化</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：Skill的出现，让AI从"一个聊天机器人"变成了"一套标准化的工具集"。它解决了企业级痛点——没有Skill的Agent像每天失忆的员工，有了Skill就能标准化执行、稳定输出。</p>
+</blockquote>
+<hr />
+<h1 id="_8">核心概念递进图</h1>
+
+<div style="margin:16px 0;padding:20px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:10px">📐 8 个核心概念完整递进链路</p>
+<svg viewBox="0 0 750 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:750px;font-family:-apple-system,sans-serif">
+  <defs>
+    <marker id="ch1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker>
+  </defs>
+  <!-- Row 1: LLM → Token → Context → Prompt -->
+  <rect x="15" y="15" width="140" height="55" rx="10" fill="#0052d9" stroke="#003cab" stroke-width="1.5"/>
+  <text x="85" y="38" text-anchor="middle" font-size="13" fill="white" font-weight="700">LLM</text>
+  <text x="85" y="56" text-anchor="middle" font-size="9" fill="#66b1ff">超级文字接龙机</text>
+  <line x1="155" y1="42" x2="185" y2="42" stroke="#0052d9" stroke-width="2" marker-end="url(#ch1)"/>
+  <text x="170" y="36" text-anchor="middle" font-size="7" fill="#0052d9">处理</text>
+  
+  <rect x="190" y="15" width="140" height="55" rx="10" fill="#1a6fe8" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="260" y="38" text-anchor="middle" font-size="13" fill="white" font-weight="700">Token</text>
+  <text x="260" y="56" text-anchor="middle" font-size="9" fill="#a3d0ff">最小信息单位</text>
+  <line x1="330" y1="42" x2="360" y2="42" stroke="#0052d9" stroke-width="2" marker-end="url(#ch1)"/>
+  <text x="345" y="36" text-anchor="middle" font-size="7" fill="#0052d9">构成</text>
+  
+  <rect x="365" y="15" width="140" height="55" rx="10" fill="#3380e6" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="435" y="38" text-anchor="middle" font-size="13" fill="white" font-weight="700">Context</text>
+  <text x="435" y="56" text-anchor="middle" font-size="9" fill="#a3d0ff">短期记忆/信息容器</text>
+  <line x1="505" y1="42" x2="535" y2="42" stroke="#0052d9" stroke-width="2" marker-end="url(#ch1)"/>
+  <text x="520" y="36" text-anchor="middle" font-size="7" fill="#0052d9">驱动</text>
+  
+  <rect x="540" y="15" width="140" height="55" rx="10" fill="#4d94ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="610" y="38" text-anchor="middle" font-size="13" fill="white" font-weight="700">Prompt</text>
+  <text x="610" y="56" text-anchor="middle" font-size="9" fill="#d4e3fc">说话的艺术</text>
+  
+  <!-- 转弯箭头 Row1→Row2 -->
+  <line x1="610" y1="70" x2="610" y2="100" stroke="#0052d9" stroke-width="2" marker-end="url(#ch1)"/>
+  <text x="625" y="88" font-size="7" fill="#0052d9">扩展</text>
+  
+  <!-- Row 2: Tool ← MCP ← Agent ← Skill (right to left) -->
+  <rect x="540" y="105" width="140" height="55" rx="10" fill="#0052d9" stroke="#003cab" stroke-width="1.5"/>
+  <text x="610" y="128" text-anchor="middle" font-size="13" fill="white" font-weight="700">Tool</text>
+  <text x="610" y="146" text-anchor="middle" font-size="9" fill="#66b1ff">装上手脚</text>
+  <line x1="540" y1="132" x2="510" y2="132" stroke="#0052d9" stroke-width="2" marker-end="url(#ch1)"/>
+  <text x="525" y="126" text-anchor="middle" font-size="7" fill="#0052d9">标准化</text>
+  
+  <rect x="365" y="105" width="140" height="55" rx="10" fill="#1a6fe8" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="435" y="128" text-anchor="middle" font-size="13" fill="white" font-weight="700">MCP</text>
+  <text x="435" y="146" text-anchor="middle" font-size="9" fill="#a3d0ff">USB-C统一接口</text>
+  <line x1="365" y1="132" x2="335" y2="132" stroke="#0052d9" stroke-width="2" marker-end="url(#ch1)"/>
+  <text x="350" y="126" text-anchor="middle" font-size="7" fill="#0052d9">组装</text>
+  
+  <rect x="190" y="105" width="140" height="55" rx="10" fill="#3380e6" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="260" y="128" text-anchor="middle" font-size="13" fill="white" font-weight="700">Agent</text>
+  <text x="260" y="146" text-anchor="middle" font-size="9" fill="#a3d0ff">自主干活的智能体</text>
+  <line x1="190" y1="132" x2="160" y2="132" stroke="#0052d9" stroke-width="2" marker-end="url(#ch1)"/>
+  <text x="175" y="126" text-anchor="middle" font-size="7" fill="#0052d9">沉淀</text>
+  
+  <rect x="15" y="105" width="140" height="55" rx="10" fill="#059669" stroke="#047857" stroke-width="1.5"/>
+  <text x="85" y="128" text-anchor="middle" font-size="13" fill="white" font-weight="700">Agent Skill</text>
+  <text x="85" y="146" text-anchor="middle" font-size="9" fill="#a7f3d0">可复用经验手册</text>
+  
+  <!-- 下方说明框 -->
+  <rect x="15" y="180" width="665" height="150" rx="8" fill="#f0f7ff" stroke="#d4e3fc"/>
+  <text x="348" y="202" text-anchor="middle" font-size="11" fill="#0052d9" font-weight="700">每一层都解决了上一层遗留的问题 ↓</text>
+  <text x="30" y="222" font-size="9" fill="#4b4b4b">LLM 能预测文字 → 但用什么单位处理？→ Token</text>
+  <text x="30" y="240" font-size="9" fill="#4b4b4b">Token 有了 → 但处理范围有限 → Context 扩大信息窗口</text>
+  <text x="30" y="258" font-size="9" fill="#4b4b4b">Context 扩大了 → 但如何精准指挥？→ Prompt 是说话的艺术</text>
+  <text x="30" y="276" font-size="9" fill="#4b4b4b">Prompt 指挥到位 → 但模型只会说不会做 → Tool 让模型能做事</text>
+  <text x="400" y="222" font-size="9" fill="#4b4b4b">Tool 能做事了 → 但每个平台不通用 → MCP 统一标准</text>
+  <text x="400" y="240" font-size="9" fill="#4b4b4b">MCP 通用了 → 但谁来自主决策？→ Agent 实现自主循环</text>
+  <text x="400" y="258" font-size="9" fill="#4b4b4b">Agent 能干活 → 但每次从零开始 → Skill 沉淀最佳实践</text>
+  <text x="348" y="318" text-anchor="middle" font-size="10" fill="#059669" font-weight="600">从"文字接龙"到"自主工作的AI专家"，8步完成进化 🚀</text>
+</svg>
+</div>
+
+<p>每一层都解决了上一层遗留的问题：
+- Token让LLM能处理信息 → 但处理范围有限
+- Context扩大了信息范围 → 但如何精准指挥？
+- Prompt解决了指挥问题 → 但模型只能说不能做
+- Tool让模型能做事 → 但每个平台不通用
+- MCP统一了标准 → 但谁来自主决策？
+- Agent实现了自主性 → 但每次从零开始
+- Skill沉淀了最佳实践 → 形成可复用的能力</p>
+<hr />
+<h2 id="8">附录：专有名词速查（8个）</h2>
+<table>
+<thead>
+<tr>
+<th>名词</th>
+<th>全称</th>
+<th>一句话白话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LLM</td>
+<td>Large Language Model</td>
+<td>大语言模型，超级文字接龙机</td>
+</tr>
+<tr>
+<td>Token</td>
+<td>-</td>
+<td>模型处理文本的最小单位（不是字也不是词）</td>
+</tr>
+<tr>
+<td>Context</td>
+<td>-</td>
+<td>每次发给模型的信息总和（对话历史+系统指令+工具结果）</td>
+</tr>
+<tr>
+<td>Context Window</td>
+<td>-</td>
+<td>Context能装多少Token的上限（如4K/128K/200K）</td>
+</tr>
+<tr>
+<td>System Prompt</td>
+<td>-</td>
+<td>开发者设定的AI"人设"，对用户不可见</td>
+</tr>
+<tr>
+<td>MCP</td>
+<td>Model Context Protocol</td>
+<td>AI工具的USB-C接口，一次开发到处用</td>
+</tr>
+<tr>
+<td>Agent</td>
+<td>-</td>
+<td>LLM+工具+循环 = 能自主干活的智能体</td>
+</tr>
+<tr>
+<td>Agent Skill</td>
+<td>-</td>
+<td>把Agent的最佳实践打包成可复用的经验手册</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="footer">学习笔记由 WorkBuddy AI 助手整理 · 2026-04-11 · 通俗叙事风格 · 腾讯云商务蓝配色</div>
+</div>
+</body>
+</html>

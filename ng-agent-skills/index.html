@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>吴恩达 Agent Skills with Anthropic</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;background:#f3f4f6;color:#242424;line-height:1.8}
+a{color:#0052d9;text-decoration:none}a:hover{text-decoration:underline;color:#003cab}
+.header{background:linear-gradient(135deg,#001a45 0%,#0052d9 60%,#0077ff 100%);color:white;padding:52px 32px;text-align:center}
+.header h1{font-size:22px;font-weight:700;max-width:800px;margin:0 auto;letter-spacing:0.5px}
+.header .sub{font-size:13px;opacity:.85;margin-top:12px;max-width:700px;margin-left:auto;margin-right:auto}
+.stats{display:flex;justify-content:center;gap:28px;margin-top:18px;flex-wrap:wrap}
+.stats .s{font-size:12px;opacity:.8}.stats .s strong{font-size:18px;color:#66b1ff;display:block}
+.container{max-width:1000px;margin:0 auto;padding:24px}
+.content{background:white;border-radius:10px;padding:32px 36px;margin-top:20px;border:1px solid #e5e6eb;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
+.content h1{font-size:22px;color:#0052d9;margin:36px 0 16px;padding-bottom:10px;border-bottom:2px solid #0052d9;font-weight:700}
+.content h1:first-child{margin-top:0}
+.content h2{font-size:18px;color:#242424;margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid #e5e6eb;font-weight:600}
+.content h3{font-size:15px;color:#0052d9;margin:20px 0 8px;font-weight:600}
+.content p{font-size:14px;color:#4b4b4b;margin:8px 0}
+.content ul,.content ol{padding-left:22px;margin:8px 0}
+.content li{font-size:14px;color:#4b4b4b;margin:4px 0}
+.content strong{color:#242424}
+.content em{color:#0052d9;font-style:normal}
+.content blockquote{background:#edf4ff;border-left:4px solid #0052d9;padding:12px 18px;margin:12px 0;border-radius:0 8px 8px 0;font-size:14px;color:#003cab}
+.content blockquote p{color:#003cab;margin:4px 0}
+.content hr{border:none;border-top:1px solid #e5e6eb;margin:28px 0}
+.content table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+.content th{background:#edf4ff;text-align:left;padding:10px 14px;font-weight:600;color:#0052d9;border-bottom:1px solid #d4e3fc}
+.content td{padding:10px 14px;border-bottom:1px solid #f0f1f2;color:#4b4b4b}
+.content tr:hover td{background:#f5f9ff}
+.content pre{background:#0d1b2a;border-radius:8px;padding:14px 18px;margin:10px 0;font-family:"SF Mono",Consolas,monospace;font-size:12.5px;line-height:1.6;overflow-x:auto;color:#c9d1d9}
+.content code{font-family:"SF Mono",Consolas,monospace;font-size:12.5px;background:#edf4ff;padding:2px 6px;border-radius:4px;color:#0052d9}
+.content pre code{background:none;padding:0;color:#c9d1d9}
+.footer{text-align:center;padding:30px 0;color:#8f959e;font-size:12px}</style>
+</head>
+<body>
+<div class="header">
+<h1>吴恩达 Agent Skills with Anthropic</h1>
+<div class="sub">DeepLearning.AI × Anthropic | <a href="https://www.bilibili.com/video/BV1qv6eBZErD/" target="_blank" style="color:#66b1ff">B站 BV1qv6eBZErD</a> | 10集</div>
+<div class="stats">
+<div class="s"><strong>10</strong>集视频</div>
+<div class="s"><strong>4</strong>设计模式</div>
+<div class="s"><strong>10</strong>专有名词</div>
+<div class="s"><strong>5</strong>大模块</div>
+</div>
+</div>
+<div class="container">
+<div class="content">
+<div style="margin:0 0 24px;padding:20px 24px;background:linear-gradient(135deg,#edf4ff 0%,#f0f7ff 50%,#f5f9ff 100%);border-radius:10px;border:1px solid #d4e3fc">
+<h2 id="_1">📖 内容综述</h2>
+<p>这门课回答的是一个很实际的问题：<strong>怎么让AI Agent从"每天失忆的实习生"变成"靠谱的老员工"？</strong> 答案是<strong>Skill</strong>——把特定领域的最佳实践（品牌规范、法务流程、业务指标）打包成标准化文件夹，Agent加载后就能像专家一样工作。</p>
+<p>课程分五个模块递进展开：先用<strong>四大设计模式</strong>（反思/工具/规划/多Agent）打好Agent的架构基础，再深入<strong>Skill的三层加载机制</strong>（元数据→指令→资源）解决Token经济学问题，最后讲<strong>MCP协议</strong>如何让工具标准化连接，以及<strong>评估与误差分析</strong>为什么才是Agent开发成败的真正关键。</p>
+
+</div>
+
+<hr />
+<h1 id="agent">一、四大Agent设计模式</h1>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 四大Agent设计模式总览</p>
+<svg viewBox="0 0 700 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <rect x="20" y="8" width="310" height="46" rx="8" fill="#0052d9"/><text x="175" y="27" text-anchor="middle" font-size="11" fill="white" font-weight="700">1. 反思 Reflection</text><text x="175" y="44" text-anchor="middle" font-size="8" fill="#66b1ff">生成→批评→修改 正确率+26%</text>
+  <rect x="350" y="8" width="330" height="46" rx="8" fill="#1a6fe8"/><text x="515" y="27" text-anchor="middle" font-size="11" fill="white" font-weight="700">2. 工具使用 Tool Use</text><text x="515" y="44" text-anchor="middle" font-size="8" fill="#a3d0ff">代码/搜索/API 扩展能力边界</text>
+  <rect x="20" y="62" width="310" height="46" rx="8" fill="#3380e6"/><text x="175" y="81" text-anchor="middle" font-size="11" fill="white" font-weight="700">3. 规划 Planning</text><text x="175" y="98" text-anchor="middle" font-size="8" fill="#a3d0ff">ReAct/CoT 复杂任务拆解</text>
+  <rect x="350" y="62" width="330" height="46" rx="8" fill="#4d94ff"/><text x="515" y="81" text-anchor="middle" font-size="11" fill="white" font-weight="700">4. 多Agent协作</text><text x="515" y="98" text-anchor="middle" font-size="8" fill="#d4e3fc">角色分工 辩论/协作 团队智能</text>
+  <text x="350" y="125" text-anchor="middle" font-size="8" fill="#0052d9">组合: Planning(拆) + ReAct(执行) + Reflection(质检) + Multi-Agent(大规模)</text>
+</svg></div>
+<h2 id="1-reflection">1. 反思模式（Reflection）</h2>
+<p><strong>一句话</strong>：让AI先写初稿，再自我批评，然后根据批评修改——模拟人类"写→审→改"的过程。</p>
+<pre class="codehilite"><code>生成初稿 → 自我反思/批评 → 根据反馈修正 → 最终输出
+</code></pre>
+
+<p><strong>课上例子</strong>：
+- 让GPT写代码 → 运行测试 → 把错误反馈给GPT → GPT修复
+- 效果：代码正确率从48%提升到74%（甚至超越未优化的GPT-4）</p>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：反思模式"相对容易实施，但性能提升令人惊讶"。只是多调用一次LLM让它"反省"，质量就能显著提升。</p>
+</blockquote>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 反思模式(Reflection)流程</p>
+<svg viewBox="0 0 600 70" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;font-family:-apple-system,sans-serif">
+  <defs><marker id="rf2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="10" width="110" height="38" rx="6" fill="#0052d9"/><text x="65" y="33" text-anchor="middle" font-size="10" fill="white" font-weight="700">生成初稿</text>
+  <line x1="120" y1="29" x2="140" y2="29" stroke="#0052d9" stroke-width="2" marker-end="url(#rf2)"/>
+  <rect x="145" y="10" width="110" height="38" rx="6" fill="#dc2626"/><text x="200" y="33" text-anchor="middle" font-size="10" fill="white" font-weight="700">自我批评</text>
+  <line x1="255" y1="29" x2="275" y2="29" stroke="#0052d9" stroke-width="2" marker-end="url(#rf2)"/>
+  <rect x="280" y="10" width="110" height="38" rx="6" fill="#059669"/><text x="335" y="33" text-anchor="middle" font-size="10" fill="white" font-weight="700">改进版本</text>
+  <path d="M335 48 L335 58 L65 58 L65 52" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#rf2)"/>
+  <rect x="420" y="10" width="120" height="38" rx="6" fill="#f0f7ff" stroke="#d4e3fc"/><text x="480" y="33" text-anchor="middle" font-size="9" fill="#059669" font-weight="700">正确率 +26%</text>
+</svg></div>
+<h2 id="2-tool-use">2. 工具使用（Tool Use）</h2>
+<p><strong>一句话</strong>：让模型能调用外部函数——查天气、执行代码、访问数据库——从"只会说"变成"能做事"。</p>
+<p><strong>课上例子</strong>：两个Agent通过调用棋盘工具进行国际象棋对弈。</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 工具使用(Tool Use)流程</p>
+<svg viewBox="0 0 650 60" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;font-family:-apple-system,sans-serif">
+  <defs><marker id="tu2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="8" width="100" height="35" rx="6" fill="#edf4ff" stroke="#0052d9"/><text x="60" y="30" text-anchor="middle" font-size="8" fill="#003cab" font-weight="600">用户问题</text>
+  <line x1="110" y1="25" x2="130" y2="25" stroke="#0052d9" stroke-width="1.5" marker-end="url(#tu2)"/>
+  <rect x="135" y="5" width="110" height="40" rx="6" fill="#0052d9"/><text x="190" y="22" text-anchor="middle" font-size="9" fill="white" font-weight="700">LLM决策</text><text x="190" y="38" text-anchor="middle" font-size="7" fill="#66b1ff">"需要查天气"</text>
+  <line x1="245" y1="25" x2="265" y2="25" stroke="#0052d9" stroke-width="1.5" marker-end="url(#tu2)"/>
+  <rect x="270" y="5" width="110" height="40" rx="6" fill="#1a6fe8"/><text x="325" y="22" text-anchor="middle" font-size="9" fill="white" font-weight="700">调用工具</text><text x="325" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">get_weather()</text>
+  <line x1="380" y1="25" x2="400" y2="25" stroke="#0052d9" stroke-width="1.5" marker-end="url(#tu2)"/>
+  <rect x="405" y="5" width="95" height="40" rx="6" fill="#3380e6"/><text x="453" y="22" text-anchor="middle" font-size="9" fill="white" font-weight="700">获取结果</text><text x="453" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">"25C晴"</text>
+  <line x1="500" y1="25" x2="520" y2="25" stroke="#0052d9" stroke-width="1.5" marker-end="url(#tu2)"/>
+  <rect x="525" y="5" width="110" height="40" rx="6" fill="#059669"/><text x="580" y="22" text-anchor="middle" font-size="9" fill="white" font-weight="700">整合回答</text><text x="580" y="38" text-anchor="middle" font-size="7" fill="#a7f3d0">"今天25度晴天"</text>
+</svg></div>
+<h2 id="3-planning">3. 规划模式（Planning）</h2>
+<p><strong>一句话</strong>：面对复杂任务，Agent先制定步骤计划，再逐步执行，遇到意外动态调整。</p>
+<p><strong>两种范式</strong>：
+- <strong>ReAct</strong>：走一步看一步（动态循环）
+- <strong>Plan-and-Execute</strong>：先画蓝图再施工（全局规划）</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 规划模式 ReAct循环</p>
+<svg viewBox="0 0 550 65" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:550px;font-family:-apple-system,sans-serif">
+  <defs><marker id="pl2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="8" width="110" height="38" rx="6" fill="#0052d9"/><text x="65" y="31" text-anchor="middle" font-size="10" fill="white" font-weight="700">Thought</text>
+  <line x1="120" y1="27" x2="140" y2="27" stroke="#0052d9" stroke-width="2" marker-end="url(#pl2)"/>
+  <rect x="145" y="8" width="110" height="38" rx="6" fill="#1a6fe8"/><text x="200" y="31" text-anchor="middle" font-size="10" fill="white" font-weight="700">Action</text>
+  <line x1="255" y1="27" x2="275" y2="27" stroke="#0052d9" stroke-width="2" marker-end="url(#pl2)"/>
+  <rect x="280" y="8" width="120" height="38" rx="6" fill="#3380e6"/><text x="340" y="31" text-anchor="middle" font-size="10" fill="white" font-weight="700">Observation</text>
+  <path d="M340 46 L340 55 L65 55 L65 50" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#pl2)"/>
+  <rect x="425" y="8" width="90" height="38" rx="6" fill="#059669"/><text x="470" y="31" text-anchor="middle" font-size="10" fill="white" font-weight="700">Final ✅</text>
+</svg></div>
+<h2 id="4-agentmulti-agent">4. 多Agent协作（Multi-Agent）</h2>
+<p><strong>一句话</strong>：放弃造"通才"，组建"专才"团队——不同Agent扮演不同角色，分工协作完成复杂任务。</p>
+<p><strong>课上例子</strong>：
+- 脱口秀对话：两个脱口秀演员Agent进行双人喜剧
+- 客户入职：多个Agent按流程做问卷、推荐产品、收集反馈
+- 股票报告：数据分析员→金融分析师→风控员→投资经理</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>核心机制</th>
+<th>解决的问题</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>反思</strong></td>
+<td>自我审查</td>
+<td>减少错误</td>
+<td>代码审查、文本润色</td>
+</tr>
+<tr>
+<td><strong>工具</strong></td>
+<td>调用外部API</td>
+<td>知识和能力扩展</td>
+<td>数据分析、实时查询</td>
+</tr>
+<tr>
+<td><strong>规划</strong></td>
+<td>任务拆解</td>
+<td>复杂任务不迷失</td>
+<td>项目管理、多步工作流</td>
+</tr>
+<tr>
+<td><strong>多Agent</strong></td>
+<td>角色分工</td>
+<td>单一视角局限</td>
+<td>团队协作、复杂决策</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="agent-skill">二、Agent Skill：从烟囱到乐高</h1>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 从烟囱模式到乐高模式: Agent能力组织方式的进化</p>
+<svg viewBox="0 0 700 90" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <rect x="20" y="8" width="280" height="55" rx="8" fill="#dc2626"/><text x="160" y="26" text-anchor="middle" font-size="10" fill="white" font-weight="700">旧: 烟囱模式(Silo)</text><text x="160" y="42" text-anchor="middle" font-size="8" fill="#fca5a5">每个Agent独立写Prompt/工具/逻辑</text><text x="160" y="55" text-anchor="middle" font-size="7" fill="#fca5a5">❌ 重复造轮子 · 不可复用</text>
+  <text x="340" y="38" font-size="16" fill="#059669" font-weight="900">→</text>
+  <rect x="380" y="8" width="300" height="55" rx="8" fill="#059669"/><text x="530" y="26" text-anchor="middle" font-size="10" fill="white" font-weight="700">新: 乐高模式(Skill)</text><text x="530" y="42" text-anchor="middle" font-size="8" fill="#a7f3d0">把能力封装成可插拔的Skill模块</text><text x="530" y="55" text-anchor="middle" font-size="7" fill="#a7f3d0">✅ 一次开发 · 到处复用 · 标准化</text>
+  <text x="350" y="80" text-anchor="middle" font-size="7" fill="#4b4b4b">就像从"每次做菜都从种地开始"到"去超市买食材+按食谱做"</text>
+</svg></div>
+<h2 id="vs">旧模式 vs 新模式</h2>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>旧模式：烟囱式</th>
+<th>新模式：通用Agent+Skill库</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>做法</td>
+<td>每个场景造一个专用Agent</td>
+<td>一个通用Agent + 按需加载Skill</td>
+</tr>
+<tr>
+<td>问题</td>
+<td>各自为战，无法复用</td>
+<td>乐高式组合，一处维护到处用</td>
+</tr>
+<tr>
+<td>维护</td>
+<td>成本极高（软件反模式）</td>
+<td>修改Skill自动影响所有Agent</td>
+</tr>
+<tr>
+<td>例子</td>
+<td>搜索Agent/编程Agent/营销Agent分开搞</td>
+<td>Skill库：BigQuery+分析+品牌+PPT</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：从烟囱到乐高的转变，本质是<strong>从"每次重写"到"积累复用"</strong>。一个写过的"数据分析Skill"，下次遇到类似需求直接加载就行——Agent从零开始的时代结束了。这就是为什么Skill被称为"Agent时代的npm包"。</p>
+</blockquote>
+<h2 id="skill">Skill到底是什么？</h2>
+<p><strong>一句话</strong>：Skill是一个有组织的文件夹，内含指令、脚本和资源，让Agent能精准执行特定任务。</p>
+<p><strong>类比</strong>：Skill不是让AI变聪明，而是告诉AI"在你的公司，事情是怎么做的"。</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 多Agent协作: 角色分工模式</p>
+<svg viewBox="0 0 650 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;font-family:-apple-system,sans-serif">
+  <rect x="225" y="5" width="200" height="35" rx="8" fill="#0052d9"/><text x="325" y="27" text-anchor="middle" font-size="11" fill="white" font-weight="700">Orchestrator 编排者</text>
+  <line x1="270" y1="40" x2="118" y2="55" stroke="#0052d9" stroke-width="1.5"/>
+  <line x1="325" y1="40" x2="325" y2="55" stroke="#0052d9" stroke-width="1.5"/>
+  <line x1="380" y1="40" x2="530" y2="55" stroke="#0052d9" stroke-width="1.5"/>
+  <rect x="40" y="58" width="155" height="35" rx="6" fill="#1a6fe8"/><text x="118" y="80" text-anchor="middle" font-size="9" fill="white" font-weight="700">Writer Agent</text>
+  <rect x="245" y="58" width="155" height="35" rx="6" fill="#3380e6"/><text x="323" y="80" text-anchor="middle" font-size="9" fill="white" font-weight="700">Coder Agent</text>
+  <rect x="450" y="58" width="155" height="35" rx="6" fill="#4d94ff"/><text x="528" y="80" text-anchor="middle" font-size="9" fill="white" font-weight="700">Reviewer Agent</text>
+  <text x="325" y="108" text-anchor="middle" font-size="8" fill="#4b4b4b">框架: CrewAI/AutoGen/LangGraph · 每个Agent独立角色+工具+Prompt</text>
+</svg></div>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Skill三层渐进式披露</p>
+<svg viewBox="0 0 560 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;font-family:-apple-system,sans-serif">
+  <rect x="20" y="5" width="520" height="30" rx="6" fill="#0052d9"/><text x="280" y="25" text-anchor="middle" font-size="10" fill="white" font-weight="700">第1层: 元数据(始终加载) · name+description · Token极少</text>
+  <rect x="60" y="42" width="440" height="30" rx="6" fill="#1a6fe8"/><text x="280" y="62" text-anchor="middle" font-size="10" fill="white" font-weight="700">第2层: 指令(选中后加载) · skill.md正文 · Token中等</text>
+  <rect x="100" y="79" width="360" height="30" rx="6" fill="#3380e6"/><text x="280" y="99" text-anchor="middle" font-size="10" fill="white" font-weight="700">第3层: 资源(按需加载) · Reference+Script</text>
+</svg></div>
+<h2 id="token">三层渐进式披露（Token经济学设计）</h2>
+<p><strong>为什么要分层？</strong> 因为Context Window有限、Token要钱。不可能把所有Skill信息一次性塞给Agent。</p>
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>内容</th>
+<th>加载时机</th>
+<th>Token消耗</th>
+<th>类比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>第1层：元数据</strong></td>
+<td>name + description</td>
+<td>始终加载</td>
+<td>极少</td>
+<td>员工简历</td>
+</tr>
+<tr>
+<td><strong>第2层：指令</strong></td>
+<td>skill.md完整正文</td>
+<td>选中后加载</td>
+<td>中等</td>
+<td>操作手册</td>
+</tr>
+<tr>
+<td><strong>第3层：资源</strong></td>
+<td>Reference文档 + Script脚本</td>
+<td>按需加载</td>
+<td>可选</td>
+<td>参考附录</td>
+</tr>
+</tbody>
+</table>
+<p><strong>核心价值</strong>：解决了"数百个Skill与有限上下文窗口"的矛盾。</p>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：三层披露的精妙之处在于<strong>Token经济学</strong>——Context Window有限、Token要钱。如果把所有Skill的完整内容都塞进去，Token立刻爆炸。分层按需加载，让Agent用最少的Token做最精准的决策。这是工程化思维在AI领域的完美体现。</p>
+</blockquote>
+<h2 id="skill_1">Skill的三个能力维度</h2>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>解决什么问题</th>
+<th>例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>领域知识</strong></td>
+<td>不懂行业规则</td>
+<td>品牌规范、法务流程</td>
+</tr>
+<tr>
+<td><strong>可复用工作流</strong></td>
+<td>重复任务无法标准化</td>
+<td>每周复盘、季度回顾</td>
+</tr>
+<tr>
+<td><strong>新能力扩展</strong></td>
+<td>原本不具备的能力</td>
+<td>生成PPT、构建MCP Server</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：Skill的本质不是"更好的Prompt"，而是"结构化的知识管理"。它让企业能把多年的业务经验、SOP流程标准化地编码进AI——这是从"聊天机器人"到"企业级AI助手"的跨越。</p>
+</blockquote>
+<hr />
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Skill的三个能力维度</p>
+<svg viewBox="0 0 650 68" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="8" width="195" height="38" rx="8" fill="#0052d9"/><text x="108" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">知识(Knowledge)</text><text x="108" y="38" text-anchor="middle" font-size="7" fill="#66b1ff">Reference: 领域文档/手册</text>
+  <rect x="220" y="8" width="195" height="38" rx="8" fill="#1a6fe8"/><text x="318" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">流程(Workflow)</text><text x="318" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">SKILL.md: 标准操作步骤</text>
+  <rect x="430" y="8" width="200" height="38" rx="8" fill="#3380e6"/><text x="530" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">执行(Execution)</text><text x="530" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">Script: 可执行的代码</text>
+  <text x="325" y="62" text-anchor="middle" font-size="7" fill="#4b4b4b">三者缺一不可: 知道做什么(知识) + 知道怎么做(流程) + 能真正做(执行)</text>
+</svg></div>
+<h1 id="agent_1">三、多Agent框架对比</h1>
+<table>
+<thead>
+<tr>
+<th>框架</th>
+<th>核心范式</th>
+<th>适用场景</th>
+<th>上手难度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LangGraph</strong></td>
+<td>状态机（有向图）</td>
+<td>严格流程控制（客服、运维）</td>
+<td>高</td>
+</tr>
+<tr>
+<td><strong>CrewAI</strong></td>
+<td>角色链</td>
+<td>内容创作、报告生成</td>
+<td>低</td>
+</tr>
+<tr>
+<td><strong>AutoGen</strong></td>
+<td>自由对话</td>
+<td>代码生成、科研探索</td>
+<td>中</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：没有最好的框架，只有最合适的场景。追求稳定选LangGraph，快速原型选CrewAI，灵活探索选AutoGen。</p>
+</blockquote>
+<hr />
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 三大多Agent框架: CrewAI vs AutoGen vs LangGraph</p>
+<svg viewBox="0 0 700 68" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="8" width="210" height="38" rx="8" fill="#0052d9"/><text x="115" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">CrewAI</text><text x="115" y="38" text-anchor="middle" font-size="7" fill="#66b1ff">最简洁 · 角色定义快速</text>
+  <rect x="235" y="8" width="220" height="38" rx="8" fill="#1a6fe8"/><text x="345" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">AutoGen(微软)</text><text x="345" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">对话驱动 · 多轮协商</text>
+  <rect x="470" y="8" width="220" height="38" rx="8" fill="#3380e6"/><text x="580" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">LangGraph</text><text x="580" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">图状态机 · 精细流程控制</text>
+  <text x="350" y="62" text-anchor="middle" font-size="7" fill="#4b4b4b">选择: 快速原型→CrewAI · 复杂编排→LangGraph · 实验性→AutoGen</text>
+</svg></div>
+<h3>Skill配置文件示例</h3>
+<pre class="codehilite"><code class="language-yaml"># skill.md 头部元数据
+---
+name: &quot;data-analysis&quot;
+description: &quot;分析CSV/Excel数据，生成图表和洞察报告&quot;
+version: &quot;1.0.0&quot;
+triggers:
+  - &quot;分析数据&quot;
+  - &quot;生成报告&quot;
+---
+
+# 正文：具体指令
+## 第1步：读取数据文件
+## 第2步：数据清洗和预处理
+## 第3步：生成可视化图表
+## 第4步：撰写洞察报告
+</code></pre>
+<h1 id="agent_2">四、评估与误差分析：Agent开发的"道"</h1>
+<p><strong>吴恩达反复强调</strong>：四大模式只是"术"，评估才是"道"。大部分团队失败的原因是"凭感觉优化"而非数据驱动。</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 AI Agent 四大设计模式</p>
+<svg viewBox="0 0 700 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <rect x="20" y="10" width="310" height="55" rx="8" fill="#0052d9"/>
+  <text x="175" y="32" text-anchor="middle" font-size="13" fill="white" font-weight="700">1. 反思 Reflection</text>
+  <text x="175" y="52" text-anchor="middle" font-size="9" fill="#66b1ff">生成→自我批评→修改 · 正确率+26%</text>
+  <rect x="350" y="10" width="330" height="55" rx="8" fill="#1a6fe8"/>
+  <text x="515" y="32" text-anchor="middle" font-size="13" fill="white" font-weight="700">2. 工具使用 Tool Use</text>
+  <text x="515" y="52" text-anchor="middle" font-size="9" fill="#a3d0ff">代码执行/搜索/API调用 · 扩展能力边界</text>
+  <rect x="20" y="80" width="310" height="55" rx="8" fill="#3380e6"/>
+  <text x="175" y="102" text-anchor="middle" font-size="13" fill="white" font-weight="700">3. 规划 Planning</text>
+  <text x="175" y="122" text-anchor="middle" font-size="9" fill="#a3d0ff">ReAct/CoT · 复杂任务拆解为子步骤</text>
+  <rect x="350" y="80" width="330" height="55" rx="8" fill="#4d94ff"/>
+  <text x="515" y="102" text-anchor="middle" font-size="13" fill="white" font-weight="700">4. 多Agent协作</text>
+  <text x="515" y="122" text-anchor="middle" font-size="9" fill="#d4e3fc">角色分工 · 辩论/协作 · 团队智能</text>
+  <rect x="80" y="148" width="520" height="25" rx="4" fill="#f0f7ff" stroke="#d4e3fc"/>
+  <text x="340" y="165" text-anchor="middle" font-size="9" fill="#0052d9" font-weight="600">组合公式: Planning(拆任务) + ReAct(每步执行) + Reflection(质检) + Multi-Agent(大规模)</text>
+</svg></div>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Agent评估循环: 数据驱动的迭代改进</p>
+<svg viewBox="0 0 600 75" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;font-family:-apple-system,sans-serif">
+  <defs><marker id="ev2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="12" width="100" height="35" rx="6" fill="#0052d9"/><text x="60" y="33" text-anchor="middle" font-size="9" fill="white" font-weight="700">构建</text>
+  <line x1="110" y1="29" x2="130" y2="29" stroke="#0052d9" stroke-width="2" marker-end="url(#ev2)"/>
+  <rect x="135" y="12" width="100" height="35" rx="6" fill="#1a6fe8"/><text x="185" y="33" text-anchor="middle" font-size="9" fill="white" font-weight="700">测试</text>
+  <line x1="235" y1="29" x2="255" y2="29" stroke="#0052d9" stroke-width="2" marker-end="url(#ev2)"/>
+  <rect x="260" y="12" width="100" height="35" rx="6" fill="#3380e6"/><text x="310" y="33" text-anchor="middle" font-size="9" fill="white" font-weight="700">误差分析</text>
+  <line x1="360" y1="29" x2="380" y2="29" stroke="#0052d9" stroke-width="2" marker-end="url(#ev2)"/>
+  <rect x="385" y="12" width="110" height="35" rx="6" fill="#059669"/><text x="440" y="33" text-anchor="middle" font-size="9" fill="white" font-weight="700">针对性改进</text>
+  <path d="M440 47 L440 60 L60 60 L60 52" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#ev2)"/>
+  <text x="250" y="57" text-anchor="middle" font-size="7" fill="#f59e0b" font-weight="600">优先修复出错最多的类型</text>
+</svg></div>
+<h3 id="_2">评估循环</h3>
+<pre class="codehilite"><code>构建初始工作流 + 测试任务
+        ↓
+端到端评估（最终结果质量）
+        ↓
+组件级评估（每一步准确性）
+        ↓
+精准改进（只优化有问题的环节）
+        ↓
+    [循环] 直到达标
+</code></pre>
+
+<h3 id="_3">实战案例</h3>
+<p><strong>发票日期错误</strong>：
+1. 建10-20个测试发票（含易混淆日期）
+2. 手动提取正确日期作为基准
+3. 对比Agent提取结果，统计错误率（如20%）
+4. 若超阈值（10%）→ 优化日期提取工具</p>
+<blockquote>
+<p>💡 <strong>关键认知</strong>："一个简陋但自动化的评估器"远好于"强大但手工的评估流程"。哪怕只写一个5个测试用例的脚本，也比每次人肉检查强百倍。</p>
+</blockquote>
+<hr />
+<h1 id="agent_3">五、吴恩达对Agent未来的展望</h1>
+<ul>
+<li><strong>Agentic AI是最大的AI创业机会</strong>（超过基础模型）</li>
+<li><strong>应用层才是真正的价值洼地</strong>——不是芯片、不是模型</li>
+<li><strong>"会用AI的人取代不会用AI的人"</strong>——而非AI取代人类</li>
+<li><strong>人人都要学编程</strong>——这是"史上最糟糕的反面建议"的反面</li>
+<li><strong>速度决定成败</strong>——优秀团队2周 = 普通团队3个月</li>
+</ul>
+<hr />
+<h2 id="10">附录：专有名词速查（10个）</h2>
+<table>
+<thead>
+<tr>
+<th>名词</th>
+<th>全称</th>
+<th>一句话白话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agent Skill</td>
+<td>-</td>
+<td>把Agent的最佳实践打包成可复用的文件夹</td>
+</tr>
+<tr>
+<td>Reflection</td>
+<td>反思模式</td>
+<td>让AI先做再自我批评并修改</td>
+</tr>
+<tr>
+<td>Tool Use</td>
+<td>工具使用</td>
+<td>让AI调用外部函数做事</td>
+</tr>
+<tr>
+<td>Planning</td>
+<td>规划模式</td>
+<td>让AI先做计划再执行</td>
+</tr>
+<tr>
+<td>Multi-Agent</td>
+<td>多智能体</td>
+<td>多个Agent扮演不同角色协作</td>
+</tr>
+<tr>
+<td>ReAct</td>
+<td>Reasoning + Acting</td>
+<td>思考→行动→观察的循环</td>
+</tr>
+<tr>
+<td>MCP</td>
+<td>Model Context Protocol</td>
+<td>AI工具的USB-C统一接口</td>
+</tr>
+<tr>
+<td>RLHF</td>
+<td>人类反馈强化学习</td>
+<td>用人类偏好训练模型变得有帮助/诚实/无害</td>
+</tr>
+<tr>
+<td>Evals</td>
+<td>评估</td>
+<td>量化Agent性能的测试体系</td>
+</tr>
+<tr>
+<td>LangGraph</td>
+<td>-</td>
+<td>基于状态机的多Agent编排框架</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="footer">学习笔记由 WorkBuddy AI 助手整理 · 2026-04-11 · 通俗叙事风格 · 腾讯云商务蓝配色</div>
+</div>
+</body>
+</html>

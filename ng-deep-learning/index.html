@@ -1,0 +1,2188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>吴恩达深度学习专项课程 学习笔记</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;background:#f3f4f6;color:#242424;line-height:1.8}
+.header{background:linear-gradient(135deg,#001a45 0%,#0052d9 50%,#0077ff 100%);color:white;padding:40px 0;text-align:center}
+.header h1{font-size:28px;margin-bottom:8px;letter-spacing:1px}
+.header .sub{color:#a3d0ff;font-size:14px;margin-bottom:16px}
+.header a{color:#66b1ff;text-decoration:none}
+.header a:hover{color:white}
+.stats{display:flex;justify-content:center;gap:30px;margin-top:16px;flex-wrap:wrap}
+.stat{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:10px 20px;min-width:100px}
+.stat .num{font-size:22px;font-weight:700;color:#66b1ff}
+.stat .label{font-size:11px;color:#a3d0ff}
+.overview{max-width:900px;margin:0 auto;padding:20px 40px;background:linear-gradient(135deg,#edf4ff,#f0f7ff,#f5f9ff);border-radius:0 0 12px 12px}
+.overview p{font-size:14px;color:#003cab;line-height:1.9;margin-bottom:12px}
+.content{max-width:900px;margin:20px auto;background:white;border-radius:12px;padding:40px;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+h1{color:#0052d9;font-size:22px;border-bottom:2px solid #0052d9;padding-bottom:8px;margin:32px 0 16px}
+h2{color:#003cab;font-size:18px;margin:24px 0 12px}
+h3{color:#1a6fe8;font-size:15px;margin:16px 0 8px}
+p{margin:8px 0;color:#4b4b4b;font-size:14px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+th{background:#edf4ff;color:#003cab;padding:8px 12px;text-align:left;border:1px solid #d4e3fc}
+td{padding:8px 12px;border:1px solid #e5e6eb}
+tr:nth-child(even){background:#fafbfc}
+blockquote{background:#edf4ff;border-left:4px solid #0052d9;padding:12px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:13px;color:#003cab}
+pre{background:#0d1b2a;color:#e2e8f0;padding:16px;border-radius:8px;overflow-x:auto;font-size:12px;line-height:1.6;margin:12px 0}
+code{font-family:"SF Mono","Fira Code",monospace}
+a{color:#0052d9;text-decoration:none}
+a:hover{text-decoration:underline}
+hr{border:none;border-top:1px solid #e5e6eb;margin:24px 0}
+.footer{text-align:center;padding:20px;color:#999;font-size:12px}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>吴恩达深度学习专项课程 学习笔记</h1>
+  <div class="sub">Deep Learning Specialization · DeepLearning.AI / Coursera · 讲师：Andrew Ng</div>
+  <div class="sub"><a href="https://www.bilibili.com/video/BV12urfB1E7s/">B站 BV12urfB1E7s</a> · 192集 · 约28.5小时</div>
+  <div class="stats">
+    <div class="stat"><div class="num">5</div><div class="label">门课程</div></div>
+    <div class="stat"><div class="num">192</div><div class="label">集视频</div></div>
+    <div class="stat"><div class="num">31</div><div class="label">个章节</div></div>
+    <div class="stat"><div class="num">110</div><div class="label">个名词</div></div>
+  </div>
+</div>
+<div class="content">
+<h1 id="_1">吴恩达深度学习专项课程 学习笔记</h1>
+<blockquote>
+<p><strong>课程</strong>：Deep Learning Specialization · DeepLearning.AI / Coursera
+<strong>B站视频</strong>：<a href="https://www.bilibili.com/video/BV12urfB1E7s/">BV12urfB1E7s</a>（192集，约28.5小时）
+<strong>讲师</strong>：Andrew Ng（吴恩达）
+<strong>适合人群</strong>：有Python基础、想系统入门深度学习的开发者</p>
+</blockquote>
+<hr />
+<p>📖 <strong>内容综述</strong></p>
+<p>这门课是深度学习领域<strong>最经典的入门课程</strong>，5门课程像搭积木一样层层递进：</p>
+<p><strong>第1课「神经网络和深度学习」</strong>回答"深度学习是什么"——从房价预测的简单例子出发，讲清楚逻辑回归、梯度下降、计算图、向量化，最终搭建出一个完整的深层神经网络。数学推导扎实但不枯燥，用<strong>猫图识别</strong>贯穿全程。</p>
+<p><strong>第2课「改善深层神经网络」</strong>回答"怎么让模型更好"——偏差方差诊断、L2/Dropout正则化、Adam优化器、Batch Normalization，都是训练深度网络的必备工具。<strong>指数加权平均的温度例子</strong>和<strong>Dropout为什么要除以keep_prob</strong>是两个经典的"恍然大悟"时刻。</p>
+<p><strong>第3课「结构化机器学习项目」</strong>回答"怎么做项目决策"——不讲数学，只讲方法论。正交化、可避免偏差、误差分析、迁移学习、端到端学习。<strong>猫分类器的误差分析表格</strong>是最有操作性的工具。</p>
+<p><strong>第4课「卷积神经网络」</strong>回答"怎么让机器看图"——从边缘检测的3×3滤波器开始，经过LeNet→AlexNet→VGG→<strong>ResNet</strong>→Inception→<strong>MobileNet</strong>的经典架构进化史，再到YOLO目标检测、人脸识别的Triplet Loss、神经风格迁移的Gram矩阵。</p>
+<p><strong>第5课「序列模型」</strong>回答"怎么让机器理解语言"——RNN的梯度消失→<strong>LSTM/GRU的门控机制</strong>→Word2Vec词嵌入→Seq2Seq翻译→<strong>注意力机制</strong>→<strong>Transformer自注意力</strong>。这条路线直接通向今天的GPT和Claude。</p>
+<hr />
+<h1 id="_2">第一课：神经网络和深度学习</h1>
+<p>这门课用4周时间，从零搭建一个能识别猫的深层神经网络。</p>
+<hr />
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc"><p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 计算图：正向算值（→），反向算梯度（←）</p><svg viewBox="0 0 380 90" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:380px"><defs><marker id="m1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs><rect x="10" y="20" width="80" height="45" rx="8" fill="#0052d9"/><text x="50" y="40" text-anchor="middle" font-size="10" fill="white" font-weight="600">a,b,c</text><text x="50" y="55" text-anchor="middle" font-size="8" fill="#a3d0ff">输入</text><line x1="90" y1="42" x2="120" y2="42" stroke="#0052d9" stroke-width="2" marker-end="url(#m1)"/><rect x="125" y="15" width="105" height="55" rx="8" fill="#1a6fe8"/><text x="178" y="37" text-anchor="middle" font-size="10" fill="white" font-weight="600">u=bc</text><text x="178" y="53" text-anchor="middle" font-size="10" fill="#a3d0ff">v=a+u</text><line x1="230" y1="42" x2="260" y2="42" stroke="#0052d9" stroke-width="2" marker-end="url(#m1)"/><rect x="265" y="20" width="95" height="45" rx="8" fill="#3380e6"/><text x="313" y="40" text-anchor="middle" font-size="10" fill="white" font-weight="600">J=3v=33</text><line x1="265" y1="75" x2="230" y2="75" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,2"/><line x1="125" y1="75" x2="90" y2="75" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,2"/><text x="245" y="84" font-size="8" fill="#dc2626">dJ/dv=3</text><text x="105" y="84" font-size="8" fill="#dc2626">da=3 db=6</text></svg></div>
+<h2 id="_3">一、什么是神经网络？</h2>
+<p><strong>一句话</strong>：神经网络就是一台"学习机器"——你给它大量的（输入, 正确答案）数据对，它自己找出输入到答案之间的映射规则。</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 偏差方差诊断流程</p>
+<svg viewBox="0 0 550 95" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:550px">
+  <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+
+  <rect x="20" y="10" width="130" height="50" rx="8" fill="#0052d9"/>
+  <text x="85" y="30" text-anchor="middle" font-size="12" fill="white" font-weight="700">看训练误差</text>
+  <text x="85" y="45" text-anchor="middle" font-size="9" fill="#a3d0ff">高→欠拟合</text>
+  <line x1="150" y1="35" x2="190" y2="35" stroke="#0052d9" stroke-width="2" marker-end="url(#a1)"/>
+  <rect x="195" y="10" width="130" height="50" rx="8" fill="#1a6fe8"/>
+  <text x="260" y="30" text-anchor="middle" font-size="12" fill="white" font-weight="700">看验证误差</text>
+  <text x="260" y="45" text-anchor="middle" font-size="9" fill="#a3d0ff">高→过拟合</text>
+  <line x1="325" y1="35" x2="365" y2="35" stroke="#0052d9" stroke-width="2" marker-end="url(#a1)"/>
+  <rect x="370" y="10" width="140" height="50" rx="8" fill="#059669"/>
+  <text x="440" y="30" text-anchor="middle" font-size="12" fill="white" font-weight="700">两个都低</text>
+  <text x="440" y="45" text-anchor="middle" font-size="9" fill="#a7f3d0">✅ 理想模型</text>
+  <text x="85" y="80" text-anchor="middle" font-size="10" fill="#666">加大网络/训练更久</text>
+  <text x="260" y="80" text-anchor="middle" font-size="10" fill="#666">正则化/更多数据</text>
+
+</svg></div>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Batch Norm计算流程</p>
+<svg viewBox="0 0 620 85" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:620px">
+  <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+
+  <rect x="15" y="20" width="110" height="50" rx="8" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="70" y="42" text-anchor="middle" font-size="11" fill="#003cab" font-weight="600">输入 z⁽ˡ⁾</text>
+  <text x="70" y="56" text-anchor="middle" font-size="9" fill="#666">mini-batch</text>
+  <line x1="125" y1="45" x2="155" y2="45" stroke="#0052d9" stroke-width="2" marker-end="url(#a1)"/>
+  <rect x="160" y="20" width="120" height="50" rx="8" fill="#0052d9"/>
+  <text x="220" y="40" text-anchor="middle" font-size="11" fill="white" font-weight="600">归一化</text>
+  <text x="220" y="55" text-anchor="middle" font-size="9" fill="#a3d0ff">(z-μ)/√(σ²+ε)</text>
+  <line x1="280" y1="45" x2="310" y2="45" stroke="#0052d9" stroke-width="2" marker-end="url(#a1)"/>
+  <rect x="315" y="20" width="130" height="50" rx="8" fill="#1a6fe8"/>
+  <text x="380" y="40" text-anchor="middle" font-size="11" fill="white" font-weight="600">缩放+偏移</text>
+  <text x="380" y="55" text-anchor="middle" font-size="9" fill="#a3d0ff">γ·z_norm + β</text>
+  <line x1="445" y1="45" x2="475" y2="45" stroke="#0052d9" stroke-width="2" marker-end="url(#a1)"/>
+  <rect x="480" y="20" width="100" height="50" rx="8" fill="#059669"/>
+  <text x="530" y="42" text-anchor="middle" font-size="11" fill="white" font-weight="600">输出 z̃⁽ˡ⁾</text>
+  <text x="530" y="56" text-anchor="middle" font-size="9" fill="#a7f3d0">稳定分布</text>
+
+</svg></div>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 误差分析表 → 优先级决策</p>
+<svg viewBox="0 0 660 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:660px">
+  <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+
+  <rect x="20" y="10" width="180" height="80" rx="10" fill="#0052d9"/>
+  <text x="110" y="35" text-anchor="middle" font-size="12" fill="white" font-weight="700">手工分析100个</text>
+  <text x="110" y="52" text-anchor="middle" font-size="12" fill="white" font-weight="700">错误样本</text>
+  <text x="110" y="72" text-anchor="middle" font-size="9" fill="#a3d0ff">标注错误类别+占比</text>
+  <line x1="200" y1="50" x2="240" y2="50" stroke="#0052d9" stroke-width="2" marker-end="url(#a1)"/>
+  <rect x="245" y="10" width="160" height="80" rx="10" fill="#1a6fe8"/>
+  <text x="325" y="35" text-anchor="middle" font-size="12" fill="white" font-weight="700">按占比排序</text>
+  <text x="325" y="55" text-anchor="middle" font-size="10" fill="#a3d0ff">模糊61% > 大猫43%</text>
+  <text x="325" y="72" text-anchor="middle" font-size="10" fill="#a3d0ff"> > 滤镜12% > 狗8%</text>
+  <line x1="405" y1="50" x2="445" y2="50" stroke="#0052d9" stroke-width="2" marker-end="url(#a1)"/>
+  <rect x="450" y="10" width="180" height="80" rx="10" fill="#059669"/>
+  <text x="540" y="35" text-anchor="middle" font-size="12" fill="white" font-weight="700">优先解决占比</text>
+  <text x="540" y="55" text-anchor="middle" font-size="12" fill="white" font-weight="700">最高的类别</text>
+  <text x="540" y="72" text-anchor="middle" font-size="9" fill="#a7f3d0">→ 先解决模糊问题</text>
+
+</svg></div>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 迁移学习流程</p>
+<svg viewBox="0 0 670 95" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:670px">
+  <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+
+  <rect x="20" y="15" width="180" height="60" rx="10" fill="#0052d9"/>
+  <text x="110" y="38" text-anchor="middle" font-size="12" fill="white" font-weight="700">预训练模型</text>
+  <text x="110" y="55" text-anchor="middle" font-size="9" fill="#a3d0ff">ImageNet 100万张</text>
+  <line x1="200" y1="45" x2="240" y2="45" stroke="#0052d9" stroke-width="2" marker-end="url(#a1)"/>
+  <rect x="245" y="5" width="180" height="80" rx="10" fill="#1a6fe8"/>
+  <text x="335" y="25" text-anchor="middle" font-size="12" fill="white" font-weight="700">冻结底层</text>
+  <text x="335" y="45" text-anchor="middle" font-size="10" fill="#a3d0ff">边缘/纹理检测通用</text>
+  <text x="335" y="62" text-anchor="middle" font-size="10" fill="#a3d0ff">替换最后1-2层</text>
+  <line x1="425" y1="45" x2="465" y2="45" stroke="#0052d9" stroke-width="2" marker-end="url(#a1)"/>
+  <rect x="470" y="15" width="170" height="60" rx="10" fill="#059669"/>
+  <text x="555" y="38" text-anchor="middle" font-size="12" fill="white" font-weight="700">微调</text>
+  <text x="555" y="55" text-anchor="middle" font-size="9" fill="#a7f3d0">目标数据1000张</text>
+
+</svg></div>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 CNN架构进化链路</p>
+<svg viewBox="0 0 700 85" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px">
+  <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+
+  <rect x="10" y="25" width="90" height="45" rx="6" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="55" y="44" text-anchor="middle" font-size="10" fill="#003cab" font-weight="600">LeNet-5</text>
+  <text x="55" y="58" text-anchor="middle" font-size="8" fill="#666">1998·5层</text>
+  <line x1="100" y1="48" x2="118" y2="48" stroke="#0052d9" stroke-width="1.5" marker-end="url(#a1)"/>
+  <rect x="123" y="25" width="90" height="45" rx="6" fill="#0052d9"/>
+  <text x="168" y="44" text-anchor="middle" font-size="10" fill="white" font-weight="600">AlexNet</text>
+  <text x="168" y="58" text-anchor="middle" font-size="8" fill="#a3d0ff">2012·ReLU</text>
+  <line x1="213" y1="48" x2="231" y2="48" stroke="#0052d9" stroke-width="1.5" marker-end="url(#a1)"/>
+  <rect x="236" y="25" width="80" height="45" rx="6" fill="#1a6fe8"/>
+  <text x="276" y="44" text-anchor="middle" font-size="10" fill="white" font-weight="600">VGG-16</text>
+  <text x="276" y="58" text-anchor="middle" font-size="8" fill="#a3d0ff">2014·3×3</text>
+  <line x1="316" y1="48" x2="334" y2="48" stroke="#0052d9" stroke-width="1.5" marker-end="url(#a1)"/>
+  <rect x="339" y="20" width="100" height="55" rx="8" fill="#dc2626"/>
+  <text x="389" y="42" text-anchor="middle" font-size="11" fill="white" font-weight="700">ResNet</text>
+  <text x="389" y="58" text-anchor="middle" font-size="8" fill="#fca5a5">2015·残差连接</text>
+  <line x1="439" y1="48" x2="457" y2="48" stroke="#0052d9" stroke-width="1.5" marker-end="url(#a1)"/>
+  <rect x="462" y="25" width="90" height="45" rx="6" fill="#3380e6"/>
+  <text x="507" y="44" text-anchor="middle" font-size="10" fill="white" font-weight="600">Inception</text>
+  <text x="507" y="58" text-anchor="middle" font-size="8" fill="#d4e3fc">多尺度并行</text>
+  <line x1="552" y1="48" x2="570" y2="48" stroke="#0052d9" stroke-width="1.5" marker-end="url(#a1)"/>
+  <rect x="575" y="20" width="105" height="55" rx="8" fill="#059669"/>
+  <text x="627" y="42" text-anchor="middle" font-size="11" fill="white" font-weight="700">MobileNet</text>
+  <text x="627" y="58" text-anchor="middle" font-size="8" fill="#a7f3d0">2017·轻量化</text>
+
+</svg></div>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 注意力机制核心</p>
+<svg viewBox="0 0 620 90" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:620px">
+  <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+
+  <rect x="20" y="15" width="140" height="55" rx="8" fill="#0052d9"/>
+  <text x="90" y="35" text-anchor="middle" font-size="12" fill="white" font-weight="700">Encoder输出</text>
+  <text x="90" y="52" text-anchor="middle" font-size="9" fill="#a3d0ff">所有位置的隐藏状态</text>
+  <line x1="160" y1="42" x2="190" y2="42" stroke="#0052d9" stroke-width="2" marker-end="url(#a1)"/>
+  <rect x="195" y="5" width="180" height="75" rx="8" fill="#1a6fe8"/>
+  <text x="285" y="25" text-anchor="middle" font-size="12" fill="white" font-weight="700">注意力权重 α</text>
+  <text x="285" y="45" text-anchor="middle" font-size="10" fill="#a3d0ff">softmax(eₜ,ₜ')</text>
+  <text x="285" y="62" text-anchor="middle" font-size="9" fill="#66b1ff">动态聚焦相关位置</text>
+  <line x1="375" y1="42" x2="405" y2="42" stroke="#0052d9" stroke-width="2" marker-end="url(#a1)"/>
+  <rect x="410" y="5" width="180" height="75" rx="8" fill="#059669"/>
+  <text x="500" y="25" text-anchor="middle" font-size="12" fill="white" font-weight="700">上下文向量 c</text>
+  <text x="500" y="45" text-anchor="middle" font-size="10" fill="#a7f3d0">cₜ = Σ αₜ,ₜ'·aₜ'</text>
+  <text x="500" y="62" text-anchor="middle" font-size="9" fill="#d4e3fc">加权求和 → 精准信息</text>
+
+</svg></div>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Self-Attention: Q·K→注意力→V</p>
+<svg viewBox="0 0 600 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px">
+  <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+
+  <rect x="20" y="15" width="110" height="55" rx="8" fill="#0052d9"/>
+  <text x="75" y="35" text-anchor="middle" font-size="12" fill="white" font-weight="700">Q 查询</text>
+  <text x="75" y="52" text-anchor="middle" font-size="9" fill="#a3d0ff">我在找什么？</text>
+  <rect x="155" y="15" width="110" height="55" rx="8" fill="#1a6fe8"/>
+  <text x="210" y="35" text-anchor="middle" font-size="12" fill="white" font-weight="700">K 键</text>
+  <text x="210" y="52" text-anchor="middle" font-size="9" fill="#a3d0ff">我是什么？</text>
+  <rect x="290" y="15" width="110" height="55" rx="8" fill="#3380e6"/>
+  <text x="345" y="35" text-anchor="middle" font-size="12" fill="white" font-weight="700">V 值</text>
+  <text x="345" y="52" text-anchor="middle" font-size="9" fill="#d4e3fc">我的信息？</text>
+  <line x1="75" y1="70" x2="200" y2="90" stroke="#0052d9" stroke-width="1.5"/>
+  <line x1="210" y1="70" x2="210" y2="90" stroke="#1a6fe8" stroke-width="1.5"/>
+  <rect x="150" y="92" width="130" height="35" rx="6" fill="#f59e0b"/>
+  <text x="215" y="114" text-anchor="middle" font-size="11" fill="white" font-weight="600">Q·Kᵀ / √dₖ</text>
+  <line x1="280" y1="110" x2="310" y2="110" stroke="#0052d9" stroke-width="1.5" marker-end="url(#a1)"/>
+  <rect x="315" y="92" width="110" height="35" rx="6" fill="#dc2626"/>
+  <text x="370" y="114" text-anchor="middle" font-size="11" fill="white" font-weight="600">Softmax</text>
+  <line x1="425" y1="110" x2="455" y2="110" stroke="#0052d9" stroke-width="1.5" marker-end="url(#a1)"/>
+  <rect x="460" y="92" width="110" height="35" rx="6" fill="#059669"/>
+  <text x="515" y="114" text-anchor="middle" font-size="11" fill="white" font-weight="600">× V → 输出</text>
+
+</svg></div>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc"><p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 梯度下降：沿最陡方向下山</p><svg viewBox="0 0 420 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:420px"><defs><marker id="m1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs><ellipse cx="200" cy="55" rx="170" ry="45" fill="none" stroke="#d4e3fc" stroke-width="1"/><ellipse cx="200" cy="55" rx="110" ry="30" fill="none" stroke="#a3d0ff" stroke-width="1"/><ellipse cx="200" cy="55" rx="50" ry="15" fill="none" stroke="#66b1ff" stroke-width="1.5"/><circle cx="200" cy="55" r="4" fill="#059669"/><text x="200" y="49" text-anchor="middle" font-size="9" fill="#059669" font-weight="600">最优</text><circle cx="320" cy="30" r="5" fill="#dc2626"/><text x="335" y="28" font-size="9" fill="#dc2626">起点</text><line x1="315" y1="33" x2="280" y2="38" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,2"/><line x1="278" y1="39" x2="240" y2="48" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,2"/><line x1="238" y1="49" x2="210" y2="54" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,2"/><text x="200" y="92" text-anchor="middle" font-size="10" fill="#666">每步沿梯度反方向走α步</text></svg></div>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc"><p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 浅层神经网络（1个隐藏层）</p><svg viewBox="0 0 560 158" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px"><defs><marker id="m1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs><text x="55" y="12" text-anchor="middle" font-size="10" fill="#003cab" font-weight="600">输入层</text><circle cx="55" cy="35" r="15" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/><text x="55" y="39" text-anchor="middle" font-size="10" fill="#003cab">x₁</text><circle cx="55" cy="80" r="15" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/><text x="55" y="84" text-anchor="middle" font-size="10" fill="#003cab">x₂</text><circle cx="55" cy="125" r="15" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/><text x="55" y="129" text-anchor="middle" font-size="10" fill="#003cab">x₃</text><text x="280" y="12" text-anchor="middle" font-size="10" fill="#003cab" font-weight="600">隐藏层(4)</text><circle cx="280" cy="30" r="15" fill="#0052d9"/><text x="280" y="34" text-anchor="middle" font-size="9" fill="white">a₁</text><circle cx="280" cy="65" r="15" fill="#0052d9"/><text x="280" y="69" text-anchor="middle" font-size="9" fill="white">a₂</text><circle cx="280" cy="100" r="15" fill="#0052d9"/><text x="280" y="104" text-anchor="middle" font-size="9" fill="white">a₃</text><circle cx="280" cy="135" r="15" fill="#0052d9"/><text x="280" y="139" text-anchor="middle" font-size="9" fill="white">a₄</text><text x="490" y="12" text-anchor="middle" font-size="10" fill="#003cab" font-weight="600">输出</text><circle cx="490" cy="80" r="20" fill="#059669"/><text x="490" y="84" text-anchor="middle" font-size="12" fill="white" font-weight="700">ŷ</text><line x1="70" y1="35" x2="265" y2="30" stroke="#a3d0ff" stroke-width="0.8"/><line x1="70" y1="35" x2="265" y2="65" stroke="#a3d0ff" stroke-width="0.8"/><line x1="70" y1="80" x2="265" y2="30" stroke="#a3d0ff" stroke-width="0.8"/><line x1="70" y1="80" x2="265" y2="100" stroke="#a3d0ff" stroke-width="0.8"/><line x1="70" y1="125" x2="265" y2="100" stroke="#a3d0ff" stroke-width="0.8"/><line x1="70" y1="125" x2="265" y2="135" stroke="#a3d0ff" stroke-width="0.8"/><line x1="295" y1="30" x2="470" y2="76" stroke="#a7f3d0" stroke-width="0.8"/><line x1="295" y1="65" x2="470" y2="78" stroke="#a7f3d0" stroke-width="0.8"/><line x1="295" y1="100" x2="470" y2="80" stroke="#a7f3d0" stroke-width="0.8"/><line x1="295" y1="135" x2="470" y2="82" stroke="#a7f3d0" stroke-width="0.8"/><text x="165" y="150" text-anchor="middle" font-size="9" fill="#666">W⁽¹⁾x+b⁽¹⁾→ReLU</text><text x="395" y="150" text-anchor="middle" font-size="9" fill="#666">W⁽²⁾a⁽¹⁾+b⁽²⁾→σ</text></svg></div>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc"><p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 四种激活函数形状对比</p><svg viewBox="0 0 665 80" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:665px"><defs><marker id="m1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs><rect x="5" y="10" width="150" height="60" rx="8" fill="#f8faff" stroke="#d4e3fc"/><text x="80" y="30" text-anchor="middle" font-size="11" fill="#003cab" font-weight="600">Sigmoid</text><text x="80" y="48" text-anchor="middle" font-size="9" fill="#666">0~1·梯度消失⚠️</text><rect x="170" y="10" width="150" height="60" rx="8" fill="#f8faff" stroke="#d4e3fc"/><text x="245" y="30" text-anchor="middle" font-size="11" fill="#003cab" font-weight="600">tanh</text><text x="245" y="48" text-anchor="middle" font-size="9" fill="#059669">-1~1·零中心</text><rect x="335" y="5" width="150" height="70" rx="8" fill="#edf4ff" stroke="#0052d9" stroke-width="2"/><text x="410" y="28" text-anchor="middle" font-size="12" fill="#0052d9" font-weight="700">ReLU ⭐</text><text x="410" y="48" text-anchor="middle" font-size="9" fill="#059669">max(0,z)·首选</text><rect x="500" y="10" width="150" height="60" rx="8" fill="#f8faff" stroke="#d4e3fc"/><text x="575" y="30" text-anchor="middle" font-size="11" fill="#003cab" font-weight="600">Leaky ReLU</text><text x="575" y="48" text-anchor="middle" font-size="9" fill="#666">防死神经元</text></svg></div>
+<h3 id="_4">房价预测的例子</h3>
+<p>课上用的第一个例子：给定房屋面积，预测房价。</p>
+<pre class="codehilite"><code>面积 → [某个函数] → 房价
+</code></pre>
+
+<p>最简单的神经网络就是一个<strong>单神经元</strong>——做一个线性变换再加一个ReLU激活：</p>
+<pre class="codehilite"><code>价格 = max(0, w × 面积 + b)
+</code></pre>
+
+<p>当输入特征变多（面积、卧室数、邮编、学区），中间加入多个隐藏神经元，就变成了<strong>标准神经网络</strong>。隐藏层自己学习哪些特征该组合在一起——你不需要手动告诉它"邮编+学区=地段质量"，它自己会发现。</p>
+<h3 id="_5">不同数据用不同架构</h3>
+<table>
+<thead>
+<tr>
+<th>数据类型</th>
+<th>网络架构</th>
+<th>应用举例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>结构化数据（表格）</td>
+<td>标准NN</td>
+<td>房价预测、广告点击率</td>
+</tr>
+<tr>
+<td>图像</td>
+<td>CNN（卷积神经网络）</td>
+<td>猫狗识别、自动驾驶</td>
+</tr>
+<tr>
+<td>序列数据（文本/语音）</td>
+<td>RNN（循环神经网络）</td>
+<td>机器翻译、语音识别</td>
+</tr>
+<tr>
+<td>混合数据</td>
+<td>混合架构</td>
+<td>自动驾驶（雷达+图像）</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：深度学习在<strong>非结构化数据</strong>（图像、文本、语音）上的突破是近年来最大的进展。结构化数据上传统机器学习也能做得不错，但图像和语言这种人类天生擅长的事情，深度学习终于也能做了。</p>
+</blockquote>
+<h3 id="_6">深度学习为什么现在才火？</h3>
+<p>三大推动力形成了完美风暴：</p>
+<table>
+<thead>
+<tr>
+<th>因素</th>
+<th>具体表现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>数据规模</strong></td>
+<td>互联网、手机、IoT产生了海量标注数据</td>
+</tr>
+<tr>
+<td><strong>计算能力</strong></td>
+<td>GPU、云计算让大模型训练成为可能</td>
+</tr>
+<tr>
+<td><strong>算法创新</strong></td>
+<td>ReLU替代Sigmoid解决了梯度消失，让训练速度大幅提升</td>
+</tr>
+</tbody>
+</table>
+<p><strong>规模效应</strong>：小数据集上，手工特征工程的SVM可能比神经网络好；但数据量足够大时，<strong>大模型+大数据</strong>的组合会持续碾压其他方法。</p>
+<hr />
+<h2 id="_7">二、逻辑回归——最简单的神经网络</h2>
+<p><strong>一句话</strong>：逻辑回归就是一个<strong>单神经元分类器</strong>——输入特征，输出"是猫的概率"。</p>
+<h3 id="_8">猫图识别的问题设置</h3>
+<pre class="codehilite"><code>输入：一张64×64×3的彩色图片 → 展平为12,288维向量 x
+输出：y = 1（是猫）或 y = 0（不是猫）
+目标：学习 P(y=1|x)，即这张图是猫的概率
+</code></pre>
+
+<p><strong>符号约定</strong>（贯穿整门课）：</p>
+<pre class="codehilite"><code>m      = 训练样本数
+nₓ     = 输入特征维度（这里是12288）
+X      = (nₓ, m) 矩阵，m个样本按列堆叠
+Y      = (1, m) 矩阵
+</code></pre>
+
+<div style="margin:12px 0;padding:14px 20px;background:#f8faff;border:1px solid #d4e3fc;border-radius:8px;text-align:center"><p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:6px">📐 Sigmoid函数公式</p><svg viewBox="0 0 360 85" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:360px"><text x="15" y="48" font-size="18" font-family="Times New Roman,serif" fill="#333" font-style="italic">σ</text><text x="26" y="48" font-size="18" fill="#333">(z)</text><text x="58" y="48" font-size="20" fill="#333">=</text><line x1="90" y1="42" x2="230" y2="42" stroke="#333" stroke-width="1.5"/><text x="160" y="33" text-anchor="middle" font-size="18" fill="#333">1</text><text x="120" y="67" font-size="15" fill="#333">1 + </text><text x="155" y="67" font-size="15" font-family="Times New Roman,serif" fill="#333" font-style="italic">e</text><text x="167" y="57" font-size="12" fill="#0052d9" font-weight="bold">−z</text><text x="250" y="52" font-size="11" fill="#888">(0, 1)</text></svg></div>
+<h3 id="sigmoid">Sigmoid函数</h3>
+<p>逻辑回归的核心是<strong>Sigmoid函数</strong>——把任意实数压缩到(0,1)之间：</p>
+<pre class="codehilite"><code>                    1
+σ(z) = ─────────────────
+         1 + e⁻ᶻ
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th>z值</th>
+<th>σ(z)</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>z → +∞</td>
+<td>→ 1</td>
+<td>很确定是猫</td>
+</tr>
+<tr>
+<td>z = 0</td>
+<td>0.5</td>
+<td>一半一半</td>
+</tr>
+<tr>
+<td>z → -∞</td>
+<td>→ 0</td>
+<td>很确定不是猫</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sigmoid的导数</strong>（后面反向传播要用）：</p>
+<pre class="codehilite"><code>σ'(z) = σ(z) · (1 - σ(z)) = a(1-a)
+</code></pre>
+
+<p>最大值在z=0时取到，等于0.25。这个0.25就是Sigmoid导致梯度消失的根源——连乘50次就是10⁻⁶⁰。</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc"><p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 逻辑回归前向传播</p><svg viewBox="0 0 600 80" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px"><defs><marker id="lr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs><rect x="10" y="12" width="100" height="50" rx="8" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/><text x="60" y="35" text-anchor="middle" font-size="11" fill="#003cab" font-weight="600">x</text><text x="60" y="50" text-anchor="middle" font-size="9" fill="#666">12288维</text><line x1="110" y1="37" x2="140" y2="37" stroke="#0052d9" stroke-width="2" marker-end="url(#lr)"/><rect x="145" y="8" width="130" height="58" rx="8" fill="#0052d9"/><text x="210" y="30" text-anchor="middle" font-size="11" fill="white" font-weight="600">z=wᵀx+b</text><text x="210" y="48" text-anchor="middle" font-size="9" fill="#a3d0ff">线性变换</text><line x1="275" y1="37" x2="305" y2="37" stroke="#0052d9" stroke-width="2" marker-end="url(#lr)"/><rect x="310" y="8" width="120" height="58" rx="8" fill="#1a6fe8"/><text x="370" y="30" text-anchor="middle" font-size="11" fill="white" font-weight="600">ŷ=σ(z)</text><text x="370" y="48" text-anchor="middle" font-size="9" fill="#a3d0ff">Sigmoid</text><line x1="430" y1="37" x2="460" y2="37" stroke="#0052d9" stroke-width="2" marker-end="url(#lr)"/><rect x="465" y="12" width="100" height="50" rx="8" fill="#059669"/><text x="515" y="35" text-anchor="middle" font-size="11" fill="white" font-weight="600">P(猫|x)</text></svg></div><h3 id="_9">完整前向传播</h3>
+<pre class="codehilite"><code>z = wᵀx + b          ← 线性变换
+ŷ = σ(z)             ← 激活函数
+</code></pre>
+
+<h3 id="_10">损失函数——为什么不用均方误差？</h3>
+<p><strong>单样本损失（交叉熵）</strong>：</p>
+<pre class="codehilite"><code>L(ŷ, y) = -[y·log(ŷ) + (1-y)·log(1-ŷ)]
+</code></pre>
+
+<p><strong>理解这个公式的直觉</strong>：
+- 当 y=1：L = -log(ŷ) → 希望ŷ尽可能大（接近1），否则损失很大
+- 当 y=0：L = -log(1-ŷ) → 希望ŷ尽可能小（接近0），否则损失很大</p>
+<p><strong>整个训练集的成本函数</strong>（m个样本取平均）：</p>
+<pre class="codehilite"><code>              1   m
+J(w,b) = ─── Σ  L(ŷ⁽ⁱ⁾, y⁽ⁱ⁾)
+              m  i=1
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：为什么不用均方误差(MSE)？因为MSE+Sigmoid组合会导致成本函数<strong>非凸</strong>（有多个局部最小值）。交叉熵是<strong>凸函数</strong>，保证梯度下降能找到全局最优解。</p>
+</blockquote>
+<hr />
+<h2 id="_11">三、梯度下降</h2>
+<p><strong>一句话</strong>：梯度下降就是"沿着山坡最陡的方向往下走"，每走一步就更接近成本函数的最低点。</p>
+<h3 id="_12">参数更新规则</h3>
+<pre class="codehilite"><code>w := w - α · ∂J/∂w
+b := b - α · ∂J/∂b
+</code></pre>
+
+<p>其中 α 是<strong>学习率</strong>（步长大小），∂J/∂w 是成本函数关于w的偏导数（梯度方向）。</p>
+<h3 id="m">逻辑回归的梯度（m个样本）</h3>
+<pre class="codehilite"><code>         1   m
+dw = ─── Σ  x⁽ⁱ⁾ · (ŷ⁽ⁱ⁾ - y⁽ⁱ⁾)
+         m  i=1
+
+         1   m
+db = ─── Σ  (ŷ⁽ⁱ⁾ - y⁽ⁱ⁾)
+         m  i=1
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：梯度的核心就是 (预测值 - 真实值) 乘以输入特征。形式非常简洁——预测越偏，梯度越大，参数更新越猛。</p>
+</blockquote>
+<hr />
+<h2 id="_13">四、计算图与链式法则</h2>
+<p><strong>一句话</strong>：计算图把复杂计算拆成一步步简单操作，正向算结果，反向算梯度。这就是<strong>反向传播的核心原理</strong>。</p>
+<h3 id="_14">简单例子</h3>
+<p>计算 J = 3(a + bc)：</p>
+<pre class="codehilite"><code>正向传播：
+  b=3 ──×──→ u=6 ──┐
+  c=2 ──┘          ├──(+)──→ v=11 ──×3──→ J=33
+  a=5 ─────────────┘
+
+反向传播（从右到左，用链式法则）：
+  dJ/dv = 3
+  dJ/da = dJ/dv × dv/da = 3 × 1 = 3
+  dJ/du = dJ/dv × dv/du = 3 × 1 = 3
+  dJ/db = dJ/du × du/db = 3 × c = 3 × 2 = 6
+  dJ/dc = dJ/du × du/dc = 3 × b = 3 × 3 = 9
+</code></pre>
+
+<p><strong>链式法则</strong>：每个节点的梯度 = 上游梯度 × 本地导数。就像接力赛一样，每一站接过前一站的"梯度棒"，乘上自己的"贡献因子"再传下去。</p>
+<hr />
+<h2 id="for300">五、向量化——速度是for循环的300倍</h2>
+<p><strong>一句话</strong>：永远不要用for循环遍历样本，用NumPy的矩阵运算替代——同样的计算，从200ms变成1.5ms。</p>
+<h3 id="vs">非向量化 vs 向量化</h3>
+<pre class="codehilite"><code class="language-python"># 非向量化（慢，200ms）
+z = 0
+for i in range(n_x):
+    z += w[i] * x[i]
+z += b
+
+# 向量化（快，1.5ms）
+z = np.dot(w, x) + b
+</code></pre>
+
+<h3 id="m_1">m个样本的全向量化前向传播</h3>
+<pre class="codehilite"><code class="language-python">Z = np.dot(W, X) + b          # (1, m) = (1, nₓ) × (nₓ, m)
+A = sigmoid(Z)                 # 逐元素应用Sigmoid
+dZ = A - Y                     # (1, m)
+dW = (1/m) * np.dot(dZ, X.T)  # (1, nₓ)
+db = (1/m) * np.sum(dZ)       # 标量
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：深度学习代码中<strong>几乎不应该出现显式for循环</strong>。所有操作都应该写成矩阵运算——这不仅是代码风格问题，而是300倍的速度差距。GPU/CPU的SIMD指令集天然支持矩阵并行。</p>
+</blockquote>
+<h3 id="pythonbroadcasting">Python广播（Broadcasting）</h3>
+<pre class="codehilite"><code class="language-python"># (m, n) + (1, n) → 自动扩展为 (m, n)
+# (m, n) + (m, 1) → 自动扩展为 (m, n)
+</code></pre>
+
+<p><strong>重要提示</strong>：避免使用rank-1数组！</p>
+<pre class="codehilite"><code class="language-python">a = np.random.randn(5)      # ❌ shape: (5,) → 行为不可预测
+a = np.random.randn(5, 1)   # ✅ shape: (5,1) → 列向量
+</code></pre>
+
+<hr />
+<h2 id="_15">六、浅层神经网络</h2>
+<p><strong>一句话</strong>：在逻辑回归的基础上加一个<strong>隐藏层</strong>，模型就从"直线"变成了"曲线"——能拟合更复杂的边界。</p>
+<h3 id="_16">网络结构</h3>
+<pre class="codehilite"><code>输入层 x → [隐藏层 a⁽¹⁾] → 输出层 ŷ
+(nₓ,1)    (n₁, 1)           (1, 1)
+</code></pre>
+
+<h3 id="_17">前向传播公式</h3>
+<pre class="codehilite"><code>z⁽¹⁾ = W⁽¹⁾x + b⁽¹⁾       ← 第1层线性变换
+a⁽¹⁾ = g⁽¹⁾(z⁽¹⁾)          ← 第1层激活
+z⁽²⁾ = W⁽²⁾a⁽¹⁾ + b⁽²⁾    ← 第2层线性变换
+ŷ = a⁽²⁾ = σ(z⁽²⁾)         ← 输出层Sigmoid
+</code></pre>
+
+<h3 id="_18">激活函数选择</h3>
+<table>
+<thead>
+<tr>
+<th>激活函数</th>
+<th>公式</th>
+<th>范围</th>
+<th>导数</th>
+<th>用在哪</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sigmoid</strong></td>
+<td>1/(1+e⁻ᶻ)</td>
+<td>(0,1)</td>
+<td>a(1-a)</td>
+<td>输出层（二分类）</td>
+</tr>
+<tr>
+<td><strong>tanh</strong></td>
+<td>(eᶻ-e⁻ᶻ)/(eᶻ+e⁻ᶻ)</td>
+<td>(-1,1)</td>
+<td>1-a²</td>
+<td>隐藏层（比Sigmoid好）</td>
+</tr>
+<tr>
+<td><strong>ReLU</strong></td>
+<td>max(0,z)</td>
+<td>[0,∞)</td>
+<td>0或1</td>
+<td><strong>隐藏层首选</strong></td>
+</tr>
+<tr>
+<td><strong>Leaky ReLU</strong></td>
+<td>max(0.01z,z)</td>
+<td>(-∞,∞)</td>
+<td>0.01或1</td>
+<td>防止"死神经元"</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：为什么需要非线性激活？如果所有层都用线性激活（a=z），那么无论网络多深，整体效果等同于一个单层线性变换：a⁽²⁾ = (W⁽²⁾W⁽¹⁾)x + (W⁽²⁾b⁽¹⁾+b⁽²⁾) = W'x + b'。<strong>深度白费了！</strong></p>
+</blockquote>
+<h3 id="_19">随机初始化</h3>
+<pre class="codehilite"><code class="language-python">W = np.random.randn(n_h, n_x) * 0.01    # ✅ 小随机数
+b = np.zeros((n_h, 1))                    # ✅ 可以初始化为0
+</code></pre>
+
+<p><strong>为什么不能全零初始化？</strong>
+- 如果W全为0，所有神经元的输出完全相同
+- 梯度也完全相同 → 更新也完全相同
+- 整层神经元<strong>永远保持对称</strong>，相当于只有1个神经元
+- 叫做"对称性问题"</p>
+<hr />
+<h2 id="_20">七、深层神经网络</h2>
+<p><strong>一句话</strong>：浅层网络只有1-2个隐藏层；深层网络有几十甚至上百层。深度的价值在于<strong>逐层抽象</strong>——底层学边缘，中层学部件，高层学整体。</p>
+<h3 id="_21">为什么深度有用？</h3>
+<p><strong>电路理论视角</strong>：某些函数用深度网络只需O(log n)个神经元，浅层网络却需要O(2ⁿ)个。</p>
+<p><strong>人脸识别的逐层抽象</strong>：</p>
+<pre class="codehilite"><code>第1层：边缘检测（水平线、垂直线、对角线）
+第2层：局部部件（眼睛、鼻子、嘴巴的形状）
+第3层：人脸轮廓（把部件组合成完整的脸）
+</code></pre>
+
+<h3 id="l">L层网络的前向传播</h3>
+<pre class="codehilite"><code>对于第l层（l = 1, 2, ..., L）：
+  Z⁽ˡ⁾ = W⁽ˡ⁾A⁽ˡ⁻¹⁾ + b⁽ˡ⁾
+  A⁽ˡ⁾ = g⁽ˡ⁾(Z⁽ˡ⁾)
+
+其中 A⁽⁰⁾ = X（输入），A⁽ᴸ⁾ = ŷ（预测）
+</code></pre>
+
+<h3 id="_22">矩阵维度速查</h3>
+<pre class="codehilite"><code>W⁽ˡ⁾:  (n⁽ˡ⁾, n⁽ˡ⁻¹⁾)
+b⁽ˡ⁾:  (n⁽ˡ⁾, 1)
+Z⁽ˡ⁾:  (n⁽ˡ⁾, m)
+A⁽ˡ⁾:  (n⁽ˡ⁾, m)
+</code></pre>
+
+<p><strong>维度检查技巧</strong>：W的行数 = 当前层神经元数，W的列数 = 上一层神经元数。做乘法前先检查维度，能避免90%的bug。</p>
+<h3 id="l_1">反向传播（L层网络）</h3>
+<pre class="codehilite"><code>从输出层开始：
+dZ⁽ᴸ⁾ = A⁽ᴸ⁾ - Y
+
+对于每一层l（从L-1到1）：
+dZ⁽ˡ⁾ = (W⁽ˡ⁺¹⁾ᵀ · dZ⁽ˡ⁺¹⁾) ⊙ g'⁽ˡ⁾(Z⁽ˡ⁾)
+
+梯度计算：
+dW⁽ˡ⁾ = (1/m) · dZ⁽ˡ⁾ · A⁽ˡ⁻¹⁾ᵀ
+db⁽ˡ⁾ = (1/m) · sum(dZ⁽ˡ⁾, axis=1, keepdims=True)
+
+参数更新：
+W⁽ˡ⁾ := W⁽ˡ⁾ - α · dW⁽ˡ⁾
+b⁽ˡ⁾ := b⁽ˡ⁾ - α · db⁽ˡ⁾
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：⊙ 是逐元素乘法（Hadamard积）。反向传播的核心就是链式法则的矩阵化实现——从输出层一路乘回输入层，每层乘上自己的"本地导数"。</p>
+</blockquote>
+<h3 id="vs_1">参数 vs 超参数</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">参数（通过训练学习）</th>
+<th style="text-align: center;">超参数（手动设置）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">W⁽¹⁾, b⁽¹⁾, W⁽²⁾, b⁽²⁾, ...</td>
+<td style="text-align: center;">学习率α</td>
+</tr>
+<tr>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">迭代次数</td>
+</tr>
+<tr>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">隐藏层数L</td>
+</tr>
+<tr>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">各层神经元数n⁽¹⁾,n⁽²⁾,...</td>
+</tr>
+<tr>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">激活函数选择</td>
+</tr>
+<tr>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">Mini-batch大小</td>
+</tr>
+<tr>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">正则化参数λ</td>
+</tr>
+</tbody>
+</table>
+<p><strong>吴恩达的建议</strong>：深度学习是一个<strong>高度经验性</strong>的过程——想法→编码→实验→调整超参数→重复。没有万能公式，只有不断试错。</p>
+<hr />
+<h2 id="25">附录：第一课专有名词速查（25个）</h2>
+<table>
+<thead>
+<tr>
+<th>名词</th>
+<th>全称</th>
+<th>一句话白话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NN</td>
+<td>Neural Network</td>
+<td>神经网络，学习输入到输出映射的模型</td>
+</tr>
+<tr>
+<td>DL</td>
+<td>Deep Learning</td>
+<td>深度学习，多层神经网络的统称</td>
+</tr>
+<tr>
+<td>Sigmoid</td>
+<td>-</td>
+<td>把任意数压缩到0-1之间的函数</td>
+</tr>
+<tr>
+<td>ReLU</td>
+<td>Rectified Linear Unit</td>
+<td>max(0,z)，隐藏层首选激活函数</td>
+</tr>
+<tr>
+<td>tanh</td>
+<td>Hyperbolic Tangent</td>
+<td>输出-1到1的激活函数，比Sigmoid好</td>
+</tr>
+<tr>
+<td>损失函数</td>
+<td>Loss Function</td>
+<td>衡量单个样本预测好不好</td>
+</tr>
+<tr>
+<td>成本函数</td>
+<td>Cost Function</td>
+<td>所有样本损失的平均，训练目标是最小化它</td>
+</tr>
+<tr>
+<td>交叉熵</td>
+<td>Cross-Entropy</td>
+<td>分类任务的标准损失函数</td>
+</tr>
+<tr>
+<td>梯度下降</td>
+<td>Gradient Descent</td>
+<td>沿梯度反方向更新参数的优化算法</td>
+</tr>
+<tr>
+<td>学习率</td>
+<td>Learning Rate (α)</td>
+<td>每步更新的步长大小</td>
+</tr>
+<tr>
+<td>正向传播</td>
+<td>Forward Propagation</td>
+<td>从输入层到输出层逐层计算</td>
+</tr>
+<tr>
+<td>反向传播</td>
+<td>Backpropagation</td>
+<td>从输出层到输入层逐层算梯度</td>
+</tr>
+<tr>
+<td>链式法则</td>
+<td>Chain Rule</td>
+<td>复合函数求导 = 各部分导数相乘</td>
+</tr>
+<tr>
+<td>计算图</td>
+<td>Computational Graph</td>
+<td>把计算过程画成节点和边的图</td>
+</tr>
+<tr>
+<td>向量化</td>
+<td>Vectorization</td>
+<td>用矩阵运算替代for循环</td>
+</tr>
+<tr>
+<td>广播</td>
+<td>Broadcasting</td>
+<td>NumPy自动扩展维度的机制</td>
+</tr>
+<tr>
+<td>隐藏层</td>
+<td>Hidden Layer</td>
+<td>输入层和输出层之间的层</td>
+</tr>
+<tr>
+<td>激活函数</td>
+<td>Activation Function</td>
+<td>引入非线性的函数</td>
+</tr>
+<tr>
+<td>超参数</td>
+<td>Hyperparameter</td>
+<td>训练前手动设置的参数</td>
+</tr>
+<tr>
+<td>偏差</td>
+<td>Bias (b)</td>
+<td>神经元的偏移量</td>
+</tr>
+<tr>
+<td>权重</td>
+<td>Weight (W)</td>
+<td>连接的强度</td>
+</tr>
+<tr>
+<td>特征</td>
+<td>Feature</td>
+<td>输入数据的每个维度</td>
+</tr>
+<tr>
+<td>过拟合</td>
+<td>Overfitting</td>
+<td>模型记住了训练数据但无法泛化</td>
+</tr>
+<tr>
+<td>欠拟合</td>
+<td>Underfitting</td>
+<td>模型太简单，连训练数据都拟合不好</td>
+</tr>
+<tr>
+<td>One-hot</td>
+<td>-</td>
+<td>用N维向量的第k位为1表示第k个类别</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="_23">第二课：改善深层神经网络</h1>
+<p>模型搭好了但效果不好——这门课教你怎么"调教"它。正则化防过拟合、优化器加速收敛、Batch Norm稳定训练，三板斧让深度网络从"能跑"变成"好用"。</p>
+<hr />
+<h2 id="_24">八、偏差与方差——诊断模型的第一步</h2>
+<p><strong>一句话</strong>：偏差(Bias)衡量"学得够不够"，方差(Variance)衡量"学得过不过"。这是调模型的<strong>第一诊断工具</strong>。</p>
+<h3 id="_25">四种情况</h3>
+<table>
+<thead>
+<tr>
+<th>情况</th>
+<th>训练误差</th>
+<th>验证误差</th>
+<th>诊断</th>
+<th>该做什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>高偏差</td>
+<td>15%</td>
+<td>16%</td>
+<td><strong>欠拟合</strong></td>
+<td>加大网络/训练更久</td>
+</tr>
+<tr>
+<td>高方差</td>
+<td>1%</td>
+<td>11%</td>
+<td><strong>过拟合</strong></td>
+<td>更多数据/正则化</td>
+</tr>
+<tr>
+<td>高偏差+高方差</td>
+<td>15%</td>
+<td>30%</td>
+<td>又欠又过</td>
+<td>两方面都要改</td>
+</tr>
+<tr>
+<td>低偏差+低方差</td>
+<td>0.5%</td>
+<td>1%</td>
+<td>✅ 理想</td>
+<td>不用改</td>
+</tr>
+</tbody>
+</table>
+<p><strong>基准线</strong>（Bayes Error）：人类在这个任务上的错误率。如果人类错误率≈0%（如猫狗识别），训练误差15%就是高偏差；如果人类错误率≈15%（如模糊X光片），训练误差15%就不算高偏差。</p>
+<h3 id="_26">吴恩达的"基本配方"</h3>
+<pre class="codehilite"><code>模型训练完 → 看训练误差
+  ↓
+训练误差高？（高偏差）
+  → 加大网络 / 训练更久 / 换架构
+  ↓
+训练误差OK → 看验证误差
+  ↓
+验证误差高？（高方差）
+  → 更多数据 / 正则化 / 换架构
+  ↓
+两个都低 → 完成！
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：深度学习时代有一个福利——加大网络几乎只减少偏差而不增加方差（前提是用正则化）。这意味着"Bigger is almost always better"，只要你有正则化兜底。</p>
+</blockquote>
+<hr />
+<h2 id="_27">九、正则化——对抗过拟合的武器库</h2>
+<p><strong>一句话</strong>：正则化就是给模型"加约束"——不让它记住训练数据的噪声，只学有用的规律。</p>
+<h3 id="l2">L2正则化（权重衰减）</h3>
+<p>在成本函数后面加一项惩罚：</p>
+<pre class="codehilite"><code>                  1   m                      λ
+J(W,b) = ─── Σ  L(ŷ⁽ⁱ⁾, y⁽ⁱ⁾) + ─── ‖W‖²F
+                  m  i=1                    2m
+</code></pre>
+
+<p>其中 ‖W‖²F 是Frobenius范数（所有权重的平方和），λ是正则化强度。</p>
+<p><strong>效果</strong>：λ越大 → 权重越小 → 网络越"简单" → 越不容易过拟合（但太大会欠拟合）。</p>
+<h3 id="dropout">Dropout正则化</h3>
+<p><strong>随机关掉一部分神经元</strong>——每次训练迭代时，每个神经元有p的概率被暂时"清除"。</p>
+<pre class="codehilite"><code class="language-python"># Inverted Dropout实现
+d = np.random.rand(a.shape[0], a.shape[1]) &lt; keep_prob
+a = a * d            # 随机清零部分神经元
+a = a / keep_prob    # ← 关键！除以keep_prob来补偿
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：为什么要除以keep_prob？因为如果keep_prob=0.8，训练时只有80%的神经元参与，输出的期望值变成了原来的0.8倍。除以0.8后恢复原来的期望值，<strong>保证训练和测试时的输出规模一致</strong>。这就是"Inverted Dropout"。</p>
+</blockquote>
+<h3 id="_28">其他正则化方法</h3>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>原理</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>数据增强</strong></td>
+<td>翻转/旋转/裁剪图片，增加训练数据</td>
+<td>图像任务</td>
+</tr>
+<tr>
+<td><strong>Early Stopping</strong></td>
+<td>验证误差开始上升时停止训练</td>
+<td>通用，但不正交</td>
+</tr>
+<tr>
+<td><strong>L1正则化</strong></td>
+<td>惩罚权重绝对值，产生稀疏权重</td>
+<td>需要特征选择时</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_29">十、优化算法——让梯度下降跑得更快</h2>
+<h3 id="mini-batch">Mini-batch梯度下降</h3>
+<p><strong>一句话</strong>：不用所有数据算一次梯度（太慢），也不用单个样本（太抖），用一小批（如64/128/256个样本）算一次。</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>Batch大小</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Batch GD</td>
+<td>m（全部）</td>
+<td>每步准确但很慢</td>
+</tr>
+<tr>
+<td>Stochastic GD</td>
+<td>1</td>
+<td>每步很快但噪声大</td>
+</tr>
+<tr>
+<td><strong>Mini-batch GD</strong></td>
+<td>64-512</td>
+<td>速度和稳定性的最佳平衡</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_30">指数加权平均</h3>
+<p>理解动量和Adam的基础：</p>
+<pre class="codehilite"><code>vₜ = β · vₜ₋₁ + (1-β) · θₜ
+</code></pre>
+
+<p><strong>β=0.9</strong> 相当于对最近 1/(1-0.9) = <strong>10天</strong>的数据取平均。</p>
+<p>课上用伦敦温度的例子：
+- β=0.9：平滑曲线，对应约10天平均
+- β=0.98：更平滑但反应迟钝，约50天平均
+- β=0.5：抖动太大，约2天平均</p>
+<h3 id="momentum">动量梯度下降（Momentum）</h3>
+<pre class="codehilite"><code>vdW = β · vdW + (1-β) · dW     ← 累积历史梯度方向
+W := W - α · vdW
+</code></pre>
+
+<p><strong>物理直觉</strong>：梯度是加速度，v是速度。球滚下山坡时，会在一个方向上持续加速，在垂直方向上抵消抖动。</p>
+<h3 id="rmsprop">RMSprop</h3>
+<pre class="codehilite"><code>sdW = β₂ · sdW + (1-β₂) · dW²    ← 累积梯度的平方
+W := W - α · dW / √(sdW + ε)
+</code></pre>
+
+<p><strong>效果</strong>：梯度大的方向被缩小（除以大的√s），梯度小的方向被放大。自动平衡不同参数的学习步长。</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Adam = Momentum + RMSprop</p>
+<svg viewBox="0 0 500 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:500px">
+  <rect x="30" y="10" width="160" height="50" rx="10" fill="#0052d9"/>
+  <text x="110" y="30" text-anchor="middle" font-size="12" fill="white" font-weight="700">Momentum</text>
+  <text x="110" y="48" text-anchor="middle" font-size="9" fill="#a3d0ff">记住方向（一阶矩）</text>
+  <rect x="250" y="10" width="160" height="50" rx="10" fill="#1a6fe8"/>
+  <text x="330" y="30" text-anchor="middle" font-size="12" fill="white" font-weight="700">RMSprop</text>
+  <text x="330" y="48" text-anchor="middle" font-size="9" fill="#a3d0ff">自适应步长（二阶矩）</text>
+  <line x1="190" y1="45" x2="215" y2="65" stroke="#0052d9" stroke-width="2"/>
+  <line x1="250" y1="45" x2="225" y2="65" stroke="#0052d9" stroke-width="2"/>
+  <rect x="155" y="72" width="130" height="35" rx="8" fill="#059669"/>
+  <text x="220" y="94" text-anchor="middle" font-size="13" fill="white" font-weight="700">Adam</text>
+  <text x="340" y="98" font-size="10" fill="#666">β₁=0.9  β₂=0.999  ε=10⁻⁸</text>
+</svg></div>
+<h3 id="adammomentum-rmsprop">Adam优化器（Momentum + RMSprop）</h3>
+<pre class="codehilite"><code>vdW = β₁ · vdW + (1-β₁) · dW       ← 动量（一阶矩）
+sdW = β₂ · sdW + (1-β₂) · dW²      ← RMSprop（二阶矩）
+v̂dW = vdW / (1-β₁ᵗ)                 ← 偏差修正
+ŝdW = sdW / (1-β₂ᵗ)                 ← 偏差修正
+W := W - α · v̂dW / (√ŝdW + ε)
+</code></pre>
+
+<p><strong>推荐超参数</strong>：β₁=0.9, β₂=0.999, ε=10⁻⁸</p>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：Adam = Adaptive Moment Estimation。它结合了Momentum（"记住方向"）和RMSprop（"自适应步长"）的优点。<strong>几乎所有深度学习项目的默认优化器</strong>——如果你不知道选什么，选Adam。</p>
+</blockquote>
+<h3 id="_31">学习率衰减</h3>
+<p>训练后期应该"小步走"以更精确地逼近最优解：</p>
+<pre class="codehilite"><code>α = α₀ / (1 + decay_rate × epoch)     # 最常用
+α = α₀ × 0.95^epoch                    # 指数衰减
+α = α₀ / √epoch                        # 根号衰减
+</code></pre>
+
+<hr />
+<h2 id="batch-normalization">十一、Batch Normalization——深度网络的"稳定器"</h2>
+<p><strong>一句话</strong>：在每层的激活之前（或之后），对数据做归一化——让每层的输入分布稳定，训练更快更稳。</p>
+<h3 id="_32">计算过程</h3>
+<pre class="codehilite"><code>对每个mini-batch：
+  μ = (1/m) Σ zᵢ                   ← 计算均值
+  σ² = (1/m) Σ (zᵢ - μ)²          ← 计算方差
+  zᵢ_norm = (zᵢ - μ) / √(σ² + ε)  ← 归一化
+  z̃ᵢ = γ · zᵢ_norm + β            ← 缩放和偏移（可学习参数）
+</code></pre>
+
+<p><strong>γ和β是可训练参数</strong>——让模型自己决定要不要完全归一化。如果γ=√(σ²+ε), β=μ，就等于没做归一化。</p>
+<h3 id="_33">为什么有效？</h3>
+<ol>
+<li><strong>加速训练</strong>：每层输入分布稳定，可以用更大的学习率</li>
+<li><strong>减少对初始化的敏感性</strong></li>
+<li><strong>轻微的正则化效果</strong>：mini-batch引入噪声，类似Dropout</li>
+</ol>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：Batch Norm解决的核心问题是<strong>Internal Covariate Shift</strong>——每层参数更新后，下一层看到的输入分布就变了，就像地基一直在晃，上面的楼很难建稳。BN让每层的"地基"稳住。</p>
+</blockquote>
+<h3 id="batch-norm">测试时的Batch Norm</h3>
+<p>测试时没有mini-batch，用训练过程中的<strong>指数加权平均</strong>估算μ和σ²。</p>
+<hr />
+<h2 id="softmax">十二、Softmax回归——多分类</h2>
+<p><strong>一句话</strong>：逻辑回归只能做"是/否"的二分类，Softmax可以做"猫/狗/鸡/无"的多分类。</p>
+<pre class="codehilite"><code>                    e^(zᵢ)
+Softmax(zᵢ) = ─────────────
+                 K
+                Σ  e^(zⱼ)
+                j=1
+</code></pre>
+
+<p>输出K个概率，加起来等于1。</p>
+<hr />
+<h2 id="20">附录：第二课专有名词速查（20个）</h2>
+<table>
+<thead>
+<tr>
+<th>名词</th>
+<th>全称</th>
+<th>一句话白话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bias</td>
+<td>偏差</td>
+<td>模型太简单，学不到规律</td>
+</tr>
+<tr>
+<td>Variance</td>
+<td>方差</td>
+<td>模型太复杂，记住了噪声</td>
+</tr>
+<tr>
+<td>L2正则化</td>
+<td>Weight Decay</td>
+<td>惩罚大权重，让模型更简单</td>
+</tr>
+<tr>
+<td>Dropout</td>
+<td>-</td>
+<td>随机关掉部分神经元防止过拟合</td>
+</tr>
+<tr>
+<td>keep_prob</td>
+<td>-</td>
+<td>Dropout中保留神经元的概率</td>
+</tr>
+<tr>
+<td>数据增强</td>
+<td>Data Augmentation</td>
+<td>对训练图片做变换来增加数据量</td>
+</tr>
+<tr>
+<td>Early Stopping</td>
+<td>-</td>
+<td>验证误差上升时停止训练</td>
+</tr>
+<tr>
+<td>Mini-batch</td>
+<td>-</td>
+<td>把训练集分成小批次处理</td>
+</tr>
+<tr>
+<td>指数加权平均</td>
+<td>EWA</td>
+<td>对历史值加权平均，近期权重更大</td>
+</tr>
+<tr>
+<td>Momentum</td>
+<td>动量</td>
+<td>累积历史梯度方向，加速收敛</td>
+</tr>
+<tr>
+<td>RMSprop</td>
+<td>Root Mean Square Propagation</td>
+<td>自适应调整每个参数的学习步长</td>
+</tr>
+<tr>
+<td>Adam</td>
+<td>Adaptive Moment Estimation</td>
+<td>Momentum+RMSprop，默认最优选择</td>
+</tr>
+<tr>
+<td>学习率衰减</td>
+<td>Learning Rate Decay</td>
+<td>训练后期减小学习率</td>
+</tr>
+<tr>
+<td>Batch Norm</td>
+<td>Batch Normalization</td>
+<td>对每层输入归一化，稳定训练</td>
+</tr>
+<tr>
+<td>γ, β</td>
+<td>Scale and Shift</td>
+<td>BN的可训练参数</td>
+</tr>
+<tr>
+<td>Covariate Shift</td>
+<td>协变量偏移</td>
+<td>输入分布变化导致模型失效</td>
+</tr>
+<tr>
+<td>Softmax</td>
+<td>-</td>
+<td>多分类的激活函数，输出概率分布</td>
+</tr>
+<tr>
+<td>Frobenius范数</td>
+<td>‖W‖F</td>
+<td>矩阵所有元素平方和再开根号</td>
+</tr>
+<tr>
+<td>鞍点</td>
+<td>Saddle Point</td>
+<td>梯度为零但不是最优的点</td>
+</tr>
+<tr>
+<td>超参数调整</td>
+<td>Hyperparameter Tuning</td>
+<td>试不同的超参数组合找最优</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="_34">第三课：结构化机器学习项目</h1>
+<p>这门课不讲数学，只讲<strong>决策方法论</strong>——面对一个ML项目，怎么高效地诊断问题、做出正确的技术决策、避免浪费时间。</p>
+<hr />
+<h2 id="_35">十三、正交化——一次只调一个旋钮</h2>
+<p><strong>一句话</strong>：好的ML系统设计应该让每个"旋钮"只影响一个方面——就像老式电视的旋钮，一个调亮度，一个调色彩，互不干扰。</p>
+<p><strong>四个独立目标</strong>：
+1. 训练集表现好 → 更大网络/更好优化器
+2. 验证集表现好 → 正则化/更多数据
+3. 测试集表现好 → 更大验证集
+4. 实际应用好 → 更换指标/调整数据分布</p>
+<p><strong>为什么Early Stopping不够"正交"</strong>：它同时影响训练集表现和过拟合程度——拧一个旋钮动了两个方面。吴恩达更推荐L2正则化，因为它只管过拟合，不影响你训练到收敛。</p>
+<hr />
+<h2 id="_36">十四、评估指标——用数字说话</h2>
+<h3 id="_37">单一数字评估指标</h3>
+<p><strong>核心原则</strong>：必须有一个<strong>单一数字</strong>来比较不同模型——否则你会在"A精度高但B召回高"的无尽纠结中浪费时间。</p>
+<pre class="codehilite"><code>F1 = 2 × (Precision × Recall) / (Precision + Recall)
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th>分类器</th>
+<th>精确率</th>
+<th>召回率</th>
+<th>F1分数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>95%</td>
+<td>90%</td>
+<td><strong>92.4%</strong> ← 选这个</td>
+</tr>
+<tr>
+<td>B</td>
+<td>98%</td>
+<td>85%</td>
+<td>91.0%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="vs_2">满足指标 vs 优化指标</h3>
+<table>
+<thead>
+<tr>
+<th>指标类型</th>
+<th>作用</th>
+<th>例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>优化指标</strong>（1个）</td>
+<td>越高越好，用来排名</td>
+<td>准确率</td>
+</tr>
+<tr>
+<td><strong>满足指标</strong>（N个）</td>
+<td>达标就行，不用最优</td>
+<td>运行时间&lt;100ms</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：如果你有N个关心的指标，选1个作为优化指标，剩下N-1个作为满足指标。这样"选最好的模型"就变成了"在满足所有约束的前提下，选优化指标最高的"——决策变得清晰。</p>
+</blockquote>
+<h3 id="_38">训练/验证/测试集划分</h3>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>划分原则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>验证和测试必须同分布</strong></td>
+<td>都从你关心的实际应用数据中采样</td>
+</tr>
+<tr>
+<td><strong>训练集可以不同分布</strong></td>
+<td>可以用网上爬的+用户上传的混合</td>
+</tr>
+<tr>
+<td><strong>大数据时代</strong></td>
+<td>98%训练/1%验证/1%测试（百万级数据时1%就够了）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_39">十五、误差分析——高效找到改进方向</h2>
+<p><strong>一句话</strong>：与其凭感觉调模型，不如花10分钟<strong>手工分析100个错误样本</strong>——找出最大的错误类别，再决定优先改什么。</p>
+<h3 id="_40">误差分析表格（课上最实用的工具）</h3>
+<table>
+<thead>
+<tr>
+<th>错误样本#</th>
+<th style="text-align: center;">是狗？</th>
+<th style="text-align: center;">大猫？</th>
+<th style="text-align: center;">模糊？</th>
+<th style="text-align: center;">Instagram滤镜？</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td>金毛很像猫</td>
+</tr>
+<tr>
+<td>2</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td>低光+滤镜</td>
+</tr>
+<tr>
+<td>3</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td>美洲豹</td>
+</tr>
+<tr>
+<td>...</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>占比</strong></td>
+<td style="text-align: center;"><strong>8%</strong></td>
+<td style="text-align: center;"><strong>43%</strong></td>
+<td style="text-align: center;"><strong>61%</strong></td>
+<td style="text-align: center;"><strong>12%</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>决策</strong>：模糊图片占61%——应该优先解决图片质量问题（如数据增强/预处理），而不是花时间区分狗和猫。</p>
+<h3 id="_41">错误标注数据</h3>
+<ul>
+<li>训练集有少量标注错误？<strong>别管它</strong>——深度学习对训练数据的随机错误很鲁棒</li>
+<li>验证/测试集有标注错误？如果错误比例影响了模型选择，就<strong>必须修正</strong></li>
+<li>修正时注意：不只修错的，也要检查对的（可能是"碰巧蒙对"的）</li>
+</ul>
+<hr />
+<h2 id="_42">十六、迁移学习——站在巨人的肩膀上</h2>
+<p><strong>一句话</strong>：用在大数据集上预训练好的模型，换掉最后几层，在你的小数据集上微调——效果远比从零训练好。</p>
+<h3 id="_43">什么时候可以迁移</h3>
+<table>
+<thead>
+<tr>
+<th>条件</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>源任务和目标任务有相似的低级特征</td>
+<td>如图像→图像（都需要边缘/纹理检测）</td>
+</tr>
+<tr>
+<td>源任务数据量 &gt;&gt; 目标任务数据量</td>
+<td>预训练用100万张，微调用1000张</td>
+</tr>
+<tr>
+<td>源任务的低级特征对目标有帮助</td>
+<td>如ImageNet特征 → 医学影像</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_44">微调策略</h3>
+<table>
+<thead>
+<tr>
+<th>目标数据量</th>
+<th>策略</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>很少（&lt;1000）</td>
+<td>只训练最后1-2层，冻结其余</td>
+</tr>
+<tr>
+<td>中等</td>
+<td>训练最后几层</td>
+</tr>
+<tr>
+<td>很多</td>
+<td>全部微调，预训练权重作初始化</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_45">多任务学习</h3>
+<p>和迁移学习的区别：不是先学A再学B，而是<strong>同时学A、B、C</strong>。</p>
+<pre class="codehilite"><code>一张图同时标注：有没有行人？有没有车？有没有红绿灯？有没有停车标志？
+→ 输出层有4个Sigmoid（不是Softmax，因为可以同时存在多个目标）
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：迁移学习在实践中远比多任务学习常用——因为你几乎总能找到一个预训练好的大模型来微调。多任务学习只在"你有足够数据同时训练所有任务"且"任务之间共享低级特征"时才值得。</p>
+</blockquote>
+<h3 id="_46">端到端深度学习</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">传统Pipeline</th>
+<th style="text-align: center;">端到端</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">音频→特征提取→音素→词→句子</td>
+<td style="text-align: center;">音频→句子</td>
+</tr>
+<tr>
+<td style="text-align: center;">图片→人脸检测→裁剪→识别</td>
+<td style="text-align: center;">图片→身份</td>
+</tr>
+</tbody>
+</table>
+<p><strong>何时用端到端</strong>：数据量足够大时。数据不够时，手工设计的Pipeline（拆成子任务）更靠谱。</p>
+<hr />
+<h2 id="15">附录：第三课专有名词速查（15个）</h2>
+<table>
+<thead>
+<tr>
+<th>名词</th>
+<th>全称</th>
+<th>一句话白话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>正交化</td>
+<td>Orthogonalization</td>
+<td>每个旋钮只影响一个方面</td>
+</tr>
+<tr>
+<td>F1分数</td>
+<td>F1 Score</td>
+<td>精确率和召回率的调和平均</td>
+</tr>
+<tr>
+<td>优化指标</td>
+<td>Optimizing Metric</td>
+<td>越高越好的唯一排名指标</td>
+</tr>
+<tr>
+<td>满足指标</td>
+<td>Satisficing Metric</td>
+<td>达标就行的约束条件</td>
+</tr>
+<tr>
+<td>人类水平表现</td>
+<td>Human-level Performance</td>
+<td>作为贝叶斯误差的近似</td>
+</tr>
+<tr>
+<td>可避免偏差</td>
+<td>Avoidable Bias</td>
+<td>训练误差 - 人类误差</td>
+</tr>
+<tr>
+<td>误差分析</td>
+<td>Error Analysis</td>
+<td>手工分析错误样本找改进方向</td>
+</tr>
+<tr>
+<td>迁移学习</td>
+<td>Transfer Learning</td>
+<td>用预训练模型在新任务上微调</td>
+</tr>
+<tr>
+<td>预训练</td>
+<td>Pre-training</td>
+<td>在大数据集上先训练基础能力</td>
+</tr>
+<tr>
+<td>微调</td>
+<td>Fine-tuning</td>
+<td>在目标数据集上调整预训练模型</td>
+</tr>
+<tr>
+<td>多任务学习</td>
+<td>Multi-task Learning</td>
+<td>一个模型同时学多个任务</td>
+</tr>
+<tr>
+<td>端到端学习</td>
+<td>End-to-end Learning</td>
+<td>跳过中间步骤，直接从输入到输出</td>
+</tr>
+<tr>
+<td>数据不匹配</td>
+<td>Data Mismatch</td>
+<td>训练数据和实际应用数据分布不同</td>
+</tr>
+<tr>
+<td>Bayes误差</td>
+<td>Bayes Error</td>
+<td>理论上的最低错误率</td>
+</tr>
+<tr>
+<td>合成数据</td>
+<td>Data Synthesis</td>
+<td>人工生成训练数据</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="_47">第四课：卷积神经网络</h1>
+<p>从边缘检测的3×3滤波器开始，经过经典架构进化史（LeNet→ResNet→MobileNet），到YOLO目标检测、人脸识别、神经风格迁移——这是计算机视觉的完整路线图。</p>
+<hr />
+<h2 id="_48">十七、卷积基础——从边缘检测说起</h2>
+<p><strong>一句话</strong>：卷积就是用一个小的"滤波器"在图片上滑动，每个位置算一个点积——不同的滤波器能检测不同的特征（垂直边缘、水平边缘、纹理...）。</p>
+<h3 id="_49">边缘检测</h3>
+<p>用3×3的滤波器在6×6的图片上滑动，每次覆盖3×3区域，算点积得到一个数：</p>
+<pre class="codehilite"><code>输入(6×6) * 滤波器(3×3) = 输出(4×4)
+</code></pre>
+
+<p><strong>垂直边缘检测器</strong>：</p>
+<pre class="codehilite"><code> 1  0 -1
+ 1  0 -1
+ 1  0 -1
+</code></pre>
+
+<p>左边亮右边暗 → 输出大正数（有垂直边缘）</p>
+<h3 id="padding">填充（Padding）</h3>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>做法</th>
+<th>输出尺寸</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Valid</td>
+<td>不填充</td>
+<td>n-f+1</td>
+<td>不关心边缘</td>
+</tr>
+<tr>
+<td>Same</td>
+<td>填充p=(f-1)/2</td>
+<td>n</td>
+<td>保持尺寸不变</td>
+</tr>
+</tbody>
+</table>
+<h3 id="stride">步长（Stride）</h3>
+<pre class="codehilite"><code>输出尺寸 = ⌊(n + 2p - f) / s⌋ + 1
+</code></pre>
+
+<p>n=输入尺寸, f=滤波器尺寸, p=填充, s=步长</p>
+<h3 id="_50">三维卷积</h3>
+<p>彩色图片有3个通道（RGB），滤波器也是3维的：</p>
+<pre class="codehilite"><code>输入: (6×6×3) * 滤波器: (3×3×3) = 输出: (4×4×1)
+多个滤波器 → 多个输出通道 → 一层卷积完成！
+</code></pre>
+
+<hr />
+<h2 id="cnn">十八、经典CNN架构进化史</h2>
+<h3 id="_51">完整进化链路</h3>
+<pre class="codehilite"><code>LeNet-5(1998) → AlexNet(2012) → VGG-16(2014) → ResNet(2015) → Inception(2014) → MobileNet(2017)
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th>架构</th>
+<th>关键创新</th>
+<th style="text-align: center;">层数</th>
+<th>参数量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LeNet-5</strong></td>
+<td>CNN的开山之作，用于手写数字</td>
+<td style="text-align: center;">5</td>
+<td>60K</td>
+</tr>
+<tr>
+<td><strong>AlexNet</strong></td>
+<td>ReLU+GPU训练+Dropout，ImageNet冠军</td>
+<td style="text-align: center;">8</td>
+<td>60M</td>
+</tr>
+<tr>
+<td><strong>VGG-16</strong></td>
+<td>统一用3×3卷积，简洁优雅</td>
+<td style="text-align: center;">16</td>
+<td>138M</td>
+</tr>
+<tr>
+<td><strong>ResNet</strong></td>
+<td><strong>残差连接</strong>，解决深层退化问题</td>
+<td style="text-align: center;">152</td>
+<td>60M</td>
+</tr>
+<tr>
+<td><strong>Inception</strong></td>
+<td>多尺度并行卷积+1×1降维</td>
+<td style="text-align: center;">22</td>
+<td>5M</td>
+</tr>
+<tr>
+<td><strong>MobileNet</strong></td>
+<td><strong>深度可分离卷积</strong>，移动端可用</td>
+<td style="text-align: center;">28</td>
+<td>3.4M</td>
+</tr>
+</tbody>
+</table>
+<h3 id="resnet">ResNet——残差连接（最重要的创新之一）</h3>
+<p><strong>问题</strong>：理论上网络越深越好，但实际训练时超过20层后误差反而上升（退化问题）。</p>
+<p><strong>解决方案</strong>：跳跃连接（Skip Connection）</p>
+<pre class="codehilite"><code>a⁽ˡ⁺²⁾ = g(z⁽ˡ⁺²⁾ + a⁽ˡ⁾)     ← 把输入直接加到2层后的输出上
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：为什么残差连接有效？因为如果额外的层学不到有用的东西，权重趋近于零，a⁽ˡ⁺²⁾≈g(a⁽ˡ⁾)=a⁽ˡ⁾，等于直接"跳过"这两层。网络<strong>至少不会变差</strong>——这就是为什么ResNet可以训练到152层。</p>
+</blockquote>
+<h3 id="mobilenet">MobileNet——深度可分离卷积</h3>
+<table>
+<thead>
+<tr>
+<th>标准卷积</th>
+<th>深度可分离卷积</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一步到位：同时处理空间和通道</td>
+<td>拆成两步：先空间(Depthwise)再通道(Pointwise)</td>
+</tr>
+<tr>
+<td>计算量：f²×nᶜ×nᶜ'×n²</td>
+<td>计算量：f²×nᶜ×n² + nᶜ×nᶜ'×n²</td>
+</tr>
+<tr>
+<td>-</td>
+<td><strong>节省约10倍计算量</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="yolo">十九、目标检测——YOLO</h2>
+<h3 id="_52">从分类到检测</h3>
+<table>
+<thead>
+<tr>
+<th>任务</th>
+<th>输出</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>分类</td>
+<td>是什么？（猫）</td>
+</tr>
+<tr>
+<td>定位</td>
+<td>是什么+在哪里？（猫, bx=0.5, by=0.7, bw=0.3, bh=0.4）</td>
+</tr>
+<tr>
+<td>检测</td>
+<td>图中有几个什么在哪里？（多个边界框）</td>
+</tr>
+</tbody>
+</table>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 YOLO检测流程</p>
+<svg viewBox="0 0 680 90" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:680px">
+  <defs><marker id="y1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="15" width="120" height="55" rx="8" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="70" y="37" text-anchor="middle" font-size="11" fill="#003cab" font-weight="600">输入图片</text>
+  <text x="70" y="55" text-anchor="middle" font-size="9" fill="#666">448×448</text>
+  <line x1="130" y1="42" x2="155" y2="42" stroke="#0052d9" stroke-width="2" marker-end="url(#y1)"/>
+  <rect x="160" y="10" width="130" height="65" rx="8" fill="#0052d9"/>
+  <text x="225" y="32" text-anchor="middle" font-size="11" fill="white" font-weight="600">CNN一次前向</text>
+  <text x="225" y="50" text-anchor="middle" font-size="9" fill="#a3d0ff">分成19×19格</text>
+  <text x="225" y="65" text-anchor="middle" font-size="9" fill="#66b1ff">You Only Look Once</text>
+  <line x1="290" y1="42" x2="315" y2="42" stroke="#0052d9" stroke-width="2" marker-end="url(#y1)"/>
+  <rect x="320" y="10" width="140" height="65" rx="8" fill="#1a6fe8"/>
+  <text x="390" y="30" text-anchor="middle" font-size="11" fill="white" font-weight="600">每格预测</text>
+  <text x="390" y="48" text-anchor="middle" font-size="9" fill="#a3d0ff">pₒ,bx,by,bh,bw</text>
+  <text x="390" y="65" text-anchor="middle" font-size="9" fill="#a3d0ff">+ 类别概率</text>
+  <line x1="460" y1="42" x2="485" y2="42" stroke="#0052d9" stroke-width="2" marker-end="url(#y1)"/>
+  <rect x="490" y="15" width="120" height="55" rx="8" fill="#059669"/>
+  <text x="550" y="37" text-anchor="middle" font-size="11" fill="white" font-weight="600">NMS去重</text>
+  <text x="550" y="55" text-anchor="middle" font-size="9" fill="#a7f3d0">→ 最终检测框</text>
+</svg></div>
+<h3 id="yolo_1">YOLO核心思想</h3>
+<pre class="codehilite"><code>把图片分成19×19的网格
+每个格子负责检测中心点落在该格子内的目标
+输出: 19×19×(5×B+C)
+  5 = [pₒ, bx, by, bh, bw]
+  B = 锚框数量
+  C = 类别数
+</code></pre>
+
+<h3 id="_53">关键技术</h3>
+<table>
+<thead>
+<tr>
+<th>技术</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IoU（并交比）</strong></td>
+<td>衡量预测框和真实框的重叠程度，≥0.5算正确</td>
+</tr>
+<tr>
+<td><strong>非极大值抑制</strong></td>
+<td>同一目标的多个重叠框，只保留置信度最高的</td>
+</tr>
+<tr>
+<td><strong>锚框</strong></td>
+<td>预定义几种形状（高瘦/矮胖），让模型预测相对偏移</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="triplet-loss">二十、人脸识别——Triplet Loss</h2>
+<h3 id="one-shot-learning">一次学习（One-Shot Learning）</h3>
+<p>每个人只有1张照片，不能用传统分类器。解决思路：不学"这是谁"，而是学"两张脸像不像"。</p>
+<h3 id="siamese-network">孪生网络（Siamese Network）</h3>
+<pre class="codehilite"><code>图片A → CNN → 128维向量 f(A)
+图片B → CNN → 128维向量 f(B)
+距离 d = ‖f(A) - f(B)‖²
+d &lt; τ → 同一人
+d ≥ τ → 不同人
+</code></pre>
+
+<h3 id="triplet-loss_1">Triplet Loss</h3>
+<p>每次训练用三元组（Anchor, Positive, Negative）：</p>
+<pre class="codehilite"><code>L = max(0, ‖f(A)-f(P)‖² - ‖f(A)-f(N)‖² + α)
+</code></pre>
+
+<p>目标：让A和P的距离小于A和N的距离，至少差一个<strong>间隔α</strong>。</p>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：选"难的"三元组是关键——如果N本来就和A差很远，模型什么都学不到。要选那些长得像但不是同一人的Negative。</p>
+</blockquote>
+<hr />
+<h2 id="_54">二十一、神经风格迁移</h2>
+<p><strong>一句话</strong>：把一张照片的"内容"和一幅画的"风格"融合，生成一张既有照片内容又有绘画风格的新图。</p>
+<h3 id="_55">成本函数</h3>
+<pre class="codehilite"><code>J(G) = α · J_content(C, G) + β · J_style(S, G)
+</code></pre>
+
+<ul>
+<li><strong>内容损失</strong>：用CNN中间层的激活值衡量，G和C在该层的特征表示应该相似</li>
+<li><strong>风格损失</strong>：用<strong>Gram矩阵</strong>（通道之间的相关性），G和S的Gram矩阵应该相似</li>
+</ul>
+<pre class="codehilite"><code>Gram矩阵：G[l]_kk' = Σᵢ Σⱼ a[l]_ijk · a[l]_ijk'
+</code></pre>
+
+<p>风格 = 不同通道之间的相关模式（如"橙色纹理"常和"粗笔触"一起出现）。</p>
+<hr />
+<h2 id="25_1">附录：第四课专有名词速查（25个）</h2>
+<table>
+<thead>
+<tr>
+<th>名词</th>
+<th>全称</th>
+<th>一句话白话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CNN</td>
+<td>Convolutional Neural Network</td>
+<td>卷积神经网络，专门处理图像</td>
+</tr>
+<tr>
+<td>卷积</td>
+<td>Convolution</td>
+<td>滤波器在输入上滑动做点积</td>
+</tr>
+<tr>
+<td>滤波器/核</td>
+<td>Filter/Kernel</td>
+<td>检测特定特征的小矩阵</td>
+</tr>
+<tr>
+<td>Padding</td>
+<td>填充</td>
+<td>在输入边缘补零保持尺寸</td>
+</tr>
+<tr>
+<td>Stride</td>
+<td>步长</td>
+<td>滤波器每次移动的像素数</td>
+</tr>
+<tr>
+<td>池化</td>
+<td>Pooling</td>
+<td>缩小特征图尺寸（Max/Average）</td>
+</tr>
+<tr>
+<td>ResNet</td>
+<td>Residual Network</td>
+<td>带跳跃连接的深层网络</td>
+</tr>
+<tr>
+<td>Skip Connection</td>
+<td>跳跃连接</td>
+<td>把输入直接加到几层后的输出</td>
+</tr>
+<tr>
+<td>1×1卷积</td>
+<td>-</td>
+<td>只改通道数不改空间尺寸</td>
+</tr>
+<tr>
+<td>Inception</td>
+<td>-</td>
+<td>多尺度并行卷积的网络模块</td>
+</tr>
+<tr>
+<td>MobileNet</td>
+<td>-</td>
+<td>用深度可分离卷积的轻量网络</td>
+</tr>
+<tr>
+<td>Depthwise</td>
+<td>深度卷积</td>
+<td>每个通道独立做空间卷积</td>
+</tr>
+<tr>
+<td>Pointwise</td>
+<td>逐点卷积</td>
+<td>1×1卷积混合通道信息</td>
+</tr>
+<tr>
+<td>YOLO</td>
+<td>You Only Look Once</td>
+<td>一次前向传播完成检测</td>
+</tr>
+<tr>
+<td>IoU</td>
+<td>Intersection over Union</td>
+<td>预测框和真实框的重叠程度</td>
+</tr>
+<tr>
+<td>NMS</td>
+<td>Non-Max Suppression</td>
+<td>去除重叠的冗余框</td>
+</tr>
+<tr>
+<td>锚框</td>
+<td>Anchor Box</td>
+<td>预定义的边界框形状模板</td>
+</tr>
+<tr>
+<td>Siamese</td>
+<td>孪生网络</td>
+<td>两个共享权重的CNN比较相似度</td>
+</tr>
+<tr>
+<td>Triplet Loss</td>
+<td>三元组损失</td>
+<td>让同人近、不同人远</td>
+</tr>
+<tr>
+<td>One-Shot</td>
+<td>一次学习</td>
+<td>每类只有一个样本时的学习</td>
+</tr>
+<tr>
+<td>风格迁移</td>
+<td>Style Transfer</td>
+<td>融合内容图和风格图</td>
+</tr>
+<tr>
+<td>Gram矩阵</td>
+<td>-</td>
+<td>衡量通道间相关性（=风格）</td>
+</tr>
+<tr>
+<td>U-Net</td>
+<td>-</td>
+<td>编码-解码+跳跃连接的分割网络</td>
+</tr>
+<tr>
+<td>转置卷积</td>
+<td>Transposed Convolution</td>
+<td>上采样操作，把特征图放大</td>
+</tr>
+<tr>
+<td>语义分割</td>
+<td>Semantic Segmentation</td>
+<td>逐像素分类</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="_56">第五课：序列模型</h1>
+<p>从RNN的梯度消失困境出发，到LSTM/GRU的门控突破，再到Word2Vec词嵌入，最终抵达注意力机制和Transformer——这条路直接通向今天的GPT和Claude。</p>
+<hr />
+<h2 id="rnn">二十二、RNN——让网络有"记忆"</h2>
+<p><strong>一句话</strong>：标准神经网络处理每个输入都是独立的——RNN让每一步的输出"记住"前面的信息，适合处理序列数据（文本、语音、时间序列）。</p>
+<h3 id="rnn_1">为什么需要RNN</h3>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>标准NN的困难</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>输入/输出长度不固定</td>
+<td>网络结构必须预设固定大小</td>
+</tr>
+<tr>
+<td>不同位置的特征不共享</td>
+<td>"周二"在句首和句尾要分别学习</td>
+</tr>
+<tr>
+<td>没有时序关系</td>
+<td>第3个词不知道前2个词是什么</td>
+</tr>
+</tbody>
+</table>
+<h3 id="rnn_2">RNN前向传播</h3>
+<pre class="codehilite"><code>aₜ = g(Wₐₐ · aₜ₋₁ + Wₐₓ · xₜ + bₐ)    ← 隐藏状态更新
+ŷₜ = g(Wᵧₐ · aₜ + bᵧ)                    ← 输出预测
+</code></pre>
+
+<p><strong>关键</strong>：同一组参数 Wₐₐ, Wₐₓ, Wᵧₐ 在每个时间步<strong>共享</strong>——这就是RNN的参数效率。</p>
+<h3 id="rnn_3">RNN的多种架构</h3>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>输入→输出</th>
+<th>应用举例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一对一</td>
+<td>1→1</td>
+<td>标准NN（不是RNN）</td>
+</tr>
+<tr>
+<td>一对多</td>
+<td>1→多</td>
+<td>音乐生成</td>
+</tr>
+<tr>
+<td>多对一</td>
+<td>多→1</td>
+<td>情感分析</td>
+</tr>
+<tr>
+<td>多对多（等长）</td>
+<td>多→多</td>
+<td>命名实体识别</td>
+</tr>
+<tr>
+<td>多对多（不等长）</td>
+<td>多→多</td>
+<td>机器翻译（Encoder-Decoder）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_57">语言模型</h3>
+<p>RNN做语言模型的核心：<strong>预测下一个词的概率</strong>。</p>
+<pre class="codehilite"><code>P(&quot;cats average 15 hours of sleep a day&quot;) = P(cats) × P(average|cats) × P(15|cats average) × ...
+</code></pre>
+
+<p>训练数据：大量文本。目标：给定前面的词，预测下一个词。这不就是今天GPT做的事吗？</p>
+<hr />
+<h2 id="lstmgru">二十三、LSTM与GRU——解决长期记忆</h2>
+<h3 id="rnn_4">RNN的梯度消失问题</h3>
+<p>句子："The <strong>cat</strong>, which already ate ..., <strong>was</strong> full."</p>
+<p>RNN很难让"was"记住很远处的"cat"（单数）——因为梯度在反向传播时会指数级衰减。</p>
+<h3 id="gru">GRU（门控循环单元）</h3>
+<p>用<strong>更新门Γᵤ</strong>和<strong>重置门Γᵣ</strong>来控制"记住什么、忘记什么"：</p>
+<pre class="codehilite"><code>Γᵤ = σ(Wᵤ[cₜ₋₁, xₜ] + bᵤ)         ← 更新门：要不要更新记忆？
+Γᵣ = σ(Wᵣ[cₜ₋₁, xₜ] + bᵣ)         ← 重置门：要不要忽略旧记忆？
+c̃ₜ = tanh(Wc[Γᵣ⊙cₜ₋₁, xₜ] + bc)   ← 候选记忆
+cₜ = Γᵤ⊙c̃ₜ + (1-Γᵤ)⊙cₜ₋₁          ← 最终记忆：新旧混合
+</code></pre>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 LSTM三门控制</p>
+<svg viewBox="0 0 580 125" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:580px">
+  <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+
+  <rect x="40" y="10" width="130" height="50" rx="8" fill="#dc2626"/>
+  <text x="105" y="30" text-anchor="middle" font-size="12" fill="white" font-weight="700">遗忘门 Γf</text>
+  <text x="105" y="48" text-anchor="middle" font-size="9" fill="#fca5a5">丢掉多少旧记忆</text>
+  <rect x="220" y="10" width="130" height="50" rx="8" fill="#059669"/>
+  <text x="285" y="30" text-anchor="middle" font-size="12" fill="white" font-weight="700">输入门 Γᵢ</text>
+  <text x="285" y="48" text-anchor="middle" font-size="9" fill="#a7f3d0">加入多少新信息</text>
+  <rect x="400" y="10" width="130" height="50" rx="8" fill="#0052d9"/>
+  <text x="465" y="30" text-anchor="middle" font-size="12" fill="white" font-weight="700">输出门 Γₒ</text>
+  <text x="465" y="48" text-anchor="middle" font-size="9" fill="#a3d0ff">输出哪些信息</text>
+  <rect x="130" y="75" width="310" height="40" rx="8" fill="#f0f7ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="285" y="97" text-anchor="middle" font-size="11" fill="#003cab" font-weight="600">cₜ = Γf⊙cₜ₋₁ + Γᵢ⊙c̃ₜ → aₜ = Γₒ⊙tanh(cₜ)</text>
+  <line x1="105" y1="60" x2="180" y2="75" stroke="#dc2626" stroke-width="1.5"/>
+  <line x1="285" y1="60" x2="285" y2="75" stroke="#059669" stroke-width="1.5"/>
+  <line x1="465" y1="60" x2="390" y2="75" stroke="#0052d9" stroke-width="1.5"/>
+
+</svg></div>
+<h3 id="lstm">LSTM（长短期记忆）</h3>
+<p>比GRU更强大，三个门：</p>
+<pre class="codehilite"><code>Γf = σ(Wf[aₜ₋₁, xₜ] + bf)    ← 遗忘门：忘掉什么？
+Γᵢ = σ(Wᵢ[aₜ₋₁, xₜ] + bᵢ)   ← 输入门：记住什么？
+Γₒ = σ(Wₒ[aₜ₋₁, xₜ] + bₒ)   ← 输出门：输出什么？
+
+c̃ₜ = tanh(Wc[aₜ₋₁, xₜ] + bc)
+cₜ = Γf⊙cₜ₋₁ + Γᵢ⊙c̃ₜ          ← 记忆更新
+aₜ = Γₒ⊙tanh(cₜ)               ← 隐藏状态
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：LSTM的记忆更新公式 cₜ = Γf⊙cₜ₋₁ + Γᵢ⊙c̃ₜ 是关键——遗忘门控制保留多少旧记忆，输入门控制加入多少新信息。当遗忘门≈1、输入门≈0时，信息可以<strong>不衰减地传递任意远</strong>——这就解决了梯度消失。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>对比</th>
+<th>GRU</th>
+<th>LSTM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>门数</td>
+<td>2个</td>
+<td>3个</td>
+</tr>
+<tr>
+<td>参数量</td>
+<td>较少</td>
+<td>较多</td>
+</tr>
+<tr>
+<td>效果</td>
+<td>多数任务够用</td>
+<td>极长序列更好</td>
+</tr>
+<tr>
+<td>选择建议</td>
+<td>默认先试GRU</td>
+<td>GRU不够时换LSTM</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_58">二十四、词嵌入——让机器理解语义</h2>
+<p><strong>一句话</strong>：把每个词表示为一个高维向量（如300维），让语义相近的词在向量空间中距离相近。</p>
+<h3 id="_59">为什么需要词嵌入</h3>
+<p>One-hot编码的问题：10000个词就是10000维，且任意两个词的距离都相等——"苹果"和"橙子"的距离 = "苹果"和"国王"的距离。这不合理。</p>
+<h3 id="word2vec">Word2Vec</h3>
+<p>两种架构：
+- <strong>Skip-gram</strong>：给定中心词，预测上下文词
+- <strong>CBOW</strong>：给定上下文词，预测中心词</p>
+<p>训练后的词向量有<strong>类比推理</strong>能力：</p>
+<pre class="codehilite"><code>e_king - e_man + e_woman ≈ e_queen
+</code></pre>
+
+<h3 id="_60">词嵌入的偏见问题</h3>
+<pre class="codehilite"><code>e_man - e_woman ≈ e_computer_programmer - e_homemaker
+</code></pre>
+
+<p>词嵌入会学到训练数据中的社会偏见。课上介绍了消除偏见的方法：找到"性别方向"→在该方向上中和化。</p>
+<hr />
+<h2 id="seq2seq">二十五、Seq2Seq与注意力机制</h2>
+<h3 id="_61">序列到序列模型</h3>
+<pre class="codehilite"><code>Encoder: &quot;Jane visite l'Afrique&quot; → 固定长度向量 c
+Decoder: c → &quot;Jane visits Africa&quot;
+</code></pre>
+
+<p><strong>问题</strong>：整个输入句子被压缩成一个固定向量——句子越长，信息丢失越多。</p>
+<h3 id="beam-search">集束搜索（Beam Search）</h3>
+<p>不用贪心（每步选概率最高的词），而是保留B个最有可能的候选序列：</p>
+<pre class="codehilite"><code>B=3时：每步保留3个最佳候选 → 最终选总概率最高的完整句子
+</code></pre>
+
+<h3 id="attention">注意力机制（Attention）</h3>
+<p><strong>核心思想</strong>：翻译每个词时，不只看压缩后的c，而是<strong>回头看整个输入序列</strong>，给每个输入词分配一个"注意力权重"。</p>
+<pre class="codehilite"><code>αₜ,ₜ' = softmax(eₜ,ₜ')         ← 当前输出对每个输入位置的关注程度
+cₜ = Σₜ' αₜ,ₜ' · aₜ'           ← 加权求和得到上下文向量
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：注意力机制的本质是<strong>动态的、内容相关的检索</strong>——翻译"Africa"时，模型学会把注意力放在"l'Afrique"上。这个机制后来成为Transformer的核心，直接催生了GPT/BERT/Claude。</p>
+</blockquote>
+<hr />
+<h2 id="transformer">二十六、Transformer——一切的起点</h2>
+<p><strong>一句话</strong>：抛弃RNN的顺序处理，完全用<strong>自注意力机制</strong>并行处理所有位置——更快、更强、能处理更长的序列。</p>
+<h3 id="self-attention">自注意力（Self-Attention）</h3>
+<p>对输入序列中的每个词，计算三个向量：
+- <strong>Q（Query）</strong>：我在找什么？
+- <strong>K（Key）</strong>：我是什么？
+- <strong>V（Value）</strong>：我的信息是什么？</p>
+<pre class="codehilite"><code>                    Q · Kᵀ
+Attention(Q,K,V) = softmax(─────) · V
+                     √dₖ
+</code></pre>
+
+<p><strong>除以√dₖ的原因</strong>：防止点积值太大导致softmax梯度消失。</p>
+<h3 id="multi-head-attention">多头注意力（Multi-Head Attention）</h3>
+<pre class="codehilite"><code>不止一组QKV，而是h组（如h=8）
+→ 每组从不同&quot;视角&quot;关注不同方面
+→ 拼接后线性变换
+</code></pre>
+
+<p><strong>类比</strong>：一组注意力看语法关系，一组看语义关系，一组看距离关系...多个视角互补。</p>
+<h3 id="transformer_1">Transformer完整架构</h3>
+<pre class="codehilite"><code>Encoder:
+  输入 → 嵌入+位置编码 → [自注意力 → FFN] × N → 编码器输出
+
+Decoder:
+  输出(shifted) → 嵌入+位置编码 → [掩码自注意力 → 交叉注意力 → FFN] × N → 线性+Softmax → 预测
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：Transformer的突破不是"性能更好"，而是<strong>可以并行</strong>。RNN必须顺序处理（前一个算完才能算后一个），Transformer通过Self-Attention让所有位置同时互相关注，训练速度提升了几十倍。没有这个并行化，今天的万亿参数大模型根本训练不出来。</p>
+</blockquote>
+<hr />
+<h2 id="25_2">附录：第五课专有名词速查（25个）</h2>
+<table>
+<thead>
+<tr>
+<th>名词</th>
+<th>全称</th>
+<th>一句话白话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RNN</td>
+<td>Recurrent Neural Network</td>
+<td>有"记忆"的神经网络，处理序列数据</td>
+</tr>
+<tr>
+<td>LSTM</td>
+<td>Long Short-Term Memory</td>
+<td>三门控制的长期记忆网络</td>
+</tr>
+<tr>
+<td>GRU</td>
+<td>Gated Recurrent Unit</td>
+<td>两门控制的简化版LSTM</td>
+</tr>
+<tr>
+<td>遗忘门</td>
+<td>Forget Gate</td>
+<td>决定丢掉多少旧记忆</td>
+</tr>
+<tr>
+<td>输入门</td>
+<td>Input Gate</td>
+<td>决定加入多少新信息</td>
+</tr>
+<tr>
+<td>输出门</td>
+<td>Output Gate</td>
+<td>决定输出哪些信息</td>
+</tr>
+<tr>
+<td>BPTT</td>
+<td>Backprop Through Time</td>
+<td>RNN的反向传播</td>
+</tr>
+<tr>
+<td>词嵌入</td>
+<td>Word Embedding</td>
+<td>把词表示为语义向量</td>
+</tr>
+<tr>
+<td>Word2Vec</td>
+<td>-</td>
+<td>训练词嵌入的经典算法</td>
+</tr>
+<tr>
+<td>Skip-gram</td>
+<td>-</td>
+<td>用中心词预测上下文</td>
+</tr>
+<tr>
+<td>CBOW</td>
+<td>Continuous Bag of Words</td>
+<td>用上下文预测中心词</td>
+</tr>
+<tr>
+<td>GloVe</td>
+<td>Global Vectors</td>
+<td>基于共现矩阵的词嵌入</td>
+</tr>
+<tr>
+<td>负采样</td>
+<td>Negative Sampling</td>
+<td>Word2Vec的高效训练技巧</td>
+</tr>
+<tr>
+<td>Seq2Seq</td>
+<td>Sequence to Sequence</td>
+<td>序列到序列模型（编码器-解码器）</td>
+</tr>
+<tr>
+<td>Beam Search</td>
+<td>集束搜索</td>
+<td>保留B个最佳候选的解码策略</td>
+</tr>
+<tr>
+<td>BLEU</td>
+<td>Bilingual Evaluation Understudy</td>
+<td>机器翻译的评估指标</td>
+</tr>
+<tr>
+<td>Attention</td>
+<td>注意力机制</td>
+<td>动态关注输入序列的不同位置</td>
+</tr>
+<tr>
+<td>Self-Attention</td>
+<td>自注意力</td>
+<td>序列中每个位置关注所有其他位置</td>
+</tr>
+<tr>
+<td>Q/K/V</td>
+<td>Query/Key/Value</td>
+<td>注意力的三个核心向量</td>
+</tr>
+<tr>
+<td>Multi-Head</td>
+<td>多头注意力</td>
+<td>多组QKV从不同视角关注</td>
+</tr>
+<tr>
+<td>Transformer</td>
+<td>-</td>
+<td>完全基于注意力的架构</td>
+</tr>
+<tr>
+<td>位置编码</td>
+<td>Positional Encoding</td>
+<td>告诉模型每个词的位置信息</td>
+</tr>
+<tr>
+<td>FFN</td>
+<td>Feed-Forward Network</td>
+<td>Transformer中的前馈层</td>
+</tr>
+<tr>
+<td>掩码注意力</td>
+<td>Masked Attention</td>
+<td>解码时屏蔽未来位置</td>
+</tr>
+<tr>
+<td>Teacher Forcing</td>
+<td>-</td>
+<td>训练时用真实标签而非预测结果</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="footer">
+  生成日期：2026-04-14 · 基于B站学习笔记Skill v2.5
+</div>
+</body>
+</html>

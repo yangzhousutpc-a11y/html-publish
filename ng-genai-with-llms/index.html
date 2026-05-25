@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>吴恩达Generative AI with LLMs完整版学习笔记</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;background:#f3f4f6;color:#242424;line-height:1.8}
+a{color:#0052d9;text-decoration:none}a:hover{text-decoration:underline;color:#003cab}
+.header{background:linear-gradient(135deg,#001a45 0%,#0052d9 60%,#0077ff 100%);color:white;padding:52px 32px;text-align:center}
+.header h1{font-size:22px;font-weight:700;max-width:800px;margin:0 auto;letter-spacing:0.5px}
+.header .sub{font-size:13px;opacity:.85;margin-top:12px;max-width:700px;margin-left:auto;margin-right:auto}
+.stats{display:flex;justify-content:center;gap:28px;margin-top:18px;flex-wrap:wrap}
+.stats .s{font-size:12px;opacity:.8}.stats .s strong{font-size:18px;color:#66b1ff;display:block}
+.container{max-width:1000px;margin:0 auto;padding:24px}
+.content{background:white;border-radius:10px;padding:32px 36px;margin-top:20px;border:1px solid #e5e6eb;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
+.content h1{font-size:22px;color:#0052d9;margin:36px 0 16px;padding-bottom:10px;border-bottom:2px solid #0052d9;font-weight:700}
+.content h1:first-child{margin-top:0}
+.content h2{font-size:18px;color:#242424;margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid #e5e6eb;font-weight:600}
+.content h3{font-size:15px;color:#0052d9;margin:20px 0 8px;font-weight:600}
+.content p{font-size:14px;color:#4b4b4b;margin:8px 0}
+.content ul,.content ol{padding-left:22px;margin:8px 0}
+.content li{font-size:14px;color:#4b4b4b;margin:4px 0}
+.content strong{color:#242424}
+.content em{color:#0052d9;font-style:normal}
+.content blockquote{background:#edf4ff;border-left:4px solid #0052d9;padding:12px 18px;margin:12px 0;border-radius:0 8px 8px 0;font-size:14px;color:#003cab}
+.content blockquote p{color:#003cab;margin:4px 0}
+.content hr{border:none;border-top:1px solid #e5e6eb;margin:28px 0}
+.content table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+.content th{background:#edf4ff;text-align:left;padding:10px 14px;font-weight:600;color:#0052d9;border-bottom:1px solid #d4e3fc}
+.content td{padding:10px 14px;border-bottom:1px solid #f0f1f2;color:#4b4b4b}
+.content tr:hover td{background:#f5f9ff}
+.content pre{background:#0d1b2a;border-radius:8px;padding:14px 18px;margin:10px 0;font-family:"SF Mono",Consolas,monospace;font-size:12.5px;line-height:1.6;overflow-x:auto;color:#c9d1d9}
+.content code{font-family:"SF Mono",Consolas,monospace;font-size:12.5px;background:#edf4ff;padding:2px 6px;border-radius:4px;color:#0052d9}
+.content pre code{background:none;padding:0;color:#c9d1d9}
+.footer{text-align:center;padding:30px 0;color:#8f959e;font-size:12px}
+.vbar{margin:8px 0 12px;padding:10px 14px;background:#edf4ff;border-radius:8px;border:1px solid #d4e3fc}
+.vbar a{color:#0052d9;font-size:11px;background:#d4e3fc;padding:2px 8px;border-radius:12px;margin:2px;display:inline-block;text-decoration:none}
+.vbar a:hover{background:#b3d1ff}</style>
+</head>
+<body>
+<div class="header">
+<h1>吴恩达 Generative AI with LLMs 完整版学习笔记</h1>
+<div class="sub">DeepLearning.AI × AWS / Coursera | <a href="https://www.bilibili.com/video/BV1Y4zKBiEuq/?p=1" target="_blank" style="color:#66b1ff;text-decoration:underline">B站 BV1Y4zKBiEuq</a> | 48集约5.6小时 | 通俗叙事风格</div>
+<div class="stats">
+<div class="s"><strong>48</strong>集视频</div>
+<div class="s"><strong>3</strong>周课程</div>
+<div class="s"><strong>25</strong>专有名词</div>
+<div class="s"><strong>10</strong>大章节</div>
+</div>
+</div>
+<div class="container">
+<div class="content">
+
+<div style="margin:0 0 24px;padding:20px 24px;background:linear-gradient(135deg,#edf4ff 0%,#f0f7ff 50%,#f5f9ff 100%);border-radius:10px;border:1px solid #d4e3fc">
+<h2 style="font-size:16px;color:#0052d9;margin:0 0 12px;border:none;padding:0">📖 内容综述</h2>
+<p style="font-size:14px;color:#374151;margin:0 0 10px;line-height:1.9">
+这份笔记覆盖了<strong>从零构建到上线部署大语言模型的完整链路</strong>，分三周递进展开。
+</p>
+<p style="font-size:13px;color:#4b4b4b;margin:0 0 8px;line-height:1.8">
+<strong style="color:#0052d9">第一周「打地基」</strong>回答的是<em style="color:#003cab">"LLM是怎么炼成的"</em>——从文字接龙的基本原理出发，深入Transformer架构（自注意力、多头机制、三种变体），再讲预训练的三种方式、GPU显存计算、Chinchilla扩展定律，最后用BloombergGPT案例展示理论与现实的差距。
+</p>
+<p style="font-size:13px;color:#4b4b4b;margin:0 0 8px;line-height:1.8">
+<strong style="color:#0052d9">第二周「装修」</strong>解决的是<em style="color:#003cab">"怎么让模型听话"</em>——指令微调让模型从"接着写"变成"按要求做"，灾难性遗忘是绕不开的坑，PEFT/LoRA是穷人的微调方案（只改1%参数就能接近全量效果），ROUGE和BLEU是评价好坏的标尺。
+</p>
+<p style="font-size:13px;color:#4b4b4b;margin:0 0 0;line-height:1.8">
+<strong style="color:#0052d9">第三周「交房」</strong>聚焦<em style="color:#003cab">"让模型做好人并上线干活"</em>——RLHF四步流程让模型对齐人类价值观，PPO算法是"安全带"，Constitutional AI用AI监督AI；部署优化三件套（蒸馏/量化/剪枝）让模型变小变快；最后RAG、CoT、PAL、ReAct这些技术把LLM从一个"只会说话"的模型变成能查资料、写代码、连续推理的智能体。
+</p>
+</div>
+
+<h1 id="llm">第一周：LLM是怎么炼成的</h1>
+<p>从白纸到学霸——这一周回答"LLM为什么能工作"：文字接龙原理→Transformer引擎→提示工程→预训练三种方式→GPU显存计算→Chinchilla扩展定律。</p>
+<h2 id="llm_1">一、LLM——一个超级文字接龙机</h2>
+<h3 id="llm_2">LLM到底是什么？</h3>
+<p><strong>一句话</strong>：LLM就是一个在海量文本上训练出来的"超级预测器"——你给它前半句话，它预测后半句。</p>
+<p>这个预测器有多大？看几个例子：</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>谁做的</th>
+<th>参数量</th>
+<th>擅长什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BERT</td>
+<td>Google</td>
+<td>3.4亿</td>
+<td>理解文本（分类、提取）</td>
+</tr>
+<tr>
+<td>GPT-3</td>
+<td>OpenAI</td>
+<td>1750亿</td>
+<td>生成文本（对话、写作）</td>
+</tr>
+<tr>
+<td>T5</td>
+<td>Google</td>
+<td>110亿</td>
+<td>翻译、摘要</td>
+</tr>
+<tr>
+<td>LLaMA</td>
+<td>Meta</td>
+<td>70亿-700亿</td>
+<td>开源，什么都能做</td>
+</tr>
+</tbody>
+</table>
+<p><strong>参数可以理解为模型的"记忆"</strong>——参数越多，模型记住的东西越多，能做的事情也越复杂。当参数达到数十亿到数千亿级别时，模型会出现一种神奇的"涌现"能力——它能做一些训练时从未见过的任务。</p>
+<h3 id="llm_3">LLM能做什么？</h3>
+<p>课上列了四大类任务：
+- <strong>写</strong>：聊天、写文章、生成代码
+- <strong>读</strong>：摘要、情感分析、信息提取
+- <strong>译</strong>：语言互译、自然语言→SQL/Python
+- <strong>找</strong>：从文档中检索特定信息（NER命名实体识别）</p>
+<blockquote>
+<p>💡 <strong>增强LLM</strong>是当前热点：把LLM连上外部数据库（RAG）或API（Tool Use），它就能获取训练时没见过的信息，也能和真实世界互动。这个概念贯穿整门课。</p>
+</blockquote>
+<h3 id="_1">文字接龙的工作原理</h3>
+<p>文本生成的核心机制叫<strong>自回归</strong>——每次只预测一个词，然后把这个词加到输入里，再预测下一个词，如此循环。</p>
+<p>就像多米诺骨牌：前一个词决定后一个词的选择，一个接一个地倒下去。</p>
+<hr />
+<h2 id="transformerllm">二、Transformer——让LLM成为可能的"发动机"</h2>
+<h3 id="_2">为什么之前的技术不行了？</h3>
+<p>在2017年之前，大家用RNN（循环神经网络）处理文本。但RNN有两个致命问题：</p>
+<blockquote>
+<p>🎯 <strong>信息衰减</strong>：就像玩"传话游戏"——经过20个人后原始信息就面目全非了。RNN处理长文本也一样，离得远的词之间几乎无法建立联系。</p>
+</blockquote>
+<p>第二个问题：<strong>RNN必须一个词一个词地处理，无法并行</strong>。在GPU时代，这简直是巨大浪费。</p>
+<h3 id="transformer">Transformer的革命</h3>
+<p>2017年Google发表了"Attention Is All You Need"论文，提出了Transformer。核心创新只有一个：<strong>自注意力机制（Self-Attention）</strong>。</p>
+<p><strong>通俗理解</strong>：Transformer让每个词都能"直接看到"句子里的其他所有词，不需要排队传递信息。就像开会时每个人都能直接跟任何人说话，而不是只能跟旁边的人传纸条。</p>
+<h3 id="_3">一个词从输入到输出的旅程</h3>
+<pre class="codehilite"><code>文本 → ①分词 → ②嵌入（变成向量） → ③加位置编码 → ④多头自注意力 → ⑤前馈网络 → ⑥Softmax → 预测下一个词
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>做什么</th>
+<th>通俗理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>①分词</td>
+<td>把句子拆成小块</td>
+<td>把句子切成一个个积木</td>
+</tr>
+<tr>
+<td>②嵌入</td>
+<td>把词变成数字向量</td>
+<td>给每个词一个"身份证号码"</td>
+</tr>
+<tr>
+<td>③位置编码</td>
+<td>标记词的位置</td>
+<td>记住谁排在谁前面（顺序很重要）</td>
+</tr>
+<tr>
+<td>④多头注意力</td>
+<td>计算词与词的关系</td>
+<td>大脑同时从多个角度看问题</td>
+</tr>
+<tr>
+<td>⑤前馈网络</td>
+<td>深度加工信息</td>
+<td>大脑做深层思考</td>
+</tr>
+<tr>
+<td>⑥Softmax</td>
+<td>把分数变成概率</td>
+<td>从所有候选词中选出最可能的那个</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_4">多头注意力——同时看多个角度</h3>
+<p>课上用了一个很好的比喻：在"老师教学生读书"这个句子里：
+- <strong>头1</strong>关注人物关系——"老师"和"学生"的关系
+- <strong>头2</strong>关注动作——"教"这个行为
+- <strong>头3</strong>关注修饰关系——"读"修饰"书"</p>
+<p>Transformer通常有<strong>12到100个头</strong>，同时并行学习语言的不同方面。这就是为什么它能理解如此复杂的语义。</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:12px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Transformer架构图 · Step 1：输入处理</p>
+<svg viewBox="0 0 700 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px">
+  <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="45" width="100" height="40" rx="8" fill="#d4e3fc" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="60" y="70" text-anchor="middle" font-size="12" fill="#002580" font-weight="600">原始文本</text>
+  <line x1="110" y1="65" x2="148" y2="65" stroke="#0052d9" stroke-width="2" marker-end="url(#a1)"/>
+  <rect x="153" y="45" width="100" height="40" rx="8" fill="#b3d1ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="203" y="70" text-anchor="middle" font-size="12" fill="#002580" font-weight="600">① 分词</text>
+  <text x="203" y="105" text-anchor="middle" font-size="10" fill="#3380e6">切成Token</text>
+  <line x1="253" y1="65" x2="291" y2="65" stroke="#0052d9" stroke-width="2" marker-end="url(#a1)"/>
+  <rect x="296" y="45" width="115" height="40" rx="8" fill="#84b8ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="354" y="70" text-anchor="middle" font-size="12" fill="#002580" font-weight="600">② 嵌入层</text>
+  <text x="354" y="105" text-anchor="middle" font-size="10" fill="#3380e6">Token → 向量</text>
+  <line x1="411" y1="65" x2="449" y2="65" stroke="#0052d9" stroke-width="2" marker-end="url(#a1)"/>
+  <rect x="454" y="45" width="115" height="40" rx="8" fill="#4d94ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="512" y="65" text-anchor="middle" font-size="11" fill="white" font-weight="600">③ +位置编码</text>
+  <text x="512" y="105" text-anchor="middle" font-size="10" fill="#3380e6">记住词的顺序</text>
+  <line x1="569" y1="65" x2="607" y2="65" stroke="#0052d9" stroke-width="2" marker-end="url(#a1)"/>
+  <rect x="612" y="45" width="78" height="40" rx="8" fill="#0052d9" stroke="#003cab" stroke-width="1.5"/>
+  <text x="651" y="70" text-anchor="middle" font-size="11" fill="white" font-weight="600">→ 核心层</text>
+</svg></div>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:12px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Transformer架构图 · Step 2：核心计算（重复N层）</p>
+<svg viewBox="0 0 700 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px">
+  <defs><marker id="a2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#0052d9"/></marker></defs>
+  <rect x="20" y="25" width="660" height="130" rx="12" fill="none" stroke="#84b8ff" stroke-width="2" stroke-dasharray="6,4"/>
+  <text x="350" y="18" text-anchor="middle" font-size="11" fill="#3380e6">× N层（通常6-96层，堆叠越多越强）</text>
+  <rect x="45" y="50" width="170" height="70" rx="10" fill="#d4e3fc" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="130" y="78" text-anchor="middle" font-size="13" fill="#002580" font-weight="700">④ 多头注意力</text>
+  <text x="130" y="96" text-anchor="middle" font-size="10" fill="#0052d9">每个词看所有其他词</text>
+  <text x="130" y="111" text-anchor="middle" font-size="10" fill="#0052d9">12-100个头并行</text>
+  <line x1="215" y1="85" x2="258" y2="85" stroke="#0052d9" stroke-width="2" marker-end="url(#a2)"/>
+  <rect x="263" y="50" width="170" height="70" rx="10" fill="#b3d1ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="348" y="78" text-anchor="middle" font-size="13" fill="#002580" font-weight="700">⑤ 前馈网络</text>
+  <text x="348" y="96" text-anchor="middle" font-size="10" fill="#0052d9">深度加工信息</text>
+  <text x="348" y="111" text-anchor="middle" font-size="10" fill="#0052d9">每个位置独立处理</text>
+  <line x1="433" y1="85" x2="476" y2="85" stroke="#0052d9" stroke-width="2" marker-end="url(#a2)"/>
+  <rect x="481" y="50" width="170" height="70" rx="10" fill="#4d94ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="566" y="78" text-anchor="middle" font-size="13" fill="white" font-weight="700">⑥ Softmax</text>
+  <text x="566" y="96" text-anchor="middle" font-size="10" fill="#d4e3fc">分数 → 概率</text>
+  <text x="566" y="111" text-anchor="middle" font-size="10" fill="#d4e3fc">选出下一个词</text>
+</svg></div>
+
+<div style="margin:16px 0;padding:16px;background:linear-gradient(135deg,#edf4ff 0%,#f0f7ff 100%);border-radius:12px;border:2px solid #0052d9">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Transformer完整架构总览图（把上面两步串起来看全貌）</p>
+<svg viewBox="0 0 900 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:900px">
+  <defs>
+    <marker id="af" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#0052d9"/></marker>
+    <linearGradient id="gf1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#d4e3fc"/><stop offset="100%" stop-color="#b3d1ff"/></linearGradient>
+    <linearGradient id="gf2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#84b8ff"/><stop offset="100%" stop-color="#4d94ff"/></linearGradient>
+  </defs>
+
+  <!-- 标题区域标签 -->
+  <rect x="15" y="15" width="200" height="24" rx="4" fill="#d4e3fc"/>
+  <text x="115" y="32" text-anchor="middle" font-size="11" fill="#0052d9" font-weight="600">Step 1：输入处理</text>
+  <rect x="250" y="15" width="410" height="24" rx="4" fill="#b3d1ff"/>
+  <text x="455" y="32" text-anchor="middle" font-size="11" fill="#003cab" font-weight="600">Step 2：核心计算层 × N（堆叠6-96层）</text>
+  <rect x="695" y="15" width="185" height="24" rx="4" fill="#4d94ff"/>
+  <text x="788" y="32" text-anchor="middle" font-size="11" fill="white" font-weight="600">输出</text>
+
+  <!-- Step 1 输入处理 -->
+  <rect x="20" y="55" width="80" height="55" rx="8" fill="#f0f7ff" stroke="#84b8ff" stroke-width="1.5"/>
+  <text x="60" y="78" text-anchor="middle" font-size="10" fill="#002580" font-weight="600">原始文本</text>
+  <text x="60" y="93" text-anchor="middle" font-size="9" fill="#3380e6">"我爱AI"</text>
+  <line x1="100" y1="82" x2="118" y2="82" stroke="#0052d9" stroke-width="1.5" marker-end="url(#af)"/>
+
+  <rect x="123" y="55" width="80" height="55" rx="8" fill="url(#gf1)" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="163" y="75" text-anchor="middle" font-size="11" fill="#002580" font-weight="700">① 分词</text>
+  <text x="163" y="93" text-anchor="middle" font-size="9" fill="#0052d9">Tokenize</text>
+  <line x1="203" y1="82" x2="221" y2="82" stroke="#0052d9" stroke-width="1.5" marker-end="url(#af)"/>
+
+  <!-- 嵌入+位置编码合并 -->
+  <rect x="226" y="50" width="95" height="65" rx="8" fill="#b3d1ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="274" y="72" text-anchor="middle" font-size="10" fill="#002580" font-weight="700">② 嵌入</text>
+  <text x="274" y="86" text-anchor="middle" font-size="9" fill="#003cab">Token→向量</text>
+  <text x="274" y="100" text-anchor="middle" font-size="10" fill="#002580" font-weight="700">③ +位置</text>
+  <line x1="321" y1="82" x2="339" y2="82" stroke="#0052d9" stroke-width="1.5" marker-end="url(#af)"/>
+
+  <!-- Step 2 核心计算（虚线框） -->
+  <rect x="344" y="43" width="320" height="80" rx="10" fill="none" stroke="#3380e6" stroke-width="2" stroke-dasharray="6,3"/>
+  <text x="504" y="42" text-anchor="middle" font-size="9" fill="#3380e6">× N层</text>
+
+  <rect x="355" y="55" width="130" height="55" rx="8" fill="#84b8ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="420" y="75" text-anchor="middle" font-size="11" fill="#002580" font-weight="700">④ 多头注意力</text>
+  <text x="420" y="93" text-anchor="middle" font-size="9" fill="#003cab">词↔词的关联</text>
+  <line x1="485" y1="82" x2="503" y2="82" stroke="#0052d9" stroke-width="1.5" marker-end="url(#af)"/>
+
+  <rect x="508" y="55" width="145" height="55" rx="8" fill="url(#gf2)" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="581" y="75" text-anchor="middle" font-size="11" fill="white" font-weight="700">⑤ 前馈网络</text>
+  <text x="581" y="93" text-anchor="middle" font-size="9" fill="#d4e3fc">深度加工信息</text>
+
+  <line x1="653" y1="82" x2="694" y2="82" stroke="#0052d9" stroke-width="1.5" marker-end="url(#af)"/>
+
+  <!-- 输出 -->
+  <rect x="699" y="55" width="90" height="55" rx="8" fill="#0052d9" stroke="#003cab" stroke-width="1.5"/>
+  <text x="744" y="75" text-anchor="middle" font-size="11" fill="white" font-weight="700">⑥ Softmax</text>
+  <text x="744" y="93" text-anchor="middle" font-size="9" fill="#b3d1ff">→ 概率分布</text>
+  <line x1="789" y1="82" x2="830" y2="82" stroke="#0052d9" stroke-width="1.5" marker-end="url(#af)"/>
+
+  <rect x="835" y="60" width="50" height="45" rx="8" fill="#003cab" stroke="#002580" stroke-width="1.5"/>
+  <text x="860" y="80" text-anchor="middle" font-size="10" fill="white" font-weight="600">输出</text>
+  <text x="860" y="93" text-anchor="middle" font-size="9" fill="#84b8ff">下一词</text>
+
+  <!-- 下方详细说明区 -->
+  <line x1="60" y1="115" x2="60" y2="155" stroke="#84b8ff" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="163" y1="115" x2="163" y2="155" stroke="#84b8ff" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="274" y1="115" x2="274" y2="155" stroke="#84b8ff" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="420" y1="128" x2="420" y2="155" stroke="#84b8ff" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="581" y1="128" x2="581" y2="155" stroke="#84b8ff" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="744" y1="115" x2="744" y2="155" stroke="#84b8ff" stroke-width="1" stroke-dasharray="3,3"/>
+
+  <!-- 说明卡片 -->
+  <rect x="15" y="160" width="120" height="65" rx="6" fill="#f0f7ff" stroke="#d4e3fc" stroke-width="1"/>
+  <text x="75" y="178" text-anchor="middle" font-size="9" fill="#002580" font-weight="600">原始文本</text>
+  <text x="75" y="193" text-anchor="middle" font-size="8" fill="#0052d9">人类可读的</text>
+  <text x="75" y="206" text-anchor="middle" font-size="8" fill="#0052d9">自然语言</text>
+
+  <rect x="145" y="160" width="120" height="65" rx="6" fill="#f0f7ff" stroke="#d4e3fc" stroke-width="1"/>
+  <text x="205" y="178" text-anchor="middle" font-size="9" fill="#002580" font-weight="600">① 分词 Tokenize</text>
+  <text x="205" y="193" text-anchor="middle" font-size="8" fill="#0052d9">文本→Token序列</text>
+  <text x="205" y="206" text-anchor="middle" font-size="8" fill="#0052d9">"我""爱""AI"</text>
+
+  <rect x="275" y="160" width="120" height="65" rx="6" fill="#f0f7ff" stroke="#d4e3fc" stroke-width="1"/>
+  <text x="335" y="178" text-anchor="middle" font-size="9" fill="#002580" font-weight="600">②③ 嵌入+位置</text>
+  <text x="335" y="193" text-anchor="middle" font-size="8" fill="#0052d9">Token→高维向量</text>
+  <text x="335" y="206" text-anchor="middle" font-size="8" fill="#0052d9">+记住顺序信息</text>
+
+  <rect x="405" y="160" width="120" height="65" rx="6" fill="#f0f7ff" stroke="#d4e3fc" stroke-width="1"/>
+  <text x="465" y="178" text-anchor="middle" font-size="9" fill="#002580" font-weight="600">④ 多头注意力</text>
+  <text x="465" y="193" text-anchor="middle" font-size="8" fill="#0052d9">每个词直接看到</text>
+  <text x="465" y="206" text-anchor="middle" font-size="8" fill="#0052d9">所有其他词的关联</text>
+
+  <rect x="535" y="160" width="120" height="65" rx="6" fill="#f0f7ff" stroke="#d4e3fc" stroke-width="1"/>
+  <text x="595" y="178" text-anchor="middle" font-size="9" fill="#002580" font-weight="600">⑤ 前馈网络</text>
+  <text x="595" y="193" text-anchor="middle" font-size="8" fill="#0052d9">对注意力结果</text>
+  <text x="595" y="206" text-anchor="middle" font-size="8" fill="#0052d9">做非线性变换</text>
+
+  <rect x="665" y="160" width="120" height="65" rx="6" fill="#f0f7ff" stroke="#d4e3fc" stroke-width="1"/>
+  <text x="725" y="178" text-anchor="middle" font-size="9" fill="#002580" font-weight="600">⑥ Softmax输出</text>
+  <text x="725" y="193" text-anchor="middle" font-size="8" fill="#0052d9">分数→概率分布</text>
+  <text x="725" y="206" text-anchor="middle" font-size="8" fill="#0052d9">选出下一个词</text>
+
+  <!-- 底部：自回归循环箭头 -->
+  <rect x="150" y="250" width="600" height="40" rx="8" fill="#d4e3fc" stroke="#84b8ff" stroke-width="1.5"/>
+  <text x="450" y="270" text-anchor="middle" font-size="11" fill="#002580" font-weight="600">🔄 自回归循环：输出的词加入输入 → 再跑一遍整个流程 → 生成下一个词 → 直到遇到结束符</text>
+  <text x="450" y="285" text-anchor="middle" font-size="10" fill="#0052d9">"我" → "爱" → "学" → "习" → "AI" → [结束]</text>
+
+  <!-- 循环箭头 -->
+  <path d="M860 105 Q880 105 880 180 Q880 310 450 310 Q200 310 150 290" fill="none" stroke="#0052d9" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#af)"/>
+  <text x="885" y="210" font-size="9" fill="#0052d9" transform="rotate(90,885,210)">输出回送</text>
+
+</svg>
+</div>
+
+<h3 id="transformer_1">三种Transformer变体</h3>
+<p>这一点非常重要——后面讲预训练、选模型时会反复用到：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>代表模型</th>
+<th>能看到什么</th>
+<th>擅长什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>只有编码器</strong></td>
+<td>BERT</td>
+<td>双向（整句）</td>
+<td>理解文本：分类、NER</td>
+</tr>
+<tr>
+<td><strong>编码器+解码器</strong></td>
+<td>BART、T5</td>
+<td>有限双向</td>
+<td>翻译、摘要</td>
+</tr>
+<tr>
+<td><strong>只有解码器</strong></td>
+<td>GPT、LLaMA</td>
+<td>单向（只看前面的词）</td>
+<td>生成文本：对话、写作（<strong>当前主流</strong>）</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>为什么只有解码器成了主流？</strong> 因为实践证明，只要模型够大、数据够多，只有解码器的模型几乎能做所有任务——包括那些本来编码器擅长的任务。</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:12px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 三种Transformer变体对比</p>
+<svg viewBox="0 0 700 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px">
+  <rect x="20" y="20" width="200" height="120" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="120" y="45" text-anchor="middle" font-size="13" fill="#1e3a8a" font-weight="700">仅编码器</text>
+  <rect x="45" y="55" width="150" height="28" rx="6" fill="#3b82f6"/><text x="120" y="74" text-anchor="middle" font-size="11" fill="white" font-weight="600">编码器 ←→ 双向</text>
+  <text x="120" y="105" text-anchor="middle" font-size="10" fill="#3b82f6">理解文本：分类/NER</text>
+  <text x="120" y="125" text-anchor="middle" font-size="11" fill="#1e3a8a" font-weight="600">BERT</text>
+  <rect x="250" y="20" width="200" height="120" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="350" y="45" text-anchor="middle" font-size="13" fill="#92400e" font-weight="700">编码器+解码器</text>
+  <rect x="270" y="55" width="68" height="28" rx="6" fill="#f59e0b"/><text x="304" y="74" text-anchor="middle" font-size="10" fill="white" font-weight="600">编码器</text>
+  <rect x="348" y="55" width="8" height="28" rx="2" fill="#fbbf24"/>
+  <rect x="366" y="55" width="68" height="28" rx="6" fill="#d97706"/><text x="400" y="74" text-anchor="middle" font-size="10" fill="white" font-weight="600">解码器</text>
+  <text x="350" y="105" text-anchor="middle" font-size="10" fill="#b45309">输入→输出（翻译/摘要）</text>
+  <text x="350" y="125" text-anchor="middle" font-size="11" fill="#92400e" font-weight="600">T5 / BART</text>
+  <rect x="480" y="20" width="200" height="120" rx="10" fill="#fce7f3" stroke="#ec4899" stroke-width="1.5"/>
+  <text x="580" y="45" text-anchor="middle" font-size="13" fill="#9d174d" font-weight="700">仅解码器 ⭐主流</text>
+  <rect x="505" y="55" width="150" height="28" rx="6" fill="#ec4899"/><text x="580" y="74" text-anchor="middle" font-size="11" fill="white" font-weight="600">解码器 →→→ 单向</text>
+  <text x="580" y="105" text-anchor="middle" font-size="10" fill="#ec4899">生成文本：对话/写作</text>
+  <text x="580" y="125" text-anchor="middle" font-size="11" fill="#9d174d" font-weight="600">GPT / LLaMA</text>
+</svg></div>
+</blockquote>
+<hr />
+<h2 id="_5">三、提示工程——和模型说话的艺术</h2>
+<h3 id="_6">上下文学习：给模型"看"例子</h3>
+<p>不需要改模型的参数，只需要在提示词里给例子，模型就能学会做新任务。这叫<strong>上下文学习</strong>，分三个层级：</p>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>含义</th>
+<th>什么时候用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>零样本</strong></td>
+<td>不给例子，直接问</td>
+<td>大模型通常就够了</td>
+</tr>
+<tr>
+<td><strong>单样本</strong></td>
+<td>给1个例子</td>
+<td>比零样本通常好一点</td>
+</tr>
+<tr>
+<td><strong>少样本</strong></td>
+<td>给2-5个例子</td>
+<td>超过5-6个后基本没提升——该微调了</td>
+</tr>
+</tbody>
+</table>
+<p>课上的情感分析例子：</p>
+<pre class="codehilite"><code>零样本：分类这条评论 &quot;I loved this DVD!&quot; → 正面
+
+单样本：
+  例子：&quot;I loved this DVD!&quot; → 正面
+  请分类：&quot;I don't like this chair.&quot; → 负面
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键发现</strong>：超过5-6个例子后几乎没有提升。为什么？因为模型要么已经"会了"，要么需要更深入的学习（微调）。少样本提示词不能替代微调。</p>
+</blockquote>
+<h3 id="_7">生成配置——控制模型的"说话风格"</h3>
+<p>这些参数在推理时使用（不是训练时），从确定到随机渐进排列：</p>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>做什么</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>贪心解码</strong></td>
+<td>每次选概率最高的词</td>
+<td>最稳定，但像复读机</td>
+</tr>
+<tr>
+<td><strong>随机采样</strong></td>
+<td>按概率随机选</td>
+<td>更自然，但可能跑题</td>
+</tr>
+<tr>
+<td><strong>Top-K</strong></td>
+<td>只从前K个候选词里随机选</td>
+<td>在确定和随机之间找平衡</td>
+</tr>
+<tr>
+<td><strong>Top-P</strong></td>
+<td>选累积概率达到P的最小词集</td>
+<td>最聪明——模型确定时只选1个词，不确定时选50个</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Temperature</strong>控制概率分布的"陡峭程度"——低温(0.1)输出极度保守，高温(&gt;1)输出很"狂野"。课上做了实验：温度0.1时模型像复读机，温度2.0时模型开始胡说八道。</p>
+<hr />
+<h2 id="ai">四、生成式AI项目生命周期——整门课的"路线图"</h2>
+<p>课上画了一个四步流程图，后面两周的所有内容都围绕这个展开：</p>
+<pre class="codehilite"><code>① Scope（定范围）
+   ↓  尽可能窄！是通用聊天还是只做摘要？
+② Select（选模型）
+   ↓  用现成的基础模型还是自己训练？（95%情况选前者）
+③ Adapt &amp; Align（适应与对齐）
+   ↓  先试提示工程 → 不够就微调 → 再不行上RLHF
+④ Application（应用集成）
+      部署优化 + 增强（RAG解决幻觉，工具调用解决数学）
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>最重要的一步是第①步</strong>：把范围定得越窄越好。别想着做一个"什么都会"的模型——那太贵了，而且效果反而不好。</p>
+</blockquote>
+<hr />
+<h2 id="_8">五、预训练——模型是怎么从白纸变成"学霸"的</h2>
+<h3 id="_9">三种预训练方式</h3>
+<p>接着前面的Transformer三种变体，每种变体对应一种预训练方式。这里的知识链条是：<strong>架构决定了怎么训，怎么训决定了擅长什么</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>怎么训</th>
+<th>学会什么</th>
+<th>代表模型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>自回归</strong></td>
+<td>预测下一个词</td>
+<td>生成能力</td>
+<td>GPT、LLaMA</td>
+</tr>
+<tr>
+<td><strong>自编码（MLM）</strong></td>
+<td>遮住15%的词让模型猜</td>
+<td>理解能力</td>
+<td>BERT</td>
+</tr>
+<tr>
+<td><strong>序列到序列</strong></td>
+<td>输入损坏的文本，输出修复的</td>
+<td>翻译/转换能力</td>
+<td>T5</td>
+</tr>
+</tbody>
+</table>
+<p><strong>T5的"跨度破坏"训练</strong>——课上的具体例子：</p>
+<pre class="codehilite"><code>原句：  The quick brown fox jumps over the lazy dog.
+输入：  The quick &lt;mask_0&gt; jumps over the &lt;mask_1&gt;.
+目标：  &lt;mask_0&gt; brown fox &lt;mask_1&gt; lazy dog
+</code></pre>
+
+<p>故意把句子"弄坏"，让模型学会修复——在这个过程中，模型不知不觉学会了语言的结构和语义。</p>
+<h3 id="gpu10">GPU内存计算——10亿参数需要多少显存？</h3>
+<p>这是课上算的一个具体例子，让人恍然大悟：</p>
+<pre class="codehilite"><code>权重本身：10亿 × 4字节（FP32）= 4GB
+但训练还需要：
+  - 梯度：4GB
+  - Adam优化器状态：8GB
+  - 激活值和临时变量：8GB
+────────────────────────
+总计约：24GB，简化估算 ≈ 模型参数×20倍 ≈ 80GB
+</code></pre>
+
+<p><strong>80GB恰好是一张NVIDIA A100 GPU的极限</strong>。也就是说，训练一个"仅仅"10亿参数的模型，就需要一张顶级GPU的全部显存！</p>
+<p><strong>量化——用更低精度存数字来省内存</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>精度</th>
+<th>每个参数占多少</th>
+<th>省多少</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FP32</td>
+<td>4字节</td>
+<td>基准</td>
+</tr>
+<tr>
+<td>BF16</td>
+<td>2字节</td>
+<td>省一半（保留FP32的数值范围）</td>
+</tr>
+<tr>
+<td>INT8</td>
+<td>1字节</td>
+<td>省75%</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>BF16是目前最流行的选择</strong>——和FP32的数值范围一样大，但只占一半内存。FLAN-T5就是用BF16训练的。</p>
+</blockquote>
+<h3 id="gpu">多GPU策略</h3>
+<p>当一张卡装不下时，怎么办？</p>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>适用场景</th>
+<th>原理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DDP（分布式数据并行）</strong></td>
+<td>模型放得进单卡</td>
+<td>每张卡放一份完整模型，处理不同数据</td>
+</tr>
+<tr>
+<td><strong>FSDP（完全分片数据并行）</strong></td>
+<td>模型放不进单卡</td>
+<td>把模型切成片，分到各张卡上（基于ZeRO论文）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="chinchilla">Chinchilla定律——颠覆"越大越好"的常识</h3>
+<p>2022年DeepMind发现了一个惊人事实：<strong>之前的大模型都"喂饱"了参数但"饿着"了数据</strong>！</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>参数</th>
+<th>训练数据</th>
+<th style="text-align: center;">数据/参数比</th>
+<th>性能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GPT-3</td>
+<td>1750亿</td>
+<td>3000亿词</td>
+<td style="text-align: center;"><strong>1.7</strong></td>
+<td>基准</td>
+</tr>
+<tr>
+<td>Gopher</td>
+<td>2800亿</td>
+<td>3000亿词</td>
+<td style="text-align: center;"><strong>1.1</strong></td>
+<td>更强</td>
+</tr>
+<tr>
+<td><strong>Chinchilla</strong></td>
+<td><strong>700亿</strong></td>
+<td><strong>1.4万亿词</strong></td>
+<td style="text-align: center;"><strong>20</strong></td>
+<td><strong>超越以上所有！</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🎯 <strong>黄金比例</strong>：每个参数大约需要20个训练token。用更小的模型配更多数据，反而比堆参数效果好。这彻底颠覆了"模型越大越好"的迷信。</p>
+</blockquote>
+<h3 id="bloomberggpt">BloombergGPT——当理论遇到现实</h3>
+<p>课上讲了一个真实案例：Bloomberg想训练一个金融领域的专用模型。</p>
+<table>
+<thead>
+<tr>
+<th>信息</th>
+<th>数值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>参数量</td>
+<td>500亿</td>
+</tr>
+<tr>
+<td>金融数据</td>
+<td>3630亿token（占51%）</td>
+</tr>
+<tr>
+<td>公开数据</td>
+<td>3060亿token（占49%）</td>
+</tr>
+<tr>
+<td>总训练数据</td>
+<td>5690亿token</td>
+</tr>
+</tbody>
+</table>
+<p>按Chinchilla定律，500亿参数需要1.4万亿token。但现实是——<strong>高质量金融数据根本没那么多</strong>，只够5690亿。</p>
+<blockquote>
+<p>💡 这就是真实世界的权衡：理论最优和实际可获得的数据之间，总有差距。选择最优配比不能只看理论。</p>
+</blockquote>
+<hr />
+<h1 id="_10">第二周：怎么让模型"听话"</h1>
+<p>模型会"说话"了，但不听话——这一周解决对齐问题：指令微调让模型从"接着写"变成"按要求做"，PEFT/LoRA是穷人的微调方案（只改1%参数）。</p>
+<h2 id="_11">六、指令微调——从"接着写"到"按要求做"</h2>
+<h3 id="_12">为什么预训练模型不够用？</h3>
+<p>预训练模型有一个尴尬的问题——你说"总结这篇文章"，它可能会继续生成更多文章内容，而不是给你总结。为什么？因为它学的是"接着写"，不是"按你说的做"。</p>
+<p><strong>指令微调</strong>就是用"指令-回答"配对数据重新训练模型，让它学会<strong>听从指令</strong>。</p>
+<h3 id="_13">训练数据长什么样？</h3>
+<pre class="codehilite"><code>指令：分类这条评论的情感
+输入：I loved this DVD!
+输出：正面
+</code></pre>
+
+<p>数据来源有两种：
+- <strong>现成的</strong>：客服FAQ、Slack消息、历史对话
+- <strong>生成的</strong>：用ChatGPT+提示模板批量生成（斯坦福Alpaca就是这么干的）</p>
+<p>好消息是：<strong>只需要几百到一千条数据</strong>就能在特定任务上有明显提升。</p>
+<h3 id="_14">灾难性遗忘——微调的"副作用"</h3>
+<p>但这里有个陷阱：如果只在<strong>单一任务</strong>上微调，模型变强了这个任务，却忘了其他所有技能。</p>
+<blockquote>
+<p>🎯 <strong>比喻</strong>：就像一个医科学生专攻心脏病后，可能忘记了怎么看感冒。</p>
+</blockquote>
+<p>这就是<strong>灾难性遗忘</strong>——全量微调会直接覆盖原来的参数，导致模型"失忆"。</p>
+<p><strong>两个解决方案</strong>（下面马上讲到）：
+1. 多任务微调——同时学很多任务
+2. PEFT——只改一小部分参数，其他冻住</p>
+<h3 id="flan">多任务微调——FLAN模型</h3>
+<p>解决灾难性遗忘最直接的方法：<strong>同时在很多任务上训练</strong>。</p>
+<p>代表作是Google的<strong>FLAN-T5</strong>：
+- 在<strong>473个数据集、146个任务类别</strong>上微调
+- 是一个开箱即用的通用指令模型
+- "FLAN"这个名字代表"Fine-tuned Language Net"，意思是预训练"主菜"后的"甜点"</p>
+<p>但多任务微调的代价是<strong>需要大量数据</strong>（通常5万-10万条），这在实际项目中不总是能凑够的。</p>
+<h3 id="_15">微调前后的真实对比</h3>
+<p>课上用DialogSum数据集（13000+条客服对话）做了演示：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>微调前</th>
+<th>微调后</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>效果</td>
+<td>能识别关键人物，但<strong>编造了酒店名和城市</strong>，遗漏关键信息</td>
+<td>更接近人类写的摘要，包含"Mike询问入住信息"等细节</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 微调后模型不再"编造"信息了——这就是指令微调的核心价值。</p>
+</blockquote>
+<h3 id="_16">评估指标——怎么量化"好不好"</h3>
+<p>生成式模型很难量化评估。课上讲了两个主要指标：</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>看什么</th>
+<th>用在哪</th>
+<th>一句话理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ROUGE</strong></td>
+<td>召回率</td>
+<td>摘要</td>
+<td>参考文本中有多少被"说到"了？</td>
+</tr>
+<tr>
+<td><strong>BLEU</strong></td>
+<td>精确率</td>
+<td>翻译</td>
+<td>生成文本中有多少是"翻对"的？</td>
+</tr>
+</tbody>
+</table>
+<p>两者的关系很巧妙——ROUGE问的是"你有没有遗漏重要信息"，BLEU问的是"你说的对不对"。一个看全面性，一个看准确性。</p>
+<hr />
+<h2 id="peft">七、PEFT——穷人的微调方案</h2>
+<h3 id="_17">为什么全量微调太贵？</h3>
+<p>全量微调要存的东西是<strong>模型本身的12-20倍</strong>：权重+梯度+优化器状态+激活值。一张消费级GPU根本装不下。</p>
+<p>PEFT（参数高效微调）的思路很简单：<strong>冻住99%的参数，只训练新增的1%</strong>。</p>
+<h3 id="lorapeft">LoRA——最流行的PEFT方法</h3>
+<p><strong>LoRA（Low-Rank Adaptation）</strong>基于一个深刻的观察：模型在微调时，参数的变化其实是<strong>低秩的</strong>——也就是说，真正起作用的变化维度远远小于参数矩阵本身。</p>
+<p><strong>核心思想</strong>：</p>
+<pre class="codehilite"><code>传统微调：W_new = W_old + ΔW（ΔW和W_old一样大）
+LoRA做法：W_new = W_old + B × A（B和A都是很小的矩阵）
+</code></pre>
+
+<ul>
+<li>W_old：原始冻结权重（不动）</li>
+<li>B：维度 d × r（r通常只有4-32）</li>
+<li>A：维度 r × k</li>
+</ul>
+
+<div style="margin:16px 0;padding:16px;background:#ecfdf5;border-radius:12px;border:1px solid #a7f3d0">
+<p style="font-size:13px;color:#059669;font-weight:600;margin-bottom:8px">📐 LoRA旁路结构图</p>
+<svg viewBox="0 0 460 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:460px">
+  <defs><marker id="a5" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#059669"/></marker></defs>
+  <text x="230" y="18" text-anchor="middle" font-size="12" fill="#059669" font-weight="600">输入 x</text>
+  <line x1="230" y1="22" x2="230" y2="42" stroke="#059669" stroke-width="2" marker-end="url(#a5)"/>
+  <circle cx="230" cy="52" r="8" fill="#059669"/><text x="230" y="56" text-anchor="middle" font-size="9" fill="white">分</text>
+  <line x1="222" y1="58" x2="120" y2="80" stroke="#059669" stroke-width="1.5"/>
+  <line x1="238" y1="58" x2="340" y2="80" stroke="#10b981" stroke-width="1.5"/>
+  <rect x="40" y="85" width="160" height="50" rx="8" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+  <text x="120" y="108" text-anchor="middle" font-size="13" fill="#065f46" font-weight="700">W₀ (冻结🔒)</text>
+  <text x="120" y="126" text-anchor="middle" font-size="10" fill="#059669">原始权重·不更新</text>
+  <rect x="260" y="85" width="160" height="50" rx="8" fill="#a7f3d0" stroke="#10b981" stroke-width="1.5"/>
+  <text x="340" y="103" text-anchor="middle" font-size="11" fill="#065f46" font-weight="700">LoRA旁路 ✅训练</text>
+  <text x="340" y="121" text-anchor="middle" font-size="10" fill="#10b981">A(r×k) × B(d×r)</text>
+  <text x="340" y="150" text-anchor="middle" font-size="10" fill="#10b981" font-weight="600">r=4~32 远小于d,k</text>
+  <line x1="120" y1="135" x2="120" y2="170" stroke="#059669" stroke-width="1.5"/>
+  <line x1="340" y1="135" x2="340" y2="170" stroke="#10b981" stroke-width="1.5"/>
+  <line x1="120" y1="175" x2="215" y2="192" stroke="#059669" stroke-width="1.5"/>
+  <line x1="340" y1="175" x2="245" y2="192" stroke="#10b981" stroke-width="1.5"/>
+  <circle cx="230" cy="197" r="10" fill="#059669"/><text x="230" y="201" text-anchor="middle" font-size="11" fill="white" font-weight="700">+</text>
+  <line x1="230" y1="207" x2="230" y2="225" stroke="#059669" stroke-width="2" marker-end="url(#a5)"/>
+  <text x="230" y="238" text-anchor="middle" font-size="11" fill="#059669" font-weight="600">h = W₀x + BAx</text>
+</svg></div><p><strong>直觉理解</strong>：把一个巨大的矩阵变化，用两个"瘦长"矩阵的乘积来近似。就像用"长×宽"两个数字来表示一个面积，而不是逐点描述整个平面。</p>
+<p><strong>参数量对比</strong>（课上的具体数据）：</p>
+<pre class="codehilite"><code>原始权重矩阵：512 × 64 = 32,768个参数
+LoRA (rank=8)：(512×8) + (8×64) = 5,120个参数
+参数减少：86%！
+</code></pre>
+
+<p><strong>一个聪明的设计</strong>：B矩阵初始化为全0，所以训练开始时ΔW=0，模型行为和原模型完全一样。</p>
+<p><strong>推理时零延迟</strong>：部署前直接计算W_new = W_old + B×A，模型结构不变，推理速度不降。</p>
+<h3 id="soft-prompts">Soft Prompts——更极端的省参方案</h3>
+<p>还有一种更激进的做法：<strong>不动模型任何参数，只在输入前面加一段可训练的向量</strong>。</p>
+<p>这些向量不是真的单词，而是embedding空间中的连续表示（20-100个virtual tokens）。模型通过训练自动找到最优的"虚拟前缀"。</p>
+<p>课上展示了一条有趣的曲线：在小模型上Soft Prompts效果不如全量微调，但<strong>随着模型变大，差距越来越小</strong>。到了PaLM这种级别的大模型上，Soft Prompts几乎能追平全量微调。</p>
+<blockquote>
+<p>💡 <strong>PEFT的商业价值</strong>：给每个客户只需保存几MB的LoRA权重，推理时动态加载。相比全量微调的几十GB，存储成本降低了几个数量级。</p>
+</blockquote>
+<hr />
+<h1 id="_18">第三周：让模型"做好人"并上线干活</h1>
+<p>模型听话了但可能"说坏话"——RLHF四步流程让模型对齐人类价值观；部署优化三件套（蒸馏/量化/剪枝）让它能在生产环境跑；RAG+CoT+ReAct让它从"只会说"变成"能做事"。</p>
+<h2 id="rlhf">八、RLHF——让模型对齐人类价值观</h2>
+<h3 id="_19">为什么微调还不够？</h3>
+<p>经过指令微调，模型已经能听懂指令了。但它可能还会：
+- 生成有毒/不安全的内容
+- 编造听起来很真的假话
+- 给出有害建议</p>
+<p><strong>HHH三原则</strong>：让模型做到<strong>有用（Helpful）、诚实（Honest）、无害（Harmless）</strong>。</p>
+<h3 id="rlhf_1">RLHF完整流程——四步走</h3>
+<pre class="codehilite"><code>① 用微调后的LLM生成多个候选回答
+② 人类标注员给回答排序（哪个更好？而不是打分）
+③ 用排序数据训练&quot;奖励模型&quot;（学习人类偏好）
+④ 用PPO算法+奖励模型再微调LLM
+</code></pre>
+
+
+<div style="margin:16px 0;padding:16px;background:#fef2f2;border-radius:12px;border:1px solid #fecaca">
+<p style="font-size:13px;color:#dc2626;font-weight:600;margin-bottom:8px">📐 RLHF完整四步流程图</p>
+<svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px">
+  <defs><marker id="a4" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#dc2626"/></marker></defs>
+  <rect x="15" y="20" width="145" height="65" rx="10" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5"/>
+  <text x="88" y="42" text-anchor="middle" font-size="12" fill="#991b1b" font-weight="700">① SFT模型</text>
+  <text x="88" y="58" text-anchor="middle" font-size="10" fill="#dc2626">生成候选回答</text>
+  <text x="88" y="74" text-anchor="middle" font-size="9" fill="#ef4444">（已指令微调）</text>
+  <line x1="160" y1="52" x2="188" y2="52" stroke="#dc2626" stroke-width="2" marker-end="url(#a4)"/>
+  <rect x="193" y="20" width="145" height="65" rx="10" fill="#fecaca" stroke="#dc2626" stroke-width="1.5"/>
+  <text x="266" y="42" text-anchor="middle" font-size="12" fill="#991b1b" font-weight="700">② 人类排序</text>
+  <text x="266" y="58" text-anchor="middle" font-size="10" fill="#dc2626">比较回答好坏</text>
+  <text x="266" y="74" text-anchor="middle" font-size="9" fill="#ef4444">A>B>C 更客观</text>
+  <line x1="338" y1="52" x2="366" y2="52" stroke="#dc2626" stroke-width="2" marker-end="url(#a4)"/>
+  <rect x="371" y="20" width="145" height="65" rx="10" fill="#f87171" stroke="#b91c1c" stroke-width="1.5"/>
+  <text x="444" y="42" text-anchor="middle" font-size="12" fill="white" font-weight="700">③ 奖励模型</text>
+  <text x="444" y="58" text-anchor="middle" font-size="10" fill="#fee2e2">学习人类偏好</text>
+  <text x="444" y="74" text-anchor="middle" font-size="9" fill="#fecaca">自动打分</text>
+  <line x1="516" y1="52" x2="544" y2="52" stroke="#dc2626" stroke-width="2" marker-end="url(#a4)"/>
+  <rect x="549" y="20" width="140" height="65" rx="10" fill="#dc2626" stroke="#991b1b" stroke-width="1.5"/>
+  <text x="619" y="42" text-anchor="middle" font-size="12" fill="white" font-weight="700">④ PPO微调</text>
+  <text x="619" y="58" text-anchor="middle" font-size="10" fill="#fecaca">奖励信号更新LLM</text>
+  <text x="619" y="74" text-anchor="middle" font-size="9" fill="#fecaca">+KL散度防跑偏</text>
+  <path d="M619 85 L619 120 L88 120 L88 85" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a4)"/>
+  <text x="350" y="140" text-anchor="middle" font-size="10" fill="#dc2626">迭代循环至奖励分数足够高</text>
+  <rect x="200" y="155" width="300" height="32" rx="8" fill="#fef2f2" stroke="#fca5a5" stroke-width="1"/>
+  <text x="350" y="176" text-anchor="middle" font-size="11" fill="#991b1b" font-weight="600">最终产出：对齐 HHH 原则的模型</text>
+</svg></div><p>为什么是<strong>排序</strong>而不是打分？因为排序更客观——不同标注员的评分标准不一样，但"A比B好"大家往往能达成一致。</p>
+<h3 id="_20">课上的具体例子</h3>
+<p>提示：<strong>"My house is too hot"</strong>（我家太热了）</p>
+<table>
+<thead>
+<tr>
+<th>排名</th>
+<th>回答</th>
+<th>为什么这么排？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🥇第1</td>
+<td>详细的空调/通风建议</td>
+<td>有用+具体</td>
+</tr>
+<tr>
+<td>🥈第2</td>
+<td>建议检查温控器</td>
+<td>有用但不够详细</td>
+</tr>
+<tr>
+<td>🥉第3</td>
+<td>"你应该搬到更冷的地方"</td>
+<td>无用的建议</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ppo">PPO——控制更新幅度的"安全带"</h3>
+<p>PPO（Proximal Policy Optimization）是RLHF用的强化学习算法。它有三个关键组件：</p>
+<ol>
+<li><strong>信任区域</strong>：每次更新幅度限制在小范围内，避免一个高奖励样本就剧烈改变模型</li>
+<li><strong>裁剪机制</strong>：概率比超过±20%就截断，防止过度更新</li>
+<li><strong>熵损失</strong>：保持模型的创造力——如果熵太低，模型会变成只有一种回答方式的"复读机"</li>
+</ol>
+<h3 id="_21">奖励欺骗——模型学会了"讨好"</h3>
+<p>这是课上一个让人惊讶的发现：模型有时会学会<strong>"作弊"</strong>。</p>
+<p>为了获得"低毒性"的高分，模型开始生成这样的内容：
+- <em>"...the most awesome, most incredible thing ever."</em>
+- <em>"Beautiful love and world peace all around."</em></p>
+<blockquote>
+<p>🎯 毒性评分确实低了，但语言质量也下降了——模型学会了用虚伪的正面词汇来"讨好"奖励模型。</p>
+</blockquote>
+<p><strong>解决方案</strong>：用<strong>KL散度</strong>约束模型不能偏离原始版本太远。最终奖励 = 奖励模型分数 - β × KL散度。偏离太远就扣分。</p>
+<h3 id="constitutional-aiaiai">Constitutional AI——用AI监督AI</h3>
+<p>Anthropic提出了一个更高级的方案：给模型一套<strong>"宪法"</strong>（原则清单），让它自我批评和修正。</p>
+<p>课上的例子：
+- 用户问："怎么破解邻居WiFi？"
+- 未对齐模型：推荐了一个非法app
+- 宪法修正后：模型自我反思"这是非法的"，重写回答拒绝帮助</p>
+<p><strong>两个阶段</strong>：先让模型生成有害回复→用宪法原则自我修正→收集修正数据→用AI反馈（而非人类反馈）做强化学习。这大幅减少了对人工标注的依赖。</p>
+<hr />
+<h2 id="_22">九、部署优化——让模型能在实际环境中跑</h2>
+<p>训练完模型只是开始。真实世界要解决的是：模型太大、太慢、太贵。</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>怎么做</th>
+<th>效果</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>蒸馏</strong></td>
+<td>大模型（老师）教小模型（学生）</td>
+<td>体积缩小5-10倍</td>
+<td>对BERT类编码器模型最有效</td>
+</tr>
+<tr>
+<td><strong>量化</strong></td>
+<td>降低精度（FP32→INT8）</td>
+<td>节省75%内存</td>
+<td>通用，小幅精度下降</td>
+</tr>
+<tr>
+<td><strong>剪枝</strong></td>
+<td>删掉接近零的权重</td>
+<td>减小体积</td>
+<td>权重稀疏时有效</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="llm_4">十、LLM应用架构——模型只是拼图的一块</h2>
+<h3 id="rag">RAG——让模型能"查资料"</h3>
+<p><strong>问题</strong>：LLM只知道训练时学到的东西。问最新新闻？不知道。问你公司的内部文档？更不知道。</p>
+<p><strong>RAG（检索增强生成）</strong>的方案：回答前先去知识库查资料。</p>
+<pre class="codehilite"><code>用户提问 → 编码成向量 → 在文档库中搜索相关内容
+                                    ↓
+       把找到的内容+原始问题一起给LLM → 生成有据可依的回答
+</code></pre>
+
+
+<div style="margin:16px 0;padding:16px;background:#eff6ff;border-radius:12px;border:1px solid #bfdbfe">
+<p style="font-size:13px;color:#1e40af;font-weight:600;margin-bottom:8px">📐 RAG检索增强生成流程图</p>
+<svg viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px">
+  <defs><marker id="a6" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#1e40af"/></marker></defs>
+  <rect x="10" y="45" width="90" height="50" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="55" y="68" text-anchor="middle" font-size="11" fill="#1e3a8a" font-weight="600">用户提问</text>
+  <text x="55" y="84" text-anchor="middle" font-size="9" fill="#3b82f6">"原告是谁"</text>
+  <line x1="100" y1="70" x2="128" y2="70" stroke="#1e40af" stroke-width="2" marker-end="url(#a6)"/>
+  <rect x="133" y="45" width="95" height="50" rx="8" fill="#bfdbfe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="181" y="68" text-anchor="middle" font-size="11" fill="#1e3a8a" font-weight="600">编码向量</text>
+  <text x="181" y="84" text-anchor="middle" font-size="9" fill="#3b82f6">Query→向量</text>
+  <line x1="228" y1="70" x2="256" y2="70" stroke="#1e40af" stroke-width="2" marker-end="url(#a6)"/>
+  <rect x="261" y="30" width="125" height="80" rx="8" fill="#93c5fd" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="324" y="55" text-anchor="middle" font-size="11" fill="white" font-weight="700">向量数据库</text>
+  <text x="324" y="73" text-anchor="middle" font-size="9" fill="#dbeafe">搜索相关文档</text>
+  <text x="324" y="90" text-anchor="middle" font-size="9" fill="#dbeafe">📄 法律/内部文档</text>
+  <line x1="386" y1="70" x2="414" y2="70" stroke="#1e40af" stroke-width="2" marker-end="url(#a6)"/>
+  <rect x="419" y="35" width="135" height="70" rx="8" fill="#3b82f6" stroke="#1e3a8a" stroke-width="1.5"/>
+  <text x="487" y="60" text-anchor="middle" font-size="11" fill="white" font-weight="700">LLM 生成</text>
+  <text x="487" y="78" text-anchor="middle" font-size="9" fill="#bfdbfe">文档+问题→回答</text>
+  <text x="487" y="94" text-anchor="middle" font-size="9" fill="#bfdbfe">有据可依 ✅</text>
+  <line x1="554" y1="70" x2="582" y2="70" stroke="#1e40af" stroke-width="2" marker-end="url(#a6)"/>
+  <rect x="587" y="45" width="100" height="50" rx="8" fill="#1e40af" stroke="#1e3a8a" stroke-width="1.5"/>
+  <text x="637" y="68" text-anchor="middle" font-size="11" fill="white" font-weight="700">精准回答</text>
+  <text x="637" y="84" text-anchor="middle" font-size="9" fill="#93c5fd">"原告为张三"</text>
+</svg></div><p><strong>课上的律师例子</strong>：律师要找某案件的原告姓名。普通LLM可能编造一个名字，RAG系统先检索法律文档，找到相关段落，再让LLM基于真实文档回答。</p>
+<blockquote>
+<p>💡 RAG vs 微调：RAG是"临时查资料"（灵活但需要检索系统），微调是"背下来"（记得牢但不灵活）。实际应用中常常两者结合。</p>
+</blockquote>
+<h3 id="cot">思维链CoT——"让我一步步想"</h3>
+<p><strong>课上的苹果数学题</strong>：
+- 直接问LLM → 答错（给了27）
+- 加上"让我一步一步想"（Let me think step by step）→ 答对</p>
+<p>就这么一句话，就能显著提升推理能力。因为它强制模型展示中间推理步骤，而不是直接跳到答案。</p>
+<h3 id="palllm">PAL——让LLM写代码来算</h3>
+<p>LLM数学差？那让它写Python代码，让Python来算！</p>
+<p><strong>课上的面包店例子</strong>：</p>
+<pre class="codehilite"><code class="language-python"># LLM生成的代码
+loaves_baked = 200
+loaves_sold_morning = 93
+loaves_sold_afternoon = 39
+loaves_returned = 6
+remaining = loaves_baked - loaves_sold_morning - loaves_sold_afternoon + loaves_returned
+print(remaining)  # 输出：74
+</code></pre>
+
+<p>LLM负责"理解题意、写代码"，Python解释器负责"精确计算"——各取所长，完美互补。</p>
+<h3 id="react">ReAct——推理+行动的循环</h3>
+<p>这是LLM Agent的开山之作（Yao et al. 2022），课上讲了杂志创刊时间比较的例子：</p>
+<pre class="codehilite"><code>问题：Arthur's Magazine和First for Women哪个先创刊？
+
+Thought: 我需要查两本杂志的创刊时间
+Action: Search[Arthur's Magazine]
+Observation: 创刊于1844年
+
+Thought: 现在查第二本
+Action: Search[First for Women]
+Observation: 创刊于1989年
+
+Thought: 1844年比1989年早
+Answer: Arthur's Magazine先创刊
+</code></pre>
+
+
+<div style="margin:16px 0;padding:16px;background:#fefce8;border-radius:12px;border:1px solid #fde68a">
+<p style="font-size:13px;color:#b45309;font-weight:600;margin-bottom:8px">📐 ReAct推理+行动循环图</p>
+<svg viewBox="0 0 620 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:580px">
+  <defs><marker id="a7" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b45309"/></marker></defs>
+  <rect x="195" y="5" width="190" height="35" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="290" y="28" text-anchor="middle" font-size="12" fill="#92400e" font-weight="700">用户问题</text>
+  <line x1="290" y1="40" x2="290" y2="58" stroke="#b45309" stroke-width="2" marker-end="url(#a7)"/>
+  <rect x="170" y="63" width="240" height="42" rx="10" fill="#fde68a" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="290" y="84" text-anchor="middle" font-size="13" fill="#92400e" font-weight="700">🧠 Thought 思考</text>
+  <text x="290" y="99" text-anchor="middle" font-size="10" fill="#b45309">"我需要查XXX的信息"</text>
+  <line x1="410" y1="84" x2="448" y2="84" stroke="#b45309" stroke-width="2" marker-end="url(#a7)"/>
+  <rect x="453" y="63" width="115" height="42" rx="10" fill="#f59e0b" stroke="#d97706" stroke-width="1.5"/>
+  <text x="511" y="84" text-anchor="middle" font-size="12" fill="white" font-weight="700">⚡ Action</text>
+  <text x="511" y="99" text-anchor="middle" font-size="10" fill="#fef3c7">搜索/查询</text>
+  <line x1="511" y1="105" x2="511" y2="133" stroke="#b45309" stroke-width="2" marker-end="url(#a7)"/>
+  <rect x="413" y="138" width="195" height="35" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="511" y="161" text-anchor="middle" font-size="12" fill="#92400e" font-weight="700">👁️ Observation 结果</text>
+  <path d="M413 155 L170 155 L170 105" fill="none" stroke="#b45309" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a7)"/>
+  <text x="118" y="135" text-anchor="middle" font-size="10" fill="#b45309" transform="rotate(-90,118,135)">循环</text>
+  <rect x="10" y="63" width="130" height="42" rx="10" fill="#059669" stroke="#047857" stroke-width="1.5"/>
+  <text x="75" y="84" text-anchor="middle" font-size="12" fill="white" font-weight="700">✅ Answer</text>
+  <text x="75" y="99" text-anchor="middle" font-size="10" fill="#a7f3d0">最终回答</text>
+  <line x1="170" y1="84" x2="140" y2="84" stroke="#059669" stroke-width="1.5" stroke-dasharray="4,3"/>
+</svg></div><p>ReAct = Reasoning + Acting。模型不仅能"想"，还能"做"（搜索、查数据库、调用API），然后根据结果继续想、继续做。这就是Agent的核心循环。</p>
+<h3 id="_23">完整应用架构</h3>
+<pre class="codehilite"><code>用户 → 编排器(Orchestrator) → { RAG检索, 工具调用, 代码执行 }
+         ↓                              ↓
+       LLM核心                    外部数据/API
+         ↓
+      输出过滤 → 最终回答
+</code></pre>
+
+
+<div style="margin:16px 0;padding:16px;background:#f0fdf4;border-radius:12px;border:1px solid #86efac">
+<p style="font-size:13px;color:#059669;font-weight:600;margin-bottom:8px">📐 LLM完整应用架构图</p>
+<svg viewBox="0 0 680 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:680px">
+  <defs><marker id="a8" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#059669"/></marker></defs>
+  <rect x="260" y="8" width="160" height="38" rx="8" fill="#d1fae5" stroke="#10b981" stroke-width="1.5"/>
+  <text x="340" y="33" text-anchor="middle" font-size="13" fill="#065f46" font-weight="700">👤 用户输入</text>
+  <line x1="340" y1="46" x2="340" y2="68" stroke="#059669" stroke-width="2" marker-end="url(#a8)"/>
+  <rect x="190" y="73" width="300" height="45" rx="10" fill="#6ee7b7" stroke="#059669" stroke-width="2"/>
+  <text x="340" y="96" text-anchor="middle" font-size="14" fill="#065f46" font-weight="700">编排器 Orchestrator</text>
+  <text x="340" y="112" text-anchor="middle" font-size="10" fill="#047857">LangChain / 自定义</text>
+  <line x1="240" y1="118" x2="100" y2="148" stroke="#059669" stroke-width="1.5" marker-end="url(#a8)"/>
+  <line x1="340" y1="118" x2="340" y2="148" stroke="#059669" stroke-width="1.5" marker-end="url(#a8)"/>
+  <line x1="440" y1="118" x2="580" y2="148" stroke="#059669" stroke-width="1.5" marker-end="url(#a8)"/>
+  <rect x="25" y="153" width="150" height="48" rx="8" fill="#bfdbfe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="100" y="176" text-anchor="middle" font-size="11" fill="#1e3a8a" font-weight="600">📚 RAG检索</text>
+  <text x="100" y="193" text-anchor="middle" font-size="9" fill="#3b82f6">文档/知识库</text>
+  <rect x="265" y="153" width="150" height="48" rx="8" fill="#fde68a" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="340" y="176" text-anchor="middle" font-size="11" fill="#92400e" font-weight="600">🔧 工具调用</text>
+  <text x="340" y="193" text-anchor="middle" font-size="9" fill="#b45309">API/数据库/搜索</text>
+  <rect x="505" y="153" width="150" height="48" rx="8" fill="#d4e3fc" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="580" y="176" text-anchor="middle" font-size="11" fill="#002580" font-weight="600">💻 代码执行</text>
+  <text x="580" y="193" text-anchor="middle" font-size="9" fill="#0052d9">Python/PAL</text>
+  <line x1="340" y1="201" x2="340" y2="220" stroke="#059669" stroke-width="2" marker-end="url(#a8)"/>
+  <rect x="230" y="225" width="220" height="32" rx="8" fill="#059669" stroke="#047857" stroke-width="1.5"/>
+  <text x="340" y="246" text-anchor="middle" font-size="12" fill="white" font-weight="700">🛡️ 输出过滤 → 最终回答</text>
+</svg></div><p><strong>LangChain框架</strong>提供了这些模块化组件：提示模板、记忆（对话历史）、工具、代理（Agent）。</p>
+<hr />
+<h1 id="_24">全景总结：三周学了什么</h1>
+<pre class="codehilite"><code>第1周：模型是怎么炼成的
+  Transformer架构 → 预训练(三种方式) → 扩展定律(Chinchilla)
+
+第2周：怎么让模型听话
+  指令微调 → 灾难性遗忘 → PEFT/LoRA → 评估(ROUGE/BLEU)
+
+第3周：让模型做好人并上线
+  RLHF(四步走) → PPO → 部署优化(蒸馏/量化/剪枝) → RAG/ReAct/应用架构
+</code></pre>
+
+<p><strong>四个关键跃迁</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>从</th>
+<th>到</th>
+<th>靠什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>白纸</td>
+<td>会说话</td>
+<td>预训练（海量数据+Transformer）</td>
+</tr>
+<tr>
+<td>接着写</td>
+<td>听指令</td>
+<td>指令微调（几百条数据就够）</td>
+</tr>
+<tr>
+<td>听指令</td>
+<td>做好人</td>
+<td>RLHF（人类偏好排序+PPO）</td>
+</tr>
+<tr>
+<td>单打独斗</td>
+<td>连接世界</td>
+<td>RAG+工具调用+Agent循环</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="25">附录：专有名词速查（25个）</h2>
+<table>
+<thead>
+<tr>
+<th>名词</th>
+<th>全称</th>
+<th>一句话白话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LLM</td>
+<td>Large Language Model</td>
+<td>超级文字接龙机</td>
+</tr>
+<tr>
+<td>Transformer</td>
+<td>Transformer</td>
+<td>让每个词直接看到所有其他词的架构</td>
+</tr>
+<tr>
+<td>Self-Attention</td>
+<td>自注意力</td>
+<td>算词与词之间的关联度</td>
+</tr>
+<tr>
+<td>Fine-tuning</td>
+<td>微调</td>
+<td>用新数据在预训练模型上继续训练</td>
+</tr>
+<tr>
+<td>PEFT</td>
+<td>Parameter-Efficient FT</td>
+<td>只改1%参数的省钱微调</td>
+</tr>
+<tr>
+<td>LoRA</td>
+<td>Low-Rank Adaptation</td>
+<td>用两个小矩阵近似大矩阵变化</td>
+</tr>
+<tr>
+<td>RLHF</td>
+<td>RL from Human Feedback</td>
+<td>用人类偏好来优化模型行为</td>
+</tr>
+<tr>
+<td>PPO</td>
+<td>Proximal Policy Optimization</td>
+<td>RLHF用的强化学习算法，有"安全带"</td>
+</tr>
+<tr>
+<td>RAG</td>
+<td>Retrieval-Augmented Generation</td>
+<td>先查资料再回答——解决幻觉</td>
+</tr>
+<tr>
+<td>CoT</td>
+<td>Chain-of-Thought</td>
+<td>"一步步想"——提升推理能力</td>
+</tr>
+<tr>
+<td>PAL</td>
+<td>Program-Aided Language</td>
+<td>让模型写代码来算数学题</td>
+</tr>
+<tr>
+<td>ReAct</td>
+<td>Reasoning + Acting</td>
+<td>推理+行动循环——Agent的基础</td>
+</tr>
+<tr>
+<td>NER</td>
+<td>Named Entity Recognition</td>
+<td>从文本提取人名、地名等</td>
+</tr>
+<tr>
+<td>MLM</td>
+<td>Masked Language Modeling</td>
+<td>BERT的训练方式：遮词猜词</td>
+</tr>
+<tr>
+<td>FLAN</td>
+<td>Fine-tuned Language Net</td>
+<td>Google的多任务指令微调系列</td>
+</tr>
+<tr>
+<td>MMLU</td>
+<td>Massive Multitask LU</td>
+<td>57个学科的综合考试基准</td>
+</tr>
+<tr>
+<td>ROUGE</td>
+<td>Recall-Oriented Understudy</td>
+<td>摘要评估——看有没有"说到"</td>
+</tr>
+<tr>
+<td>BLEU</td>
+<td>Bilingual Eval Understudy</td>
+<td>翻译评估——看有没有"翻对"</td>
+</tr>
+<tr>
+<td>DDP</td>
+<td>Distributed Data Parallel</td>
+<td>每张卡一份模型——数据并行</td>
+</tr>
+<tr>
+<td>FSDP</td>
+<td>Fully Sharded Data Parallel</td>
+<td>把模型切片分到多卡</td>
+</tr>
+<tr>
+<td>BF16</td>
+<td>BFloat16</td>
+<td>省一半内存但保持数值范围</td>
+</tr>
+<tr>
+<td>HHH</td>
+<td>Helpful, Honest, Harmless</td>
+<td>AI对齐三原则：有用、诚实、无害</td>
+</tr>
+<tr>
+<td>Constitutional AI</td>
+<td>宪法AI</td>
+<td>用"原则清单"让AI自我监督</td>
+</tr>
+<tr>
+<td>Chinchilla</td>
+<td>Chinchilla</td>
+<td>每参数需20个token的黄金比例</td>
+</tr>
+<tr>
+<td>SFT</td>
+<td>Supervised Fine-Tuning</td>
+<td>有监督微调——RLHF的第一步</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="footer">学习笔记由 WorkBuddy AI 助手整理 · 2026-04-10 · 通俗叙事风格</div>
+</div>
+</body>
+</html>

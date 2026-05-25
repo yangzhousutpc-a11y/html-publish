@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Temperature & Top-p：掌控大模型的创造力开关</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;background:#f3f4f6;color:#242424;line-height:1.8}
+a{color:#0052d9;text-decoration:none}a:hover{text-decoration:underline;color:#003cab}
+.header{background:linear-gradient(135deg,#001a45 0%,#0052d9 60%,#0077ff 100%);color:white;padding:52px 32px;text-align:center}
+.header h1{font-size:22px;font-weight:700;max-width:800px;margin:0 auto;letter-spacing:0.5px}
+.header .sub{font-size:13px;opacity:.85;margin-top:12px;max-width:700px;margin-left:auto;margin-right:auto}
+.stats{display:flex;justify-content:center;gap:28px;margin-top:18px;flex-wrap:wrap}
+.stats .s{font-size:12px;opacity:.8}.stats .s strong{font-size:18px;color:#66b1ff;display:block}
+.container{max-width:1000px;margin:0 auto;padding:24px}
+.content{background:white;border-radius:10px;padding:32px 36px;margin-top:20px;border:1px solid #e5e6eb;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
+.content h1{font-size:22px;color:#0052d9;margin:36px 0 16px;padding-bottom:10px;border-bottom:2px solid #0052d9;font-weight:700}
+.content h1:first-child{margin-top:0}
+.content h2{font-size:18px;color:#242424;margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid #e5e6eb;font-weight:600}
+.content h3{font-size:15px;color:#0052d9;margin:20px 0 8px;font-weight:600}
+.content p{font-size:14px;color:#4b4b4b;margin:8px 0}
+.content ul,.content ol{padding-left:22px;margin:8px 0}
+.content li{font-size:14px;color:#4b4b4b;margin:4px 0}
+.content strong{color:#242424}
+.content em{color:#0052d9;font-style:normal}
+.content blockquote{background:#edf4ff;border-left:4px solid #0052d9;padding:12px 18px;margin:12px 0;border-radius:0 8px 8px 0;font-size:14px;color:#003cab}
+.content blockquote p{color:#003cab;margin:4px 0}
+.content hr{border:none;border-top:1px solid #e5e6eb;margin:28px 0}
+.content table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+.content th{background:#edf4ff;text-align:left;padding:10px 14px;font-weight:600;color:#0052d9;border-bottom:1px solid #d4e3fc}
+.content td{padding:10px 14px;border-bottom:1px solid #f0f1f2;color:#4b4b4b}
+.content tr:hover td{background:#f5f9ff}
+.content pre{background:#0d1b2a;border-radius:8px;padding:14px 18px;margin:10px 0;font-family:"SF Mono",Consolas,monospace;font-size:12.5px;line-height:1.6;overflow-x:auto;color:#c9d1d9}
+.content code{font-family:"SF Mono",Consolas,monospace;font-size:12.5px;background:#edf4ff;padding:2px 6px;border-radius:4px;color:#0052d9}
+.content pre code{background:none;padding:0;color:#c9d1d9}
+.footer{text-align:center;padding:30px 0;color:#8f959e;font-size:12px}</style>
+</head>
+<body>
+<div class="header">
+<h1>Temperature & Top-p：掌控大模型的创造力开关</h1>
+<div class="sub">UP主: 马克的技术工作坊 | <a href="https://www.bilibili.com/video/BV1taSFBNEG4/" target="_blank" style="color:#66b1ff">B站 BV1taSFBNEG4</a> | 约17.5分钟</div>
+<div class="stats">
+<div class="s"><strong>17</strong>分钟</div>
+<div class="s"><strong>3</strong>步输出流程</div>
+<div class="s"><strong>8</strong>专有名词</div>
+<div class="s"><strong>6</strong>大章节</div>
+</div>
+</div>
+<div class="container">
+<div class="content">
+<div style="margin:0 0 24px;padding:20px 24px;background:linear-gradient(135deg,#edf4ff 0%,#f0f7ff 50%,#f5f9ff 100%);border-radius:10px;border:1px solid #d4e3fc">
+<h2 id="_1">📖 内容综述</h2>
+<p>当你用AI写代码，它输出一本正经、每次一样；当你让它写小说，它天马行空、每次不同。<strong>控制这种"稳重"与"狂野"的开关，就是Temperature和Top-p。</strong></p>
+<p>这份笔记用一条因果链把大模型的输出过程讲透：先是<strong>三步流程</strong>（打分→算概率→抽奖选词），然后深入<strong>Temperature</strong>如何调整概率分布的"形状"（从冰到沸腾的物理比喻），再讲<strong>Top-p</strong>如何砍掉长尾的"垃圾词"，最后揭示两者的互补关系并给出实战调参表。搞懂这两个参数，你就掌握了大模型"创造力"的遥控器。</p>
+
+</div>
+
+<hr />
+<h1 id="_2">一、大模型输出的完整三步</h1>
+<p><strong>一句话</strong>：模型生成每一个词都要经过三步——打分、算概率、抽奖。Temperature作用于第2步，Top-p作用于第3步。</p>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 大模型输出完整三步流程</p>
+<svg viewBox="0 0 720 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;font-family:-apple-system,sans-serif">
+  <defs><marker id="tp1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="20" width="180" height="60" rx="10" fill="#0052d9" stroke="#003cab" stroke-width="1.5"/>
+  <text x="100" y="45" text-anchor="middle" font-size="13" fill="white" font-weight="700">Step 1: Logits</text>
+  <text x="100" y="65" text-anchor="middle" font-size="9" fill="#66b1ff">给每个词打原始分</text>
+  <line x1="190" y1="50" x2="235" y2="50" stroke="#0052d9" stroke-width="2" marker-end="url(#tp1)"/>
+  <rect x="240" y="15" width="220" height="70" rx="10" fill="#1a6fe8" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="350" y="40" text-anchor="middle" font-size="13" fill="white" font-weight="700">Step 2: Softmax(÷T)</text>
+  <text x="350" y="58" text-anchor="middle" font-size="9" fill="#a3d0ff">原始分 → 概率分布</text>
+  <text x="350" y="74" text-anchor="middle" font-size="8" fill="#f59e0b" font-weight="600">← Temperature 在此 →</text>
+  <line x1="460" y1="50" x2="505" y2="50" stroke="#0052d9" stroke-width="2" marker-end="url(#tp1)"/>
+  <rect x="510" y="15" width="200" height="70" rx="10" fill="#3380e6" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="610" y="40" text-anchor="middle" font-size="13" fill="white" font-weight="700">Step 3: 采样选词</text>
+  <text x="610" y="58" text-anchor="middle" font-size="9" fill="#a3d0ff">数轴抽奖法</text>
+  <text x="610" y="74" text-anchor="middle" font-size="8" fill="#059669" font-weight="600">← Top-p 在此截断 →</text>
+  <rect x="10" y="92" width="700" height="22" rx="4" fill="#f0f7ff" stroke="#d4e3fc"/>
+  <text x="360" y="107" text-anchor="middle" font-size="9" fill="#4b4b4b">Temperature调Step2的概率"形状" · Top-p控Step3的候选"范围" · 两者互补不冲突</text>
+</svg>
+</div>
+
+<h3 id="ai">具体例子：推荐AI学习频道</h3>
+<p>假设用户问："帮我推荐一个学习AI大模型技术的频道"</p>
+<p><strong>Step 1：生成原始分数（Logits）</strong></p>
+<p>模型给词汇表中每个可能的"下一个词"打一个原始分数：</p>
+<table>
+<thead>
+<tr>
+<th>候选词</th>
+<th>Logits分数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>马克的技术工作坊</td>
+<td><strong>8.5</strong></td>
+<td>得分最高</td>
+</tr>
+<tr>
+<td>其他技术频道A</td>
+<td>7.2</td>
+<td>相关度次之</td>
+</tr>
+<tr>
+<td>频道B</td>
+<td>6.8</td>
+<td>一般相关</td>
+</tr>
+<tr>
+<td>无关频道C</td>
+<td>3.1</td>
+<td>相关度低</td>
+</tr>
+<tr>
+<td>"自行车"</td>
+<td>0.5</td>
+<td>完全无关</td>
+</tr>
+</tbody>
+</table>
+<p>这些分数是"原始的"、未归一化的——不同词之间的分数差可能很大，但它们还不是概率。</p>
+<p><strong>Step 2：Softmax转概率</strong></p>
+<p>Softmax函数把原始分数转成0到1之间的概率（加起来等于100%）：</p>
+<div style="margin:12px 0;padding:14px 20px;background:#f8faff;border:1px solid #d4e3fc;border-radius:8px;text-align:center;">
+<svg viewBox="0 0 520 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:520px;">
+  <!-- 等号左边：Softmax(z_i) -->
+  <text x="10" y="65" font-size="18" font-family="'Times New Roman',serif" fill="#333" font-style="italic">Softmax</text>
+  <text x="87" y="65" font-size="18" font-family="'Times New Roman',serif" fill="#333">(</text>
+  <text x="96" y="65" font-size="18" font-family="'Times New Roman',serif" fill="#333" font-style="italic">z</text>
+  <text x="108" y="70" font-size="12" font-family="'Times New Roman',serif" fill="#555" font-style="italic">i</text>
+  <text x="117" y="65" font-size="18" font-family="'Times New Roman',serif" fill="#333">)</text>
+  <!-- 等号 -->
+  <text x="138" y="65" font-size="22" font-family="'Times New Roman',serif" fill="#333">=</text>
+  <!-- 分数线 -->
+  <line x1="175" y1="58" x2="370" y2="58" stroke="#333" stroke-width="1.5"/>
+  <!-- 分子：e^(z_i) -->
+  <text x="248" y="45" font-size="20" font-family="'Times New Roman',serif" fill="#333" font-style="italic">e</text>
+  <text x="262" y="30" font-size="14" font-family="'Times New Roman',serif" fill="#333" font-style="italic">z</text>
+  <text x="273" y="36" font-size="10" font-family="'Times New Roman',serif" fill="#555" font-style="italic">i</text>
+  <!-- 分母：Σ(j=1→K) e^(z_j) -->
+  <text x="210" y="85" font-size="24" font-family="'Times New Roman',serif" fill="#333">Σ</text>
+  <text x="216" y="100" font-size="10" font-family="'Times New Roman',serif" fill="#555" font-style="italic">j=1</text>
+  <text x="220" y="68" font-size="10" font-family="'Times New Roman',serif" fill="#555" font-style="italic">K</text>
+  <text x="248" y="85" font-size="20" font-family="'Times New Roman',serif" fill="#333" font-style="italic">e</text>
+  <text x="262" y="68" font-size="14" font-family="'Times New Roman',serif" fill="#333" font-style="italic">z</text>
+  <text x="274" y="74" font-size="10" font-family="'Times New Roman',serif" fill="#555" font-style="italic">j</text>
+  <!-- 标注 -->
+  <text x="385" y="65" font-size="12" fill="#888" font-family="sans-serif">（标准 Softmax）</text>
+</svg>
+</div>
+<table>
+<thead>
+<tr>
+<th>候选词</th>
+<th>概率</th>
+<th>形象说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>马克的技术工作坊</td>
+<td>71%</td>
+<td>占据数轴大部分</td>
+</tr>
+<tr>
+<td>频道A</td>
+<td>18%</td>
+<td>次选</td>
+</tr>
+<tr>
+<td>频道B</td>
+<td>8%</td>
+<td>小概率</td>
+</tr>
+<tr>
+<td>频道C</td>
+<td>2%</td>
+<td>极小</td>
+</tr>
+<tr>
+<td>"自行车"</td>
+<td>1%</td>
+<td>几乎不会选</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Step 3：加权采样（数轴抽奖法）</strong></p>
+<p>把概率排在一条数轴上，随机扔一个飞镖：</p>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 数轴抽奖法可视化 — 概率越大，区间越宽</p>
+<svg viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <!-- 数轴 -->
+  <rect x="30" y="30" width="455" height="35" rx="4" fill="#0052d9"/>
+  <text x="258" y="52" text-anchor="middle" font-size="11" fill="white" font-weight="700">马克的技术工作坊 71%</text>
+  <rect x="485" y="30" width="116" height="35" rx="4" fill="#1a6fe8"/>
+  <text x="543" y="52" text-anchor="middle" font-size="10" fill="white" font-weight="600">频道A 18%</text>
+  <rect x="601" y="30" width="52" height="35" rx="4" fill="#3380e6"/>
+  <text x="627" y="52" text-anchor="middle" font-size="8" fill="white">B 8%</text>
+  <rect x="653" y="30" width="17" height="35" rx="2" fill="#4d94ff"/>
+  <text x="661" y="52" text-anchor="middle" font-size="6" fill="white">C</text>
+  <!-- 标注 -->
+  <text x="30" y="22" font-size="9" fill="#4b4b4b">0%</text>
+  <text x="660" y="22" font-size="9" fill="#4b4b4b">100%</text>
+  <!-- 飞镖 -->
+  <line x1="350" y1="70" x2="350" y2="85" stroke="#dc2626" stroke-width="2"/>
+  <polygon points="345,85 355,85 350,95" fill="#dc2626"/>
+  <text x="350" y="78" text-anchor="middle" font-size="9" fill="#dc2626" font-weight="600">🎯 飞镖随机落点</text>
+</svg>
+</div>
+
+<pre class="codehilite"><code>|——————马克(71%)——————|——频道A(18%)——|—频道B(8%)—|C|X|
+0%                                                  100%
+                  ↑ 飞镖落点
+</code></pre>
+
+<p>飞镖落在哪个区间，就选哪个词。71%的区间最大，所以"马克的技术工作坊"被选中的概率最高——但不是100%！</p>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：模型不是"选最好的"，而是"按概率抽奖"。这就是为什么同一个问题，模型每次回答可能不同——因为每次都在重新扔飞镖。</p>
+</blockquote>
+<hr />
+<h1 id="temperature">二、Temperature：调概率分布的"形状"</h1>
+<p><strong>一句话</strong>：Temperature是Softmax公式中的除数——它不改变词的排名顺序，但改变概率之间的差距。低温集中，高温发散。</p>
+<h3 id="temperature_1">Temperature在公式中的位置</h3>
+<div style="margin:12px 0;padding:14px 20px;background:#f8faff;border:1px solid #d4e3fc;border-radius:8px;text-align:center;">
+<svg viewBox="0 0 580 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:580px;">
+  <!-- 等号左边：Softmax(z_i) -->
+  <text x="10" y="65" font-size="18" font-family="'Times New Roman',serif" fill="#333" font-style="italic">Softmax</text>
+  <text x="87" y="65" font-size="18" font-family="'Times New Roman',serif" fill="#333">(</text>
+  <text x="96" y="65" font-size="18" font-family="'Times New Roman',serif" fill="#333" font-style="italic">z</text>
+  <text x="108" y="70" font-size="12" font-family="'Times New Roman',serif" fill="#555" font-style="italic">i</text>
+  <text x="117" y="65" font-size="18" font-family="'Times New Roman',serif" fill="#333">)</text>
+  <!-- 等号 -->
+  <text x="138" y="65" font-size="22" font-family="'Times New Roman',serif" fill="#333">=</text>
+  <!-- 分数线 -->
+  <line x1="175" y1="58" x2="410" y2="58" stroke="#333" stroke-width="1.5"/>
+  <!-- 分子：e^(z_i / T) -->
+  <text x="258" y="45" font-size="20" font-family="'Times New Roman',serif" fill="#333" font-style="italic">e</text>
+  <text x="274" y="28" font-size="14" font-family="'Times New Roman',serif" fill="#333" font-style="italic">z</text>
+  <text x="286" y="34" font-size="10" font-family="'Times New Roman',serif" fill="#555" font-style="italic">i</text>
+  <text x="296" y="28" font-size="13" font-family="'Times New Roman',serif" fill="#333">/</text>
+  <text x="306" y="28" font-size="15" font-family="'Times New Roman',serif" fill="#0052d9" font-weight="bold" font-style="italic">T</text>
+  <!-- 分母：Σ(j=1→K) e^(z_j / T) -->
+  <text x="210" y="85" font-size="24" font-family="'Times New Roman',serif" fill="#333">Σ</text>
+  <text x="216" y="100" font-size="10" font-family="'Times New Roman',serif" fill="#555" font-style="italic">j=1</text>
+  <text x="220" y="68" font-size="10" font-family="'Times New Roman',serif" fill="#555" font-style="italic">K</text>
+  <text x="258" y="85" font-size="20" font-family="'Times New Roman',serif" fill="#333" font-style="italic">e</text>
+  <text x="274" y="68" font-size="14" font-family="'Times New Roman',serif" fill="#333" font-style="italic">z</text>
+  <text x="286" y="74" font-size="10" font-family="'Times New Roman',serif" fill="#555" font-style="italic">j</text>
+  <text x="296" y="68" font-size="13" font-family="'Times New Roman',serif" fill="#333">/</text>
+  <text x="306" y="68" font-size="15" font-family="'Times New Roman',serif" fill="#0052d9" font-weight="bold" font-style="italic">T</text>
+  <!-- 注释 -->
+  <text x="420" y="58" font-size="12" fill="#666" font-family="sans-serif">← 唯一变化：除以</text>
+  <text x="530" y="58" font-size="15" fill="#0052d9" font-weight="bold" font-family="'Times New Roman',serif" font-style="italic">T</text>
+</svg>
+</div>
+<p>就是在原来的Logit后面<strong>除以T</strong>。这一个小小的除法，效果天差地别。</p>
+<h3 id="temperature_2">不同Temperature值的概率对比</h3>
+<table>
+<thead>
+<tr>
+<th>候选词</th>
+<th>T=0.1（冰冷）</th>
+<th>T=1.0（常温）</th>
+<th>T=2.0（沸腾）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>马克的技术工作坊</td>
+<td><strong>82%</strong></td>
+<td><strong>71%</strong></td>
+<td><strong>52%</strong></td>
+</tr>
+<tr>
+<td>频道A</td>
+<td>12%</td>
+<td>18%</td>
+<td>26%</td>
+</tr>
+<tr>
+<td>频道B</td>
+<td>5%</td>
+<td>8%</td>
+<td>15%</td>
+</tr>
+<tr>
+<td>频道C</td>
+<td>1%</td>
+<td>3%</td>
+<td>7%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>规律</strong>：
+- T越小（→0）：强者越强，概率极端集中在得分最高的词
+- T=1.0：标准分布，就是Softmax的默认效果
+- T越大（→2+）：概率被"拉平"，低分词也有更大概率被选中</p>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Temperature 效果对比 — 概率分布柱状图</p>
+<svg viewBox="0 0 750 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:750px;font-family:-apple-system,sans-serif">
+  <!-- T=0.1 冰冷 -->
+  <text x="90" y="15" text-anchor="middle" font-size="10" fill="#0052d9" font-weight="600">T=0.1 🧊冰冷</text>
+  <rect x="30" y="22" width="40" height="148" rx="3" fill="#0052d9"/>
+  <text x="50" y="105" text-anchor="middle" font-size="8" fill="white" font-weight="600">82%</text>
+  <rect x="75" y="148" width="40" height="22" rx="3" fill="#3380e6"/>
+  <text x="95" y="163" text-anchor="middle" font-size="7" fill="white">12%</text>
+  <rect x="120" y="161" width="40" height="9" rx="2" fill="#4d94ff"/>
+  <text x="140" y="183" text-anchor="middle" font-size="7" fill="#4b4b4b">5%</text>
+  <text x="90" y="195" text-anchor="middle" font-size="8" fill="#003cab">极度集中</text>
+  
+  <!-- T=1.0 常温 -->
+  <text x="330" y="15" text-anchor="middle" font-size="10" fill="#1a6fe8" font-weight="600">T=1.0 🌊常温</text>
+  <rect x="270" y="42" width="40" height="128" rx="3" fill="#0052d9"/>
+  <text x="290" y="115" text-anchor="middle" font-size="8" fill="white" font-weight="600">71%</text>
+  <rect x="315" y="138" width="40" height="32" rx="3" fill="#3380e6"/>
+  <text x="335" y="158" text-anchor="middle" font-size="7" fill="white">18%</text>
+  <rect x="360" y="155" width="40" height="15" rx="2" fill="#4d94ff"/>
+  <text x="380" y="183" text-anchor="middle" font-size="7" fill="#4b4b4b">8%</text>
+  <text x="330" y="195" text-anchor="middle" font-size="8" fill="#003cab">标准分布</text>
+  
+  <!-- T=2.0 沸腾 -->
+  <text x="580" y="15" text-anchor="middle" font-size="10" fill="#dc2626" font-weight="600">T=2.0 🌋沸腾</text>
+  <rect x="520" y="76" width="40" height="94" rx="3" fill="#0052d9"/>
+  <text x="540" y="130" text-anchor="middle" font-size="8" fill="white" font-weight="600">52%</text>
+  <rect x="565" y="123" width="40" height="47" rx="3" fill="#3380e6"/>
+  <text x="585" y="152" text-anchor="middle" font-size="7" fill="white">26%</text>
+  <rect x="610" y="143" width="40" height="27" rx="3" fill="#4d94ff"/>
+  <text x="630" y="160" text-anchor="middle" font-size="7" fill="white">15%</text>
+  <rect x="655" y="157" width="30" height="13" rx="2" fill="#9ca3af"/>
+  <text x="670" y="183" text-anchor="middle" font-size="7" fill="#4b4b4b">7%</text>
+  <text x="580" y="195" text-anchor="middle" font-size="8" fill="#dc2626">趋于平坦</text>
+  
+  <!-- 基线 -->
+  <line x1="25" y1="170" x2="165" y2="170" stroke="#e5e6eb" stroke-width="1"/>
+  <line x1="265" y1="170" x2="405" y2="170" stroke="#e5e6eb" stroke-width="1"/>
+  <line x1="515" y1="170" x2="695" y2="170" stroke="#e5e6eb" stroke-width="1"/>
+</svg>
+</div>
+
+<h3 id="_3">物理比喻：从冰到沸腾</h3>
+<table>
+<thead>
+<tr>
+<th>温度阶段</th>
+<th>对应Temperature</th>
+<th>分子行为</th>
+<th>模型行为</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🧊 <strong>冰</strong></td>
+<td>T → 0</td>
+<td>分子被冻住，静止不动</td>
+<td>贪婪解码，永远选最高分</td>
+</tr>
+<tr>
+<td>🥶 <strong>冷水</strong></td>
+<td>T = 0.1~0.3</td>
+<td>分子微弱抖动</td>
+<td>几乎必然选最高分，偶有变化</td>
+</tr>
+<tr>
+<td>💧 <strong>温水</strong></td>
+<td>T = 0.5~0.7</td>
+<td>分子有序流动</td>
+<td>兼顾准确与多样性</td>
+</tr>
+<tr>
+<td>🌊 <strong>常温</strong></td>
+<td>T = 1.0</td>
+<td>分子正常运动</td>
+<td>模型默认设定</td>
+</tr>
+<tr>
+<td>♨️ <strong>热水</strong></td>
+<td>T = 1.2~1.5</td>
+<td>分子快速运动</td>
+<td>创意输出，低概率词现身</td>
+</tr>
+<tr>
+<td>🌋 <strong>沸腾</strong></td>
+<td>T = 2.0+</td>
+<td>分子剧烈碰撞，混乱</td>
+<td>输出混乱，可能产生幻觉</td>
+</tr>
+</tbody>
+</table>
+<h3 id="t0greedy-decoding">T=0：贪婪解码（Greedy Decoding）</h3>
+<p>当Temperature设为0时，不进行任何采样——直接选概率最高的词。结果完全确定、每次一模一样，适合代码生成这种需要"0创意"的场景。</p>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：Temperature只改变概率分布的"形状"（Step 2层面），不改变词的排名顺序。得分最高的词永远是得分最高的——只是它被选中的概率在变化。</p>
+</blockquote>
+<hr />
+<h1 id="top-p">三、Top-p：砍掉长尾的"安全网"</h1>
+<p><strong>一句话</strong>：Top-p（核采样/Nucleus Sampling）按概率从高到低累积，到达p值就截断——后面的低概率"垃圾词"全部丢弃。</p>
+<h3 id="top-p_1">Top-p的操作步骤</h3>
+<ol>
+<li>把所有词按概率<strong>从高到低排序</strong></li>
+<li><strong>逐个累加</strong>概率值</li>
+<li>累积到<strong>p值</strong>时停止</li>
+<li>截断线以下的词全部丢弃</li>
+<li>从剩余候选词中重新采样</li>
+</ol>
+<h3 id="p09">具体例子（p=0.9）</h3>
+<table>
+<thead>
+<tr>
+<th>排名</th>
+<th>词</th>
+<th>概率</th>
+<th>累积概率</th>
+<th>是否保留</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>马克的技术工作坊</td>
+<td>71%</td>
+<td>71%</td>
+<td>✅ 保留</td>
+</tr>
+<tr>
+<td>2</td>
+<td>频道A</td>
+<td>18%</td>
+<td>89%</td>
+<td>✅ 保留</td>
+</tr>
+<tr>
+<td>3</td>
+<td>频道B</td>
+<td>8%</td>
+<td>97%</td>
+<td>❌ 超过90%截断</td>
+</tr>
+<tr>
+<td>4</td>
+<td>"自行车"</td>
+<td>2%</td>
+<td>—</td>
+<td>❌ 长尾垃圾，丢弃</td>
+</tr>
+<tr>
+<td>5</td>
+<td>"Hello"</td>
+<td>1%</td>
+<td>—</td>
+<td>❌ 完全无关，丢弃</td>
+</tr>
+</tbody>
+</table>
+<p>p=0.9意味着只保留累积概率前90%的词，砍掉后10%的长尾噪声。</p>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Top-p=0.9 截断可视化 — 砍掉长尾"垃圾词"</p>
+<svg viewBox="0 0 700 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <!-- 保留区域 -->
+  <rect x="30" y="25" width="200" height="50" rx="6" fill="#0052d9"/>
+  <text x="130" y="50" text-anchor="middle" font-size="11" fill="white" font-weight="700">马克 71%</text>
+  <text x="130" y="66" text-anchor="middle" font-size="8" fill="#66b1ff">累积: 71%</text>
+  <rect x="235" y="25" width="100" height="50" rx="6" fill="#1a6fe8"/>
+  <text x="285" y="50" text-anchor="middle" font-size="10" fill="white" font-weight="600">频道A 18%</text>
+  <text x="285" y="66" text-anchor="middle" font-size="8" fill="#a3d0ff">累积: 89%</text>
+  <!-- 截断线 -->
+  <line x1="345" y1="15" x2="345" y2="85" stroke="#dc2626" stroke-width="2.5" stroke-dasharray="6,3"/>
+  <text x="345" y="10" text-anchor="middle" font-size="10" fill="#dc2626" font-weight="700">p=0.9 截断线</text>
+  <!-- 被砍掉的 -->
+  <rect x="355" y="25" width="70" height="50" rx="6" fill="#e5e6eb" stroke="#9ca3af" stroke-dasharray="4,2"/>
+  <text x="390" y="47" text-anchor="middle" font-size="9" fill="#9ca3af">频道B 8%</text>
+  <text x="390" y="62" text-anchor="middle" font-size="8" fill="#9ca3af">❌ 砍掉</text>
+  <rect x="430" y="25" width="55" height="50" rx="6" fill="#e5e6eb" stroke="#9ca3af" stroke-dasharray="4,2"/>
+  <text x="458" y="47" text-anchor="middle" font-size="8" fill="#9ca3af">"自行车"</text>
+  <text x="458" y="62" text-anchor="middle" font-size="8" fill="#9ca3af">❌ 垃圾</text>
+  <rect x="490" y="25" width="55" height="50" rx="6" fill="#e5e6eb" stroke="#9ca3af" stroke-dasharray="4,2"/>
+  <text x="518" y="47" text-anchor="middle" font-size="8" fill="#9ca3af">"Hello"</text>
+  <text x="518" y="62" text-anchor="middle" font-size="8" fill="#9ca3af">❌ 噪声</text>
+  <!-- 说明 -->
+  <rect x="30" y="90" width="520" height="30" rx="5" fill="#f0f7ff" stroke="#d4e3fc"/>
+  <text x="290" y="109" text-anchor="middle" font-size="9" fill="#0052d9" font-weight="600">保留累积≤90%的词（动态数量）→ 从保留词中重新采样 → 杜绝荒谬输出</text>
+</svg>
+</div>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Top-p(动态) vs Top-k(固定) 对比</p>
+<svg viewBox="0 0 700 80" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <rect x="20" y="8" width="290" height="48" rx="8" fill="#0052d9"/><text x="165" y="26" text-anchor="middle" font-size="10" fill="white" font-weight="700">Top-k: 固定取前K个</text><text x="165" y="42" text-anchor="middle" font-size="7" fill="#66b1ff">K=5 → 永远取5个候选词</text><text x="165" y="52" text-anchor="middle" font-size="6" fill="#a3d0ff">❌ 分布集中时选太多，发散时选太少</text>
+  <text x="350" y="35" text-anchor="middle" font-size="12" fill="#059669" font-weight="700">vs</text>
+  <rect x="390" y="8" width="290" height="48" rx="8" fill="#059669"/><text x="535" y="26" text-anchor="middle" font-size="10" fill="white" font-weight="700">Top-p: 动态累积到p</text><text x="535" y="42" text-anchor="middle" font-size="7" fill="#a7f3d0">p=0.9 → 可能2个或8个</text><text x="535" y="52" text-anchor="middle" font-size="6" fill="#a7f3d0">✅ 自适应: 集中时少选，发散时多选</text>
+  <text x="350" y="75" text-anchor="middle" font-size="7" fill="#0052d9" font-weight="600">结论: Top-p优于Top-k · 大多数API默认用Top-p · 推荐p=0.9</text>
+</svg></div>
+<h3 id="top-p-vs-top-k">Top-p vs Top-k</h3>
+<table>
+<thead>
+<tr>
+<th>对比维度</th>
+<th>Top-k</th>
+<th>Top-p</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>选择方式</td>
+<td>固定取前k个词</td>
+<td>动态取到累积概率p</td>
+</tr>
+<tr>
+<td>候选数量</td>
+<td>固定的（如5个）</td>
+<td>动态的（可能3个或8个）</td>
+</tr>
+<tr>
+<td>自适应</td>
+<td>❌ 不适应分布变化</td>
+<td>✅ 分布集中时少选、发散时多选</td>
+</tr>
+<tr>
+<td>推荐度</td>
+<td>一般</td>
+<td>✅ 更推荐</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：Top-p优于Top-k的核心原因是<strong>动态自适应</strong>。当概率分布很集中（一个词占90%），Top-p只保留1-2个词；当分布很平（很多词各占10%），Top-p会保留更多。Top-k就做不到这一点——它永远取固定数量的词。</p>
+</blockquote>
+<hr />
+<h1 id="_4">四、两者的关系：互补而非冲突</h1>
+<p><strong>一句话</strong>：Temperature调分布的"形状"（Step 2），Top-p控候选的"范围"（Step 3）。先用T调好形状，再用p兜底砍尾。</p>
+<h3 id="_5">它们分别作用于哪一层？</h3>
+<pre class="codehilite"><code>Step 1: Logits原始打分
+         ↓
+Step 2: Softmax转概率  ← 【Temperature在这里：调形状】
+         ↓
+[调整后的概率分布]
+         ↓
+Step 3: 采样选词      ← 【Top-p在这里：砍长尾】
+         ↓
+[最终输出词]
+</code></pre>
+
+<h3 id="_6">调参优先级</h3>
+<ol>
+<li><strong>先调Temperature</strong>（影响更大、更直观）</li>
+<li><strong>Top-p作为安全网</strong>（防止极端情况下的垃圾输出）</li>
+<li>⚠️ 避免同时大幅调两者（会产生复杂的交互效果，难以预测）</li>
+</ol>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：如果你只调一个参数，优先调Temperature。Top-p更像是"保险"——大多数情况下p=0.9就够了，主要靠Temperature控制创意程度。</p>
+</blockquote>
+<hr />
+<h1 id="_7">五、实战调参表</h1>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Temperature 实战调参温度计</p>
+<svg viewBox="0 0 700 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <!-- 温度计渐变条 -->
+  <defs>
+    <linearGradient id="tgrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0052d9"/>
+      <stop offset="30%" style="stop-color:#3380e6"/>
+      <stop offset="50%" style="stop-color:#059669"/>
+      <stop offset="70%" style="stop-color:#f59e0b"/>
+      <stop offset="100%" style="stop-color:#dc2626"/>
+    </linearGradient>
+  </defs>
+  <rect x="40" y="40" width="620" height="20" rx="10" fill="url(#tgrad)"/>
+  <!-- 刻度 -->
+  <line x1="40" y1="65" x2="40" y2="75" stroke="#4b4b4b" stroke-width="1"/>
+  <text x="40" y="88" text-anchor="middle" font-size="9" fill="#4b4b4b" font-weight="600">T=0</text>
+  <text x="40" y="100" text-anchor="middle" font-size="7" fill="#0052d9">代码生成</text>
+  
+  <line x1="133" y1="65" x2="133" y2="75" stroke="#4b4b4b" stroke-width="1"/>
+  <text x="133" y="88" text-anchor="middle" font-size="9" fill="#4b4b4b" font-weight="600">T=0.3</text>
+  <text x="133" y="100" text-anchor="middle" font-size="7" fill="#3380e6">翻译/数学</text>
+  
+  <line x1="257" y1="65" x2="257" y2="75" stroke="#4b4b4b" stroke-width="1"/>
+  <text x="257" y="88" text-anchor="middle" font-size="9" fill="#4b4b4b" font-weight="600">T=0.7</text>
+  <text x="257" y="100" text-anchor="middle" font-size="7" fill="#059669" font-weight="700">通用对话 ⭐</text>
+  
+  <line x1="350" y1="65" x2="350" y2="75" stroke="#4b4b4b" stroke-width="1"/>
+  <text x="350" y="88" text-anchor="middle" font-size="9" fill="#4b4b4b" font-weight="600">T=1.0</text>
+  <text x="350" y="100" text-anchor="middle" font-size="7" fill="#f59e0b">产品文案</text>
+  
+  <line x1="505" y1="65" x2="505" y2="75" stroke="#4b4b4b" stroke-width="1"/>
+  <text x="505" y="88" text-anchor="middle" font-size="9" fill="#4b4b4b" font-weight="600">T=1.5</text>
+  <text x="505" y="100" text-anchor="middle" font-size="7" fill="#dc2626">小说/创意</text>
+  
+  <line x1="660" y1="65" x2="660" y2="75" stroke="#4b4b4b" stroke-width="1"/>
+  <text x="660" y="88" text-anchor="middle" font-size="9" fill="#4b4b4b" font-weight="600">T=2.0</text>
+  <text x="660" y="100" text-anchor="middle" font-size="7" fill="#dc2626">极致创意</text>
+  
+  <!-- 上方标签 -->
+  <text x="100" y="30" text-anchor="middle" font-size="9" fill="#0052d9" font-weight="600">🧊 严谨 · 确定 · 可复现</text>
+  <text x="560" y="30" text-anchor="middle" font-size="9" fill="#dc2626" font-weight="600">🌋 创意 · 随机 · 可能幻觉</text>
+  
+  <!-- 底部提示 -->
+  <rect x="100" y="115" width="500" height="30" rx="5" fill="#f0f7ff" stroke="#d4e3fc"/>
+  <text x="350" y="134" text-anchor="middle" font-size="9" fill="#0052d9" font-weight="600">不确定怎么调？用 T=0.7 + p=0.9 · 这是大多数AI产品的默认设置</text>
+</svg>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>应用场景</th>
+<th>Temperature</th>
+<th>Top-p</th>
+<th>为什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>代码生成</strong></td>
+<td>0 ~ 0.2</td>
+<td>0.1 ~ 0.3</td>
+<td>需要语法正确，0创意</td>
+</tr>
+<tr>
+<td><strong>数学推理</strong></td>
+<td>0.1 ~ 0.3</td>
+<td>0.2 ~ 0.5</td>
+<td>逻辑严谨第一</td>
+</tr>
+<tr>
+<td><strong>翻译/摘要</strong></td>
+<td>0.3 ~ 0.5</td>
+<td>0.5 ~ 0.7</td>
+<td>事实准确，表达自然</td>
+</tr>
+<tr>
+<td><strong>通用对话</strong></td>
+<td><strong>0.7</strong></td>
+<td><strong>0.9</strong></td>
+<td>最平衡的默认设置</td>
+</tr>
+<tr>
+<td><strong>产品文案</strong></td>
+<td>0.7 ~ 1.2</td>
+<td>0.8 ~ 1.0</td>
+<td>兼顾逻辑与发散</td>
+</tr>
+<tr>
+<td><strong>小说创作</strong></td>
+<td>1.0 ~ 1.5</td>
+<td>0.95 ~ 1.0</td>
+<td>需要想象力</td>
+</tr>
+<tr>
+<td><strong>广告创意</strong></td>
+<td>1.4 ~ 2.0</td>
+<td>0.95 ~ 1.0</td>
+<td>极致创意，接受不确定性</td>
+</tr>
+</tbody>
+</table>
+<p><strong>通用默认设置</strong>：如果不确定怎么调，用 <strong>T=0.7 + p=0.9</strong>。</p>
+<h3 id="python-api">Python API调用示例</h3>
+<pre class="codehilite"><code class="language-python">from openai import OpenAI
+
+client = OpenAI(api_key=&quot;你的KEY&quot;)
+
+# 代码生成（极度严谨）
+response = client.chat.completions.create(
+    model=&quot;gpt-4o&quot;,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;写一个快速排序&quot;}],
+    temperature=0.1,
+    top_p=0.3
+)
+
+# 创意写作（充满想象力）
+response = client.chat.completions.create(
+    model=&quot;gpt-4o&quot;,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;为新能量饮料起5个名字&quot;}],
+    temperature=1.2,
+    top_p=1.0
+)
+</code></pre>
+
+<hr />
+<h1 id="_8">六、总结：完整流程图</h1>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 完整输出流程总览 — 两个参数的作用位置</p>
+<svg viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <defs><marker id="tp5" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <!-- Step 1 -->
+  <rect x="220" y="10" width="260" height="40" rx="8" fill="#0052d9" stroke="#003cab" stroke-width="1.5"/>
+  <text x="350" y="35" text-anchor="middle" font-size="13" fill="white" font-weight="700">Step 1: Logits 原始打分</text>
+  <line x1="350" y1="50" x2="350" y2="70" stroke="#0052d9" stroke-width="2" marker-end="url(#tp5)"/>
+  <!-- Step 2 + Temperature -->
+  <rect x="180" y="75" width="340" height="45" rx="8" fill="#1a6fe8" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="350" y="97" text-anchor="middle" font-size="13" fill="white" font-weight="700">Step 2: Softmax(÷T) → 概率分布</text>
+  <text x="350" y="113" text-anchor="middle" font-size="8" fill="#a3d0ff">除以Temperature → 改变分布形状</text>
+  <rect x="540" y="78" width="145" height="38" rx="6" fill="#f59e0b" stroke="#d97706"/>
+  <text x="613" y="98" text-anchor="middle" font-size="10" fill="white" font-weight="700">Temperature</text>
+  <text x="613" y="112" text-anchor="middle" font-size="8" fill="white">T小=集中 T大=发散</text>
+  <line x1="520" y1="97" x2="540" y2="97" stroke="#f59e0b" stroke-width="1.5"/>
+  <line x1="350" y1="120" x2="350" y2="140" stroke="#0052d9" stroke-width="2" marker-end="url(#tp5)"/>
+  <!-- Step 3 + Top-p -->
+  <rect x="180" y="145" width="340" height="45" rx="8" fill="#3380e6" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="350" y="167" text-anchor="middle" font-size="13" fill="white" font-weight="700">Step 3: Top-p 截断 → 采样选词</text>
+  <text x="350" y="183" text-anchor="middle" font-size="8" fill="#a3d0ff">累积到p值截断 → 从剩余词中抽奖</text>
+  <rect x="540" y="148" width="145" height="38" rx="6" fill="#059669" stroke="#047857"/>
+  <text x="613" y="168" text-anchor="middle" font-size="10" fill="white" font-weight="700">Top-p</text>
+  <text x="613" y="182" text-anchor="middle" font-size="8" fill="white">砍长尾 · 安全网</text>
+  <line x1="520" y1="167" x2="540" y2="167" stroke="#059669" stroke-width="1.5"/>
+  <line x1="350" y1="190" x2="350" y2="210" stroke="#0052d9" stroke-width="2" marker-end="url(#tp5)"/>
+  <!-- 输出 -->
+  <rect x="240" y="215" width="220" height="35" rx="8" fill="#059669" stroke="#047857" stroke-width="1.5"/>
+  <text x="350" y="237" text-anchor="middle" font-size="12" fill="white" font-weight="700">输出下一个词</text>
+  <!-- 循环箭头 -->
+  <path d="M460 232 L520 232 L520 25 L480 25" fill="none" stroke="#d4e3fc" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#tp5)"/>
+  <text x="530" y="130" font-size="8" fill="#9ca3af" transform="rotate(90,530,130)">重复生成</text>
+  <!-- 左侧提示 -->
+  <rect x="15" y="78" width="145" height="112" rx="8" fill="#f0f7ff" stroke="#d4e3fc"/>
+  <text x="88" y="100" text-anchor="middle" font-size="9" fill="#0052d9" font-weight="600">调参优先级</text>
+  <text x="88" y="118" text-anchor="middle" font-size="8" fill="#4b4b4b">1. 先调Temperature</text>
+  <text x="88" y="134" text-anchor="middle" font-size="8" fill="#4b4b4b">2. Top-p作为安全网</text>
+  <text x="88" y="150" text-anchor="middle" font-size="8" fill="#4b4b4b">3. 避免同时大幅调</text>
+  <text x="88" y="172" text-anchor="middle" font-size="9" fill="#059669" font-weight="600">默认: T=0.7 p=0.9</text>
+</svg>
+</div>
+
+<pre class="codehilite"><code>Logits原始打分
+    ↓
+Softmax(÷Temperature)  ← T小=集中, T大=发散, T=0=贪婪
+    ↓
+概率分布
+    ↓
+Top-p截断长尾          ← p=0.9砍掉后10%垃圾词
+    ↓
+加权采样（数轴抽奖）
+    ↓
+输出下一个词
+    ↓
+[重复以上过程，直到生成完整回答]
+</code></pre>
+
+<hr />
+<h2 id="8">附录：专有名词速查（8个）</h2>
+<table>
+<thead>
+<tr>
+<th>名词</th>
+<th>全称</th>
+<th>一句话白话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Logits</td>
+<td>-</td>
+<td>模型给每个候选词打的原始分数（未归一化）</td>
+</tr>
+<tr>
+<td>Softmax</td>
+<td>-</td>
+<td>把原始分数转成0-1概率的数学函数</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>-</td>
+<td>Softmax公式中的除数，控制概率分布形状</td>
+</tr>
+<tr>
+<td>Greedy Decoding</td>
+<td>贪婪解码</td>
+<td>T=0时直接选最高分词，结果完全确定</td>
+</tr>
+<tr>
+<td>Top-p</td>
+<td>Nucleus Sampling</td>
+<td>按累积概率截断长尾的采样策略</td>
+</tr>
+<tr>
+<td>Top-k</td>
+<td>-</td>
+<td>固定取前k个高概率词的采样策略</td>
+</tr>
+<tr>
+<td>Sampling</td>
+<td>采样</td>
+<td>从概率分布中随机选一个词的过程</td>
+</tr>
+<tr>
+<td>Token</td>
+<td>-</td>
+<td>模型处理和生成的最小文本单位</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="footer">学习笔记由 WorkBuddy AI 助手整理 · 2026-04-11 · 通俗叙事风格 · 腾讯云商务蓝配色</div>
+</div>
+</body>
+</html>

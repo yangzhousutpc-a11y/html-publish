@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>吴恩达《AI Agent 的长期记忆》学习笔记</title>
+<style>
+:root {
+  --brand: #0052d9;
+  --brand-deep: #003cab;
+  --brand-darkest: #001a45;
+  --brand-light: #66b1ff;
+  --bg-page: #f3f4f6;
+  --bg-card: #ffffff;
+  --bg-blue: #edf4ff;
+  --border-blue: #d4e3fc;
+  --border-gray: #e5e6eb;
+  --text-h: #242424;
+  --text-body: #4b4b4b;
+  --code-bg: #0d1b2a;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg-page);
+  color: var(--text-body);
+  line-height: 1.75;
+  font-size: 15px;
+}
+
+.header {
+  background: linear-gradient(135deg, #001a45 0%, #0052d9 50%, #0077ff 100%);
+  color: #fff;
+  padding: 56px 40px 48px;
+  text-align: center;
+}
+.header h1 {
+  margin: 0 0 16px;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.header .sub {
+  font-size: 14px;
+  opacity: 0.92;
+  margin-bottom: 22px;
+}
+.header .sub a {
+  color: #fff;
+  text-decoration: underline;
+  margin: 0 4px;
+}
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+}
+.stat {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 10px;
+  padding: 12px 22px;
+  min-width: 120px;
+}
+.stat .num {
+  font-size: 26px;
+  font-weight: 700;
+  color: #66b1ff;
+  line-height: 1.2;
+}
+.stat .label {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-top: 4px;
+}
+
+.container {
+  max-width: 920px;
+  margin: -32px auto 60px;
+  padding: 0 24px;
+}
+
+.summary-card {
+  background: linear-gradient(135deg, #edf4ff 0%, #f0f7ff 60%, #f5f9ff 100%);
+  border: 1px solid var(--border-blue);
+  border-radius: 14px;
+  padding: 28px 36px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 16px rgba(0,82,217,0.08);
+}
+.summary-card h2 {
+  margin: 0 0 14px;
+  font-size: 20px;
+  color: var(--brand);
+  border-left: 4px solid var(--brand);
+  padding-left: 12px;
+}
+.summary-card p {
+  margin: 0 0 14px;
+  color: var(--text-body);
+  font-size: 14.5px;
+}
+.summary-card p:last-child { margin-bottom: 0; }
+.summary-card strong { color: var(--brand-deep); }
+
+.content {
+  background: var(--bg-card);
+  border: 1px solid var(--border-gray);
+  border-radius: 14px;
+  padding: 40px 48px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+
+.content h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--brand-deep);
+  margin: 48px 0 20px;
+  padding: 12px 18px;
+  background: linear-gradient(90deg, var(--bg-blue) 0%, transparent 100%);
+  border-left: 5px solid var(--brand);
+  border-radius: 4px;
+}
+.content h1:first-child { margin-top: 0; }
+
+.content h2 {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--brand);
+  margin: 36px 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border-blue);
+}
+
+.content h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-h);
+  margin: 28px 0 12px;
+  padding-left: 12px;
+  border-left: 3px solid var(--brand);
+}
+
+.content p { margin: 0 0 14px; }
+
+.content strong { color: var(--brand-deep); font-weight: 600; }
+.content em { color: var(--brand); font-style: normal; }
+
+.content a { color: var(--brand); text-decoration: none; border-bottom: 1px dashed var(--brand-light); }
+.content a:hover { color: var(--brand-deep); border-bottom-style: solid; }
+
+.content ul, .content ol { padding-left: 24px; margin: 0 0 14px; }
+.content li { margin: 6px 0; }
+
+.content blockquote {
+  margin: 20px 0;
+  padding: 14px 20px;
+  background: var(--bg-blue);
+  border-left: 4px solid var(--brand);
+  border-radius: 6px;
+  color: var(--brand-deep);
+  font-size: 14.5px;
+}
+.content blockquote p { margin: 0; }
+
+.content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 18px 0;
+  font-size: 13.5px;
+  background: #fff;
+}
+.content th {
+  background: var(--bg-blue);
+  color: var(--brand-deep);
+  font-weight: 600;
+  padding: 10px 14px;
+  border: 1px solid var(--border-blue);
+  text-align: left;
+}
+.content td {
+  padding: 9px 14px;
+  border: 1px solid var(--border-gray);
+  vertical-align: top;
+}
+.content tr:nth-child(even) td { background: #fafbfc; }
+
+.content code {
+  background: #f1f4f9;
+  color: #c7254e;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 13px;
+  font-family: "SF Mono", Monaco, Consolas, monospace;
+}
+.content pre {
+  background: var(--code-bg);
+  color: #e6e6e6;
+  padding: 18px 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 16px 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.content pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  font-size: 13px;
+}
+
+.content hr {
+  border: none;
+  border-top: 1px dashed var(--border-blue);
+  margin: 32px 0;
+}
+
+.svg-card {
+  margin: 24px 0;
+  padding: 18px 22px;
+  background: var(--bg-blue);
+  border: 1px solid var(--border-blue);
+  border-radius: 10px;
+  text-align: center;
+}
+.svg-card .svg-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--brand-deep);
+  margin: 0 0 12px;
+}
+.svg-card svg {
+  display: block;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 30px;
+  padding: 22px;
+  color: #9ca3af;
+  font-size: 12px;
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>吴恩达《AI Agent 的长期记忆》学习笔记</h1>
+  <div class="sub">
+    DeepLearning.AI · Long-Term Agentic Memory with LangGraph<br>
+    讲师：Harrison Chase（LangChain）+ Andrew Ng　·　工具栈：LangGraph + LangMem<br>
+    B站视频：<a href="https://www.bilibili.com/video/BV1kZ92BBESi/" target="_blank">BV1kZ92BBESi</a>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="num">7</div><div class="label">P 集视频</div></div>
+    <div class="stat"><div class="num">6</div><div class="label">核心章节</div></div>
+    <div class="stat"><div class="num">9</div><div class="label">SVG 架构图</div></div>
+    <div class="stat"><div class="num">25</div><div class="label">专有名词</div></div>
+  </div>
+</div>
+
+<div class="container">
+
+<div class="summary-card">
+  <h2>📖 内容综述</h2>
+  <p>这门课要解决一个最朴素的痛点：**Agent 像金鱼一样，每开一个新对话就忘光了上次的事**。Andrew 在开场把这种状态叫"金鱼脑 / 记忆碎片综合症"——你跟它说过 100 次"我落款写 Lance"，它每次都还是写 Best regards。这门课就是教你怎么给 Agent 装上**长期记忆**，让它越用越懂你。</p>
+<p>第一章「**为什么需要记忆**」回答的是"问题诊断"——为什么单纯加大上下文窗口、或者上 RAG 都解决不了这个问题。课上明确把记忆按**认知心理学的 Tulving 框架**分成三类：**Semantic（语义/事实）**、**Episodic（情景/经历）**、**Procedural（程序/指令）**——这是整门课的骨架。</p>
+<p>第二章「**构建记忆管理器**」回答的是"工程基建"——LangGraph 提供 `Store`（跨会话）和 `Checkpointer`（线程内）两套存储，靠 `namespace` 像目录一样组织记忆。`Profile`（覆盖式画像）vs `Collection`（追加式集合）是选型的关键。</p>
+<p>第三、四章「**语义记忆 + 记忆操作**」回答的是"记忆的生与死"——`Hot Path`（Agent 自己在对话中调工具记）vs `Background`（独立反思器异步整合），课上反复强调这是**人脑边聊边记 vs 回家路上复盘**的对应。再加上去重、update-in-place、ReflectionExecutor 防抖三个关键工程细节。</p>
+<p>第五章「**记忆感知智能体**」是整门课的"哇塞时刻"——把 system prompt 本身当成一条记忆放进 store，让 Agent 根据用户反馈**自己改写自己的 prompt**。不需要 fine-tune、不需要 RLHF，纯靠 prompt 改写就实现了在线学习。</p>
+<p>最后用一个完整的**邮件助手 demo** 把三类记忆全部装进去，演示从"金鱼版"到"越用越懂你"的完整进化路径。</p>
+</div>
+
+<div class="content">
+<h1 id="agent">第一部分：为什么 Agent 需要记忆</h1>
+<h2 id="agent_1">一、Agent 的"金鱼脑"问题</h2>
+<h3 id="thread">痛点演示：跨 Thread 立刻失忆</h3>
+<p><strong>一句话</strong>：现在的 Agent 默认像鱼缸里的金鱼——切到新对话就忘光，包括你刚刚说过的"我喜欢深色模式"。</p>
+<p>Harrison 在 P2 开场做了一个反面演示：</p>
+<ol>
+<li>第 1 个 thread：用户跟 Agent 说 "I prefer dark mode for my UI."（我喜欢深色模式）→ Agent 答 OK，记下了。</li>
+<li>第 2 个 thread（新对话）：用户问 "What UI mode do I prefer?" → Agent 一脸懵：<strong>"I don't have any information about your UI preferences."</strong></li>
+</ol>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：很多人以为 LangGraph 的 <code>MemorySaver</code> checkpointer 已经"加了记忆"。但 <strong>checkpointer 只在同一个 <code>thread_id</code> 内有效</strong>——换 thread 就归零。邮件助手每封新邮件几乎都是新 thread，所以<strong>只有跨 thread 的 Store 才能让 Agent 真正"长记性"</strong>。</p>
+</blockquote>
+<h3 id="_1">三个看似可行但其实解决不了的伪方案</h3>
+<table>
+<thead>
+<tr>
+<th>伪方案</th>
+<th>看起来能干嘛</th>
+<th>为什么不够</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>加大上下文窗口</strong></td>
+<td>把过去对话全塞进去</td>
+<td>100 个用户、3 年聊天记录塞不下；找不准；贵</td>
+</tr>
+<tr>
+<td><strong>RAG 检索文档</strong></td>
+<td>检索外部知识</td>
+<td>RAG 找的是"人类写的文档"，不是"关于这个用户的事实"，namespace 也不按用户隔离</td>
+</tr>
+<tr>
+<td><strong>MemorySaver checkpointer</strong></td>
+<td>保存对话状态</td>
+<td>只在同一 thread 内；跨会话归零</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：<strong>Agentic Memory ≠ RAG，也 ≠ 更长的上下文窗口</strong>。它是一套独立的工程基建：跨会话、按用户/会话隔离、可读可写可更新。</p>
+</blockquote>
+<hr />
+<h2 id="_2">二、三类记忆：来自认知心理学的框架</h2>
+
+<div class="svg-card">
+  <p class="svg-title">📐 图2：三类记忆 — Tulving 框架在 Agent 上的对应</p>
+  
+<svg viewBox="0 0 820 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:820px;height:auto;">
+  <!-- 中央节点 -->
+  <circle cx="410" cy="60" r="40" fill="#001a45" stroke="#0052d9" stroke-width="2"/>
+  <text x="410" y="58" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">长期</text>
+  <text x="410" y="74" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">记忆</text>
+
+  <!-- 三条分支 -->
+  <line x1="410" y1="100" x2="160" y2="170" stroke="#0052d9" stroke-width="1.5"/>
+  <line x1="410" y1="100" x2="410" y2="170" stroke="#0052d9" stroke-width="1.5"/>
+  <line x1="410" y1="100" x2="660" y2="170" stroke="#0052d9" stroke-width="1.5"/>
+
+  <!-- Semantic -->
+  <rect x="35" y="170" width="250" height="170" rx="10" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="160" y="195" text-anchor="middle" font-size="14" font-weight="700" fill="#0052d9">Semantic（语义）</text>
+  <text x="160" y="218" text-anchor="middle" font-size="11" fill="#4b4b4b">📚 事实 / 偏好</text>
+  <line x1="55" y1="230" x2="265" y2="230" stroke="#d4e3fc" stroke-width="1"/>
+  <text x="160" y="250" text-anchor="middle" font-size="10" fill="#003cab">人类：你知道巴黎是法国首都</text>
+  <text x="160" y="268" text-anchor="middle" font-size="10" fill="#003cab">Agent：记住"我落款叫 Lance"</text>
+  <text x="160" y="286" text-anchor="middle" font-size="10" fill="#003cab">实现：collection / profile</text>
+  <text x="160" y="304" text-anchor="middle" font-size="10" fill="#003cab">API：manage_memory_tool</text>
+  <text x="160" y="324" text-anchor="middle" font-size="10" font-weight="600" fill="#dc2626">→ Hot Path 主战场</text>
+
+  <!-- Episodic -->
+  <rect x="285" y="170" width="250" height="170" rx="10" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="410" y="195" text-anchor="middle" font-size="14" font-weight="700" fill="#0052d9">Episodic（情景）</text>
+  <text x="410" y="218" text-anchor="middle" font-size="11" fill="#4b4b4b">📖 经历过的具体例子</text>
+  <line x1="305" y1="230" x2="515" y2="230" stroke="#d4e3fc" stroke-width="1"/>
+  <text x="410" y="250" text-anchor="middle" font-size="10" fill="#003cab">人类：去年生日吃了寿司</text>
+  <text x="410" y="268" text-anchor="middle" font-size="10" fill="#003cab">Agent：Triage 历史 few-shot</text>
+  <text x="410" y="286" text-anchor="middle" font-size="10" fill="#003cab">实现：{email,label} 检索 top-k</text>
+  <text x="410" y="304" text-anchor="middle" font-size="10" fill="#003cab">API：store.search()</text>
+  <text x="410" y="324" text-anchor="middle" font-size="10" font-weight="600" fill="#f59e0b">→ Background 整合</text>
+
+  <!-- Procedural -->
+  <rect x="535" y="170" width="250" height="170" rx="10" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="660" y="195" text-anchor="middle" font-size="14" font-weight="700" fill="#0052d9">Procedural（程序）</text>
+  <text x="660" y="218" text-anchor="middle" font-size="11" fill="#4b4b4b">⚙️ 操作规则 / prompt</text>
+  <line x1="555" y1="230" x2="765" y2="230" stroke="#d4e3fc" stroke-width="1"/>
+  <text x="660" y="250" text-anchor="middle" font-size="10" fill="#003cab">人类：你会骑自行车</text>
+  <text x="660" y="268" text-anchor="middle" font-size="10" fill="#003cab">Agent：system prompt 本身</text>
+  <text x="660" y="286" text-anchor="middle" font-size="10" fill="#003cab">实现：store 存 prompt 字符串</text>
+  <text x="660" y="304" text-anchor="middle" font-size="10" fill="#003cab">API：multi_prompt_optimizer</text>
+  <text x="660" y="324" text-anchor="middle" font-size="10" font-weight="600" fill="#059669">→ Agent 自我进化</text>
+</svg>
+
+</div>
+
+<h3 id="tulving">Tulving 三分法</h3>
+<p><strong>一句话</strong>：人脑的记忆分三类——你知道的事实、你经历过的事、你会做的动作；Agent 也照着抄。</p>
+<p>这门课最重要的"骨架"就是这张三类记忆对照表（来自心理学家 Endel Tulving 1972 年的工作）：</p>
+<table>
+<thead>
+<tr>
+<th>记忆类型</th>
+<th>人类对应</th>
+<th>Agent 形态</th>
+<th>邮件助手里干啥</th>
+<th>LangMem API</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Semantic（语义）</strong></td>
+<td>你知道"巴黎是法国首都"</td>
+<td>关于用户/世界的<strong>事实</strong>（k-v 或文档）</td>
+<td>记住"我落款叫 Lance"、"Alice 是 VIP"</td>
+<td><code>manage_memory_tool</code></td>
+</tr>
+<tr>
+<td><strong>Episodic（情景）</strong></td>
+<td>你记得"去年生日吃了寿司"</td>
+<td>过去发生过的<strong>具体例子</strong>（few-shot）</td>
+<td>Triage 历史："这种邮件之前我归到 ignore 了"</td>
+<td>Store 存 <code>{email, label}</code> 检索</td>
+</tr>
+<tr>
+<td><strong>Procedural（程序）</strong></td>
+<td>你会骑自行车（不用想步骤）</td>
+<td>Agent 的<strong>操作规则 / system prompt 本身</strong></td>
+<td>"怎么写邮件、怎么分类邮件"的 prompt 字符串</td>
+<td><code>create_multi_prompt_optimizer</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：三类记忆<strong>不是三个 Store</strong>，而是同一个 Store 用<strong>不同 namespace</strong> 区分。理解 namespace = 文件夹路径，是吃透这门课的关键。</p>
+</blockquote>
+<h3 id="vs">短期 vs 长期记忆的存储分层</h3>
+
+<div class="svg-card">
+  <p class="svg-title">📐 图1：Checkpointer（短期）vs Store（长期）的存储分层</p>
+  
+<svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;height:auto;">
+  <defs>
+    <marker id="arr1" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#0052d9"/>
+    </marker>
+  </defs>
+  <!-- 当前对话 box -->
+  <rect x="20" y="40" width="160" height="80" rx="10" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="100" y="68" text-anchor="middle" font-size="14" font-weight="600" fill="#003cab">当前对话</text>
+  <text x="100" y="92" text-anchor="middle" font-size="11" fill="#4b4b4b">thread_id="abc"</text>
+  <text x="100" y="108" text-anchor="middle" font-size="11" fill="#4b4b4b">messages, state</text>
+  <!-- arrow -->
+  <line x1="190" y1="80" x2="290" y2="80" stroke="#0052d9" stroke-width="1.8" marker-end="url(#arr1)"/>
+  <!-- Checkpointer box -->
+  <rect x="300" y="30" width="220" height="100" rx="10" fill="#0052d9" stroke="#003cab" stroke-width="1.5"/>
+  <text x="410" y="58" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">Checkpointer</text>
+  <text x="410" y="78" text-anchor="middle" font-size="11" fill="#d4e3fc">短期 / thread-scoped</text>
+  <text x="410" y="98" text-anchor="middle" font-size="11" fill="#d4e3fc">MemorySaver / PostgresSaver</text>
+  <text x="410" y="118" text-anchor="middle" font-size="11" fill="#d4e3fc">换 thread 即归零</text>
+  <!-- 注释 -->
+  <text x="540" y="85" font-size="11" fill="#dc2626">⚠️ 邮件助手</text>
+  <text x="540" y="100" font-size="11" fill="#dc2626">每封新邮件 = 新thread</text>
+  <text x="540" y="115" font-size="11" fill="#dc2626">→ 这里没法长期记</text>
+
+  <!-- 跨对话 box -->
+  <rect x="20" y="190" width="160" height="80" rx="10" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="100" y="218" text-anchor="middle" font-size="14" font-weight="600" fill="#003cab">跨对话/跨用户</text>
+  <text x="100" y="242" text-anchor="middle" font-size="11" fill="#4b4b4b">facts, examples,</text>
+  <text x="100" y="258" text-anchor="middle" font-size="11" fill="#4b4b4b">prompts</text>
+  <!-- arrow -->
+  <line x1="190" y1="230" x2="290" y2="230" stroke="#0052d9" stroke-width="1.8" marker-end="url(#arr1)"/>
+  <!-- Store box -->
+  <rect x="300" y="180" width="220" height="100" rx="10" fill="#003cab" stroke="#001a45" stroke-width="1.5"/>
+  <text x="410" y="208" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">Store</text>
+  <text x="410" y="228" text-anchor="middle" font-size="11" fill="#d4e3fc">长期 / cross-thread</text>
+  <text x="410" y="248" text-anchor="middle" font-size="11" fill="#d4e3fc">InMemoryStore / PostgresStore</text>
+  <text x="410" y="268" text-anchor="middle" font-size="11" fill="#d4e3fc">按 namespace 组织</text>
+  <text x="540" y="225" font-size="11" fill="#059669">✅ 邮件助手</text>
+  <text x="540" y="240" font-size="11" fill="#059669">真正"长记性"</text>
+  <text x="540" y="255" font-size="11" fill="#059669">的地方</text>
+</svg>
+
+</div>
+
+<p><strong>一句话</strong>：短期记忆（当前对话）放 Checkpointer，长期记忆（跨对话）放 Store——两套东西，别搞混。</p>
+<pre class="codehilite"><code>                  ┌──────────────────────────────┐
+   当前对话 ───▶  │  Checkpointer (短期/thread)  │  ◀── 同 thread_id 才看得到
+                  │  保存：messages, intermediate │
+                  └──────────────────────────────┘
+
+   跨对话/跨用户   ┌──────────────────────────────┐
+   长期事实   ───▶ │  Store (长期/cross-thread)   │  ◀── 按 namespace 组织
+                  │  保存：facts, examples,       │
+                  │       prompts (procedural)    │
+                  └──────────────────────────────┘
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Checkpointer</th>
+<th>Store</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>作用域</td>
+<td>单个 thread</td>
+<td>跨 thread / 跨会话</td>
+</tr>
+<tr>
+<td>内容</td>
+<td>整张图的 state（messages、变量）</td>
+<td>用户事实、偏好、历史例子、prompt</td>
+</tr>
+<tr>
+<td>实现</td>
+<td><code>MemorySaver</code> / <code>PostgresSaver</code></td>
+<td><code>InMemoryStore</code> / <code>PostgresStore</code></td>
+</tr>
+<tr>
+<td>组织方式</td>
+<td>按 <code>thread_id</code></td>
+<td>按 <code>namespace = ("app", "user_id", "type")</code></td>
+</tr>
+<tr>
+<td>存活时长</td>
+<td>对话结束（取决于 TTL）</td>
+<td>永久（直到主动删除）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="memory-manager">第二部分：构建记忆管理器（Memory Manager）</h1>
+<h2 id="langgraph-store">一、LangGraph Store 的核心抽象</h2>
+<h3 id="namespace-tuple">namespace = tuple = 目录结构</h3>
+
+<div class="svg-card">
+  <p class="svg-title">📐 图3：namespace = 目录路径，组织所有记忆</p>
+  
+<svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;height:auto;">
+  <!-- 根 -->
+  <rect x="20" y="20" width="200" height="40" rx="6" fill="#001a45"/>
+  <text x="120" y="45" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">📦 InMemoryStore</text>
+
+  <!-- L1 namespaces -->
+  <line x1="120" y1="60" x2="120" y2="90" stroke="#0052d9" stroke-width="1.5"/>
+  <line x1="120" y1="90" x2="380" y2="90" stroke="#0052d9" stroke-width="1.5"/>
+  <line x1="380" y1="90" x2="380" y2="110" stroke="#0052d9" stroke-width="1.5"/>
+  <line x1="120" y1="90" x2="640" y2="90" stroke="#0052d9" stroke-width="1.5"/>
+  <line x1="120" y1="90" x2="120" y2="110" stroke="#0052d9" stroke-width="1.5"/>
+  <line x1="640" y1="90" x2="640" y2="110" stroke="#0052d9" stroke-width="1.5"/>
+
+  <rect x="20" y="110" width="200" height="50" rx="6" fill="#0052d9"/>
+  <text x="120" y="130" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">("lance",)</text>
+  <text x="120" y="148" text-anchor="middle" font-size="10" fill="#d4e3fc">用户级：procedural</text>
+
+  <rect x="280" y="110" width="200" height="50" rx="6" fill="#0052d9"/>
+  <text x="380" y="130" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">("email_assistant",</text>
+  <text x="380" y="148" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">"lance", "collection")</text>
+
+  <rect x="540" y="110" width="200" height="50" rx="6" fill="#0052d9"/>
+  <text x="640" y="130" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">("email_assistant",</text>
+  <text x="640" y="148" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">"lance", "examples")</text>
+
+  <!-- L2 keys -->
+  <line x1="120" y1="160" x2="120" y2="180" stroke="#66b1ff" stroke-width="1"/>
+  <line x1="380" y1="160" x2="380" y2="180" stroke="#66b1ff" stroke-width="1"/>
+  <line x1="640" y1="160" x2="640" y2="180" stroke="#66b1ff" stroke-width="1"/>
+
+  <rect x="30" y="180" width="180" height="70" rx="6" fill="#edf4ff" stroke="#d4e3fc"/>
+  <text x="120" y="200" text-anchor="middle" font-size="11" font-weight="600" fill="#003cab">"agent_instructions"</text>
+  <text x="120" y="218" text-anchor="middle" font-size="10" fill="#4b4b4b">"triage_ignore"</text>
+  <text x="120" y="234" text-anchor="middle" font-size="10" fill="#4b4b4b">"triage_notify"</text>
+  <text x="120" y="248" text-anchor="middle" font-size="9" fill="#dc2626">→ 存 prompt 字符串</text>
+
+  <rect x="290" y="180" width="180" height="70" rx="6" fill="#edf4ff" stroke="#d4e3fc"/>
+  <text x="380" y="200" text-anchor="middle" font-size="11" font-weight="600" fill="#003cab">事实条目</text>
+  <text x="380" y="218" text-anchor="middle" font-size="10" fill="#4b4b4b">"我落款叫 Lance"</text>
+  <text x="380" y="234" text-anchor="middle" font-size="10" fill="#4b4b4b">"Alice 是 VIP"</text>
+  <text x="380" y="248" text-anchor="middle" font-size="9" fill="#dc2626">→ Semantic Memory</text>
+
+  <rect x="550" y="180" width="180" height="70" rx="6" fill="#edf4ff" stroke="#d4e3fc"/>
+  <text x="640" y="200" text-anchor="middle" font-size="11" font-weight="600" fill="#003cab">few-shot 邮件</text>
+  <text x="640" y="218" text-anchor="middle" font-size="10" fill="#4b4b4b">{email, label}</text>
+  <text x="640" y="234" text-anchor="middle" font-size="10" fill="#4b4b4b">{email, label}</text>
+  <text x="640" y="248" text-anchor="middle" font-size="9" fill="#dc2626">→ Episodic Memory</text>
+</svg>
+
+</div>
+
+<p><strong>一句话</strong>：把 namespace 想成"文件夹路径"，所有记忆都按 <code>(应用名 / 用户 ID / 记忆类型)</code> 分目录存。</p>
+<p>LangMem 的官方 namespace 设计模式（课上引用过）：</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>例子</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>按用户</td>
+<td><code>("memories", "{user_id}")</code></td>
+<td>每个用户记忆隔离</td>
+</tr>
+<tr>
+<td>按助手</td>
+<td><code>("memories", "{assistant_id}")</code></td>
+<td>一个助手跨多用户共享记忆</td>
+</tr>
+<tr>
+<td>组织 + 用户</td>
+<td><code>("memories", "{org_id}", "{user_id}")</code></td>
+<td>组织内可搜，用户间隔离</td>
+</tr>
+<tr>
+<td>进一步细分</td>
+<td><code>("memories", "{user_id}", "manual_memories")</code></td>
+<td>不同种类记忆分开</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：<code>{langgraph_user_id}</code> 这种 <code>{}</code> 占位符是 LangMem 的<strong>运行时模板语法</strong>——不是 f-string，是 LangMem 自己解析的。运行时它从 <code>RunnableConfig.configurable.langgraph_user_id</code> 自动读取并替换。</p>
+</blockquote>
+<h3 id="profile-vs-collection">Profile vs Collection 选型</h3>
+<p><strong>一句话</strong>：身份证（Profile，固定字段、原地覆盖）vs 朋友圈（Collection，无限追加、按时间累积）。</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Profile（档案）</th>
+<th>Collection（集合）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>类比</td>
+<td>通讯录详细资料页</td>
+<td>微信收藏夹</td>
+</tr>
+<tr>
+<td>结构</td>
+<td>固定 schema（JSON 字段）</td>
+<td>一条条独立记录</td>
+</tr>
+<tr>
+<td>写法</td>
+<td><strong>覆盖</strong>（update-in-place）</td>
+<td><strong>追加</strong>（append）</td>
+</tr>
+<tr>
+<td>适合</td>
+<td>用户偏好（写邮件风格、会议时长、VIP 名单）</td>
+<td>通用事实、人物背景、对话要点</td>
+</tr>
+<tr>
+<td>检索</td>
+<td>直接 <code>store.get()</code> 一把取出来</td>
+<td><code>store.search()</code> 语义检索 top-k</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：选型决策很简单——<strong>字段固定 + 数量小 → Profile；条目无限 + 不预知 → Collection</strong>。课上邮件助手两种都用：写邮件偏好用 Profile，过往邮件要点用 Collection。</p>
+</blockquote>
+<hr />
+<h2 id="memory-manager_1">二、组装一个最小可用的 Memory Manager</h2>
+<h3 id="_3">五步代码（课上原版）</h3>
+<pre class="codehilite"><code class="language-python">from langgraph.store.memory import InMemoryStore
+from langgraph.prebuilt import create_react_agent
+from langgraph.utils.config import get_store
+from langmem import create_manage_memory_tool, create_search_memory_tool
+
+# Step 1: 建一个带嵌入索引的 Store
+store = InMemoryStore(
+    index={&quot;dims&quot;: 1536, &quot;embed&quot;: &quot;openai:text-embedding-3-small&quot;}
+)
+
+# Step 2: prompt 函数（注意是函数不是字符串！）
+def prompt(state):
+    store = get_store()
+    memories = store.search((&quot;memories&quot;,), query=state[&quot;messages&quot;][-1].content)
+    system_msg = f&quot;&quot;&quot;You are a helpful email assistant.
+
+## Memories
+&lt;memories&gt;
+{memories}
+&lt;/memories&gt;
+&quot;&quot;&quot;
+    return [{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: system_msg}, *state[&quot;messages&quot;]]
+
+# Step 3: 把 LangMem 的两个工具加进 Agent 工具集
+agent = create_react_agent(
+    &quot;anthropic:claude-3-5-sonnet-latest&quot;,
+    prompt=prompt,
+    tools=[
+        create_manage_memory_tool(namespace=(&quot;memories&quot;,)),  # 写记忆
+        create_search_memory_tool(namespace=(&quot;memories&quot;,)),  # 查记忆
+    ],
+    store=store,
+)
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：<code>create_react_agent</code> 的 <code>prompt</code> 参数<strong>可以是一个函数</strong>，每轮调 LLM 前会被调用。"先 store.search 取记忆 → 再拼进 system prompt"——这就是把"长期记忆"接入"短期上下文"的接缝。这个细节是初学者最容易漏掉的。</p>
+</blockquote>
+<h3 id="_4">两个核心工具的分工</h3>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>谁调用</th>
+<th>干啥</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>manage_memory_tool</code></td>
+<td>Agent 自己（在对话过程中）</td>
+<td>create / update / delete 一条记忆</td>
+</tr>
+<tr>
+<td><code>search_memory_tool</code></td>
+<td>Agent 自己（在回答前）</td>
+<td>语义检索历史记忆</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="agent_2">第三部分：用语义记忆扩展 Agent 工具调用</h1>
+<h2 id="agent-semantic-memory">一、为什么 Agent 工具调用需要 Semantic Memory</h2>
+<h3 id="_5">两个动机故事（课上原版）</h3>
+<p><strong>故事 A：避免重复犯错</strong>
+- 上周：Agent 把 Alice 的工程支持邮件当垃圾邮件忽略掉了。
+- 用户骂：<strong>"以后从 Alice 来的邮件别忽略"</strong>。
+- 没有长期记忆 → 下周 Alice 再来邮件，Agent 还会再忽略一次（因为它早忘了）。
+- 有 Semantic Memory → 这条反馈被存下来，下次 Triage 时检索到，不会再犯。</p>
+<p><strong>故事 B：记住用户偏好</strong>
+- 用户：跟 Harrison 之外的人开 30 分钟会，跟 Harrison 开 1 小时；落款写 "Lance"；不用 "Best regards"，用 "Cheers"。
+- 这些偏好不应每次都让用户重新告诉 Agent。
+- 写一次 → 存进 Semantic Memory → 永久生效。</p>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：Semantic Memory 解决的不是"知识缺失"问题（那是 RAG 的事），而是"<strong>关于这个用户/这次交互的事实</strong>"。它是按用户隔离的、长期累积的、可读可写可更新的。</p>
+</blockquote>
+<hr />
+<h2 id="memory-tool-agent">二、把 memory tool 加入 Agent 工具集</h2>
+<h3 id="demo">完整邮件助手装配（课上 demo）</h3>
+<pre class="codehilite"><code class="language-python">from langmem import create_manage_memory_tool, create_search_memory_tool
+
+manage_memory_tool = create_manage_memory_tool(
+    namespace=(&quot;email_assistant&quot;, &quot;{langgraph_user_id}&quot;, &quot;collection&quot;)
+)
+search_memory_tool = create_search_memory_tool(
+    namespace=(&quot;email_assistant&quot;, &quot;{langgraph_user_id}&quot;, &quot;collection&quot;)
+)
+
+tools = [
+    write_email,                 # 业务工具：发邮件
+    schedule_meeting,            # 业务工具：约会议
+    check_calendar_availability, # 业务工具：查档期
+    manage_memory_tool,          # 让 Agent 自己决定&quot;我要记下来&quot;
+    search_memory_tool,          # 让 Agent 自己决定&quot;我要查一下以前&quot;
+]
+</code></pre>
+
+<h3 id="alice">Alice 邮件追踪案例（课上完整演示）</h3>
+<table>
+<thead>
+<tr>
+<th>时间点</th>
+<th>发生了什么</th>
+<th>Agent 的动作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Day 1</td>
+<td>Alice 问"那个缺失的 API endpoint 怎么样了？"</td>
+<td>回完邮件后调 <code>manage_memory_tool</code>，写入：<code>"Need to follow up with Alice Smith about missing API endpoint."</code></td>
+</tr>
+<tr>
+<td>Day 3</td>
+<td>Alice 又来邮件："any updates on my previous request?"</td>
+<td>先调 <code>search_memory_tool</code> → 命中 Day 1 那条记忆 → 在新回复中精确引用上次的上下文，不需要 Alice 重新解释。</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：注意 namespace 用了 <code>{langgraph_user_id}</code> 占位符——这意味着<strong>每个用户的记忆完全隔离</strong>。同样的"Alice"在不同用户的视角里可以是完全不同的人，互不干扰。</p>
+</blockquote>
+<hr />
+<h1 id="_6">第四部分：记忆操作——提取、整合与自更新</h1>
+<h2 id="hot-path-vs-background">一、Hot Path vs Background：两种写记忆的范式</h2>
+
+<div class="svg-card">
+  <p class="svg-title">📐 图4：Hot Path（边聊边记）vs Background（回家复盘）</p>
+  
+<svg viewBox="0 0 820 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:820px;height:auto;">
+  <defs>
+    <marker id="arr2" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <path d="M0,0 L9,3.5 L0,7 Z" fill="#dc2626"/>
+    </marker>
+    <marker id="arr3" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <path d="M0,0 L9,3.5 L0,7 Z" fill="#059669"/>
+    </marker>
+  </defs>
+
+  <!-- Hot Path 半区 -->
+  <rect x="20" y="20" width="380" height="320" rx="12" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+  <text x="210" y="48" text-anchor="middle" font-size="15" font-weight="700" fill="#dc2626">🔥 Hot Path（热路径）</text>
+  <text x="210" y="68" text-anchor="middle" font-size="11" fill="#7f1d1d">"边和朋友聊天边在脑子里默念要记住"</text>
+
+  <rect x="60" y="90" width="120" height="40" rx="6" fill="#fff" stroke="#dc2626"/>
+  <text x="120" y="115" text-anchor="middle" font-size="11" fill="#7f1d1d">用户输入</text>
+  <line x1="180" y1="110" x2="240" y2="110" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr2)"/>
+  <rect x="240" y="90" width="120" height="40" rx="6" fill="#dc2626"/>
+  <text x="300" y="115" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">主 Agent</text>
+  <line x1="300" y1="130" x2="300" y2="160" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arr2)"/>
+  <rect x="220" y="160" width="160" height="40" rx="6" fill="#fff" stroke="#dc2626"/>
+  <text x="300" y="180" text-anchor="middle" font-size="10" fill="#7f1d1d">manage_memory_tool</text>
+  <text x="300" y="194" text-anchor="middle" font-size="9" fill="#dc2626">（自己决定写入）</text>
+
+  <text x="55" y="240" font-size="11" font-weight="600" fill="#7f1d1d">⏱ 当前轮延迟</text>
+  <text x="180" y="240" font-size="11" fill="#7f1d1d">高（+500ms）</text>
+  <text x="55" y="262" font-size="11" font-weight="600" fill="#7f1d1d">📦 适合</text>
+  <text x="180" y="262" font-size="11" fill="#7f1d1d">Semantic 轻量写入</text>
+  <text x="55" y="284" font-size="11" font-weight="600" fill="#7f1d1d">⚡ 立即可用</text>
+  <text x="180" y="284" font-size="11" fill="#059669">是（下轮就用上）</text>
+  <text x="55" y="306" font-size="11" font-weight="600" fill="#7f1d1d">🛠 工具</text>
+  <text x="180" y="306" font-size="9" fill="#7f1d1d">create_manage_memory_tool</text>
+  <text x="55" y="324" font-size="11" font-weight="600" fill="#7f1d1d">📍 决策</text>
+  <text x="180" y="324" font-size="11" fill="#7f1d1d">Agent 自己用工具</text>
+
+  <!-- Background 半区 -->
+  <rect x="420" y="20" width="380" height="320" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="610" y="48" text-anchor="middle" font-size="15" font-weight="700" fill="#059669">🌙 Background（后台）</text>
+  <text x="610" y="68" text-anchor="middle" font-size="11" fill="#064e3b">"聊完天回家路上一边走一边复盘"</text>
+
+  <rect x="460" y="90" width="120" height="40" rx="6" fill="#fff" stroke="#059669"/>
+  <text x="520" y="115" text-anchor="middle" font-size="11" fill="#064e3b">用户输入</text>
+  <line x1="580" y1="110" x2="640" y2="110" stroke="#059669" stroke-width="1.5" marker-end="url(#arr3)"/>
+  <rect x="640" y="90" width="120" height="40" rx="6" fill="#059669"/>
+  <text x="700" y="115" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">主 Agent（0延迟返回）</text>
+  <line x1="700" y1="130" x2="700" y2="160" stroke="#059669" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr3)"/>
+  <rect x="600" y="160" width="180" height="40" rx="6" fill="#fff" stroke="#059669"/>
+  <text x="690" y="180" text-anchor="middle" font-size="10" fill="#064e3b">ReflectionExecutor</text>
+  <text x="690" y="194" text-anchor="middle" font-size="9" fill="#059669">（异步整合 / debounce）</text>
+
+  <text x="455" y="240" font-size="11" font-weight="600" fill="#064e3b">⏱ 当前轮延迟</text>
+  <text x="580" y="240" font-size="11" fill="#059669">0（不阻塞）</text>
+  <text x="455" y="262" font-size="11" font-weight="600" fill="#064e3b">📦 适合</text>
+  <text x="580" y="262" font-size="11" fill="#064e3b">Episodic / Procedural</text>
+  <text x="455" y="284" font-size="11" font-weight="600" fill="#064e3b">⚡ 立即可用</text>
+  <text x="580" y="284" font-size="11" fill="#dc2626">否（下一轮才生效）</text>
+  <text x="455" y="306" font-size="11" font-weight="600" fill="#064e3b">🛠 工具</text>
+  <text x="580" y="306" font-size="9" fill="#064e3b">create_memory_store_manager</text>
+  <text x="455" y="324" font-size="11" font-weight="600" fill="#064e3b">📍 决策</text>
+  <text x="580" y="324" font-size="11" fill="#064e3b">独立反思 Agent</text>
+</svg>
+
+</div>
+
+<h3 id="_7">核心类比（课上原话）</h3>
+<blockquote>
+<p><strong>Hot Path</strong> 像你<strong>边和朋友聊天边在脑子里默念"这点要记住"</strong>。
+<strong>Background</strong> 像你<strong>聊完天回家路上一边走一边复盘</strong>——后者更深、更整合，但延迟。</p>
+</blockquote>
+<h3 id="_8">两种范式对比</h3>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Hot Path（热路径）</th>
+<th>Background（后台）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>触发时机</td>
+<td>生成回答的过程中</td>
+<td>对话结束 / 空闲时</td>
+</tr>
+<tr>
+<td>决策方</td>
+<td>主 Agent 自己用工具决定</td>
+<td>独立反思 Agent（reflector）</td>
+</tr>
+<tr>
+<td>当前轮延迟</td>
+<td>高（多调一次工具，~+500ms）</td>
+<td>0（不阻塞用户）</td>
+</tr>
+<tr>
+<td>处理深度</td>
+<td>浅（每轮一次）</td>
+<td>深（批量整合）</td>
+</tr>
+<tr>
+<td>立即可用</td>
+<td>是</td>
+<td>否（下一轮才生效）</td>
+</tr>
+<tr>
+<td>API 工具</td>
+<td><code>create_manage_memory_tool</code> / <code>create_search_memory_tool</code></td>
+<td><code>create_memory_store_manager</code> / <code>ReflectionExecutor</code></td>
+</tr>
+<tr>
+<td>适合谁</td>
+<td>Semantic 的轻量写入</td>
+<td>Episodic / Procedural 的整合</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：Hot Path <strong>当前轮慢</strong>但下轮就用上；Background <strong>当前轮 0 延迟</strong>但下一轮才看到效果。两者<strong>不是互斥</strong>的——生产里通常 Hot Path 处理"用户明确要记的"，Background 处理"对话隐含的事实抽取与整合"。</p>
+</blockquote>
+<hr />
+<h2 id="background">二、Background 模式的代码（课上演示）</h2>
+<pre class="codehilite"><code class="language-python">from langchain.chat_models import init_chat_model
+from langgraph.func import entrypoint
+from langgraph.store.memory import InMemoryStore
+from langmem import ReflectionExecutor, create_memory_store_manager
+
+store = InMemoryStore(index={&quot;dims&quot;: 1536, &quot;embed&quot;: &quot;openai:text-embedding-3-small&quot;})
+llm = init_chat_model(&quot;anthropic:claude-3-5-sonnet-latest&quot;)
+
+# 创建一个&quot;反思器&quot;
+memory_manager = create_memory_store_manager(
+    &quot;anthropic:claude-3-5-sonnet-latest&quot;,
+    namespace=(&quot;memories&quot;,),
+)
+
+@entrypoint(store=store)
+async def chat(message: str):
+    response = llm.invoke(message)
+    to_process = {&quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: message}, response]}
+    await memory_manager.ainvoke(to_process)   # 异步整合
+    return response.content
+</code></pre>
+
+<hr />
+<h2 id="update-in-place">三、记忆冲突 / 去重 / Update-in-place（课上的"魔法演示"）</h2>
+
+<div class="svg-card">
+  <p class="svg-title">📐 图6：Update-in-place — 狗改名的语义去重</p>
+  
+<svg viewBox="0 0 780 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:780px;height:auto;">
+  <defs>
+    <marker id="arr5" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <path d="M0,0 L9,3.5 L0,7 Z" fill="#0052d9"/>
+    </marker>
+  </defs>
+  <!-- 第1轮 -->
+  <rect x="20" y="30" width="220" height="100" rx="8" fill="#edf4ff" stroke="#0052d9"/>
+  <text x="130" y="55" text-anchor="middle" font-size="12" font-weight="700" fill="#003cab">第 1 轮</text>
+  <text x="130" y="80" text-anchor="middle" font-size="11" fill="#4b4b4b">"My dog's name is Fido."</text>
+  <text x="130" y="105" text-anchor="middle" font-size="10" fill="#0052d9">提取出事实并写入</text>
+  <line x1="240" y1="80" x2="290" y2="80" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arr5)"/>
+
+  <!-- Store 状态 1 -->
+  <rect x="290" y="40" width="220" height="80" rx="8" fill="#001a45"/>
+  <text x="400" y="65" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Store 状态</text>
+  <text x="400" y="90" text-anchor="middle" font-size="10" fill="#66b1ff">id: mem_001</text>
+  <text x="400" y="106" text-anchor="middle" font-size="10" fill="#d4e3fc">{has_dog: "Fido"}</text>
+
+  <!-- 第2轮 -->
+  <rect x="20" y="160" width="220" height="100" rx="8" fill="#edf4ff" stroke="#0052d9"/>
+  <text x="130" y="185" text-anchor="middle" font-size="12" font-weight="700" fill="#003cab">第 2 轮</text>
+  <text x="130" y="210" text-anchor="middle" font-size="10" fill="#4b4b4b">"Actually I renamed</text>
+  <text x="130" y="226" text-anchor="middle" font-size="10" fill="#4b4b4b">my dog to Buddy."</text>
+  <text x="130" y="248" text-anchor="middle" font-size="10" fill="#0052d9">语义检索找到旧记录</text>
+  <line x1="240" y1="210" x2="290" y2="210" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arr5)"/>
+
+  <!-- Store 状态 2 -->
+  <rect x="290" y="170" width="220" height="80" rx="8" fill="#001a45"/>
+  <text x="400" y="195" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Store 状态（更新后）</text>
+  <text x="400" y="220" text-anchor="middle" font-size="10" fill="#66b1ff">id: mem_001（同 ID）</text>
+  <text x="400" y="236" text-anchor="middle" font-size="10" fill="#10b981">{has_dog: "Buddy"} ✓</text>
+
+  <!-- 关键说明 -->
+  <rect x="540" y="60" width="220" height="180" rx="8" fill="#fef3c7" stroke="#f59e0b"/>
+  <text x="650" y="85" text-anchor="middle" font-size="12" font-weight="700" fill="#92400e">🔑 关键三步</text>
+  <text x="555" y="115" font-size="10" fill="#78350f">1. embedding 查相似旧记忆</text>
+  <text x="555" y="138" font-size="10" fill="#78350f">2. LLM 判断："新增 / 更新</text>
+  <text x="555" y="153" font-size="10" fill="#78350f">    / 忽略"</text>
+  <text x="555" y="178" font-size="10" fill="#78350f">3. 用同一 ID 改写（不追加</text>
+  <text x="555" y="193" font-size="10" fill="#78350f">    Fido 那条）</text>
+  <text x="555" y="220" font-size="10" font-weight="600" fill="#dc2626">enable_inserts=True</text>
+  <text x="555" y="236" font-size="10" font-weight="600" fill="#dc2626">enable_updates=True</text>
+</svg>
+
+</div>
+
+<h3 id="_9">故事：狗的名字改了</h3>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>用户输入</th>
+<th>Background reflector 干了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第 1 轮</td>
+<td>"My dog's name is Fido."</td>
+<td>提取出 <code>{subject: user, has_dog: "Fido"}</code>，写入 store。</td>
+</tr>
+<tr>
+<td>第 2 轮</td>
+<td>"Actually I renamed my dog to Buddy."</td>
+<td><strong>不会</strong>新增一条 has_dog: Buddy；而是<strong>根据语义检索找到旧记录的 ID，update-in-place 改成 Buddy</strong>。</td>
+</tr>
+</tbody>
+</table>
+<p>实现关键参数：</p>
+<pre class="codehilite"><code class="language-python">memory_manager = create_memory_manager(
+    &quot;anthropic:claude-3-5-sonnet-latest&quot;,
+    schemas=[Fact],
+    instructions=&quot;Extract important facts about the user...&quot;,
+    enable_inserts=True,   # 允许插入新条
+    enable_updates=True,   # 允许修改/合并已存在的条
+)
+</code></pre>
+
+<p>LangMem 内部的 reconciliation（调和）流程：
+1. 用 embedding 查找语义相似的旧记忆。
+2. 让 LLM 决定 "新增 / 更新 / 忽略"。
+3. 写入 store。</p>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：去重<strong>不是 hash 去重，是语义去重</strong>。"我有只狗" 和 "我养了一只狗" 会被识别成同一条事实——这要求每次写入都过一次 LLM 判断，所以 Background 模式更适合做这种"重活"。</p>
+</blockquote>
+<hr />
+<h2 id="reflectionexecutor">四、ReflectionExecutor：防抖 + 队列</h2>
+
+<div class="svg-card">
+  <p class="svg-title">📐 图5：ReflectionExecutor 的 Debounce 机制</p>
+  
+<svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;height:auto;">
+  <defs>
+    <marker id="arr4" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <path d="M0,0 L9,3.5 L0,7 Z" fill="#0052d9"/>
+    </marker>
+    <marker id="cross" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+      <path d="M2,2 L8,8 M8,2 L2,8" stroke="#dc2626" stroke-width="1.5" fill="none"/>
+    </marker>
+  </defs>
+  <!-- 时间轴 -->
+  <line x1="40" y1="160" x2="720" y2="160" stroke="#4b4b4b" stroke-width="1.5" marker-end="url(#arr4)"/>
+  <text x="725" y="155" font-size="11" fill="#4b4b4b">t</text>
+
+  <!-- 消息事件 -->
+  <circle cx="100" cy="160" r="8" fill="#0052d9"/>
+  <text x="100" y="140" text-anchor="middle" font-size="11" fill="#003cab">msg₁</text>
+  <text x="100" y="185" text-anchor="middle" font-size="9" fill="#dc2626">submit_task</text>
+  <text x="100" y="198" text-anchor="middle" font-size="9" fill="#dc2626">after=30s</text>
+
+  <circle cx="220" cy="160" r="8" fill="#0052d9"/>
+  <text x="220" y="140" text-anchor="middle" font-size="11" fill="#003cab">msg₂</text>
+  <text x="220" y="185" text-anchor="middle" font-size="9" fill="#dc2626">取消 msg₁</text>
+  <text x="220" y="198" text-anchor="middle" font-size="9" fill="#dc2626">重置计时</text>
+
+  <circle cx="340" cy="160" r="8" fill="#0052d9"/>
+  <text x="340" y="140" text-anchor="middle" font-size="11" fill="#003cab">msg₃</text>
+  <text x="340" y="185" text-anchor="middle" font-size="9" fill="#dc2626">取消 msg₂</text>
+  <text x="340" y="198" text-anchor="middle" font-size="9" fill="#dc2626">重置计时</text>
+
+  <circle cx="460" cy="160" r="8" fill="#0052d9"/>
+  <text x="460" y="140" text-anchor="middle" font-size="11" fill="#003cab">msg₄</text>
+  <text x="460" y="185" text-anchor="middle" font-size="9" fill="#dc2626">取消 msg₃</text>
+  <text x="460" y="198" text-anchor="middle" font-size="9" fill="#dc2626">重置计时</text>
+
+  <!-- 30s 等待 -->
+  <line x1="460" y1="220" x2="640" y2="220" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6,4"/>
+  <text x="550" y="240" text-anchor="middle" font-size="11" font-weight="600" fill="#f59e0b">⏳ 30s 静默期</text>
+
+  <!-- Reflection trigger -->
+  <rect x="600" y="80" width="120" height="60" rx="8" fill="#059669"/>
+  <text x="660" y="105" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">✨ 反思触发</text>
+  <text x="660" y="125" text-anchor="middle" font-size="10" fill="#d1fae5">整合 msg₁₋₄</text>
+  <line x1="640" y1="158" x2="660" y2="142" stroke="#059669" stroke-width="1.5"/>
+
+  <!-- 关键说明 -->
+  <rect x="40" y="260" width="680" height="50" rx="6" fill="#edf4ff" stroke="#d4e3fc"/>
+  <text x="60" y="280" font-size="12" font-weight="600" fill="#003cab">💡 核心机制：</text>
+  <text x="60" y="298" font-size="11" fill="#4b4b4b">同一 thread_id 的新任务会取消前一个，最终一次对话只跑一次反思——既省 token，又能整合所有上下文。</text>
+</svg>
+
+</div>
+
+<h3 id="debounce">为什么需要 Debounce</h3>
+<p><strong>一句话</strong>：用户连发 5 条消息，不应触发 5 次后台反思——浪费钱、还可能矛盾。</p>
+<pre class="codehilite"><code class="language-python">from langmem import ReflectionExecutor, create_memory_store_manager
+
+memory_manager = create_memory_store_manager(...)
+executor = ReflectionExecutor(reflector=memory_manager)
+
+future = executor.submit_task(
+    thread_id=&quot;user_123&quot;,
+    conversation_history=history,
+    after_seconds=30,   # ← 防抖：30s 内有新消息就重置计时
+)
+</code></pre>
+
+<h3 id="4">核心机制（4 步）</h3>
+<pre class="codehilite"><code>1. submit_task 进入优先级队列
+       ↓
+2. 等待 after_seconds（默认 30s）
+       ↓
+3. 等待期间同 thread_id 又来新任务？
+   ├─ 是 → 取消前一个，用新的重新计时
+   └─ 否 → 继续等
+       ↓
+4. 最终一次对话只跑一次反思，整合所有上下文
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：原来生产环境的记忆系统<strong>不是每条消息都立刻反思一次</strong>，而是用 debounce <strong>攒一批再整合</strong>——这就是为什么 Background 又不阻塞、又质量高的关键。debounce 单位是 <code>thread_id</code>，多用户并发不会互相干扰。</p>
+</blockquote>
+<hr />
+<h1 id="memory-aware-agent">第五部分：记忆感知智能体（Memory-Aware Agent）</h1>
+<h2 id="procedural-memory-agent-prompt">一、Procedural Memory：让 Agent 自己改自己的 Prompt</h2>
+
+<div class="svg-card">
+  <p class="svg-title">📐 图7：Procedural Memory — 把 prompt 当数据，让 Agent 自己改自己</p>
+  
+<svg viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:800px;height:auto;">
+  <defs>
+    <marker id="arr6" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <path d="M0,0 L9,3.5 L0,7 Z" fill="#0052d9"/>
+    </marker>
+  </defs>
+
+  <!-- Step 1: 旧 prompt -->
+  <rect x="20" y="40" width="220" height="100" rx="8" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="130" y="62" text-anchor="middle" font-size="12" font-weight="700" fill="#003cab">①  旧 Prompt（来自 Store）</text>
+  <text x="130" y="85" text-anchor="middle" font-size="10" fill="#4b4b4b">"You are a helpful</text>
+  <text x="130" y="100" text-anchor="middle" font-size="10" fill="#4b4b4b">email assistant. Write</text>
+  <text x="130" y="115" text-anchor="middle" font-size="10" fill="#4b4b4b">concise emails."</text>
+  <text x="130" y="132" text-anchor="middle" font-size="9" fill="#0052d9">store.get(("lance",), "agent_instructions")</text>
+
+  <!-- Step 2: 用户反馈 -->
+  <rect x="290" y="40" width="220" height="100" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="400" y="62" text-anchor="middle" font-size="12" font-weight="700" fill="#92400e">②  用户反馈</text>
+  <text x="400" y="92" text-anchor="middle" font-size="11" fill="#78350f">"Always sign your emails</text>
+  <text x="400" y="108" text-anchor="middle" font-size="11" fill="#78350f">as Lance"</text>
+  <text x="400" y="132" text-anchor="middle" font-size="9" fill="#92400e">trajectories = (messages, feedback)</text>
+
+  <!-- Step 3: 优化器 -->
+  <rect x="560" y="40" width="220" height="100" rx="8" fill="#001a45"/>
+  <text x="670" y="62" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">③  Prompt Optimizer</text>
+  <text x="670" y="88" text-anchor="middle" font-size="10" fill="#d4e3fc">create_multi_prompt_optimizer</text>
+  <text x="670" y="106" text-anchor="middle" font-size="10" fill="#d4e3fc">kind="prompt_memory"</text>
+  <text x="670" y="124" text-anchor="middle" font-size="9" fill="#66b1ff">读 update_instructions 元规则</text>
+
+  <!-- Arrows -->
+  <line x1="240" y1="90" x2="290" y2="90" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arr6)"/>
+  <line x1="510" y1="90" x2="560" y2="90" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arr6)"/>
+  <line x1="670" y1="140" x2="670" y2="180" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arr6)"/>
+
+  <!-- Step 4: 新 prompt -->
+  <rect x="290" y="180" width="380" height="100" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="480" y="202" text-anchor="middle" font-size="12" font-weight="700" fill="#059669">④  新 Prompt（自动改写）</text>
+  <text x="480" y="226" text-anchor="middle" font-size="10" fill="#064e3b">"You are a helpful email assistant. ...</text>
+  <text x="480" y="242" text-anchor="middle" font-size="10" fill="#064e3b">When sending emails, always sign them</text>
+  <text x="480" y="258" text-anchor="middle" font-size="10" font-weight="700" fill="#059669">as 'Lance'."</text>
+  <text x="480" y="274" text-anchor="middle" font-size="9" fill="#059669">store.put(("lance",), "agent_instructions", new_prompt)</text>
+
+  <!-- Step 5: 验证 -->
+  <rect x="20" y="180" width="220" height="100" rx="8" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="130" y="202" text-anchor="middle" font-size="12" font-weight="700" fill="#003cab">⑤  下次邮件</text>
+  <text x="130" y="228" text-anchor="middle" font-size="11" fill="#4b4b4b">Agent 自动落款</text>
+  <text x="130" y="248" text-anchor="middle" font-size="13" font-weight="700" fill="#dc2626">"Lance" ✓</text>
+  <text x="130" y="270" text-anchor="middle" font-size="9" fill="#0052d9">没改一行代码，只改 store</text>
+  <line x1="290" y1="230" x2="240" y2="230" stroke="#059669" stroke-width="1.5" marker-end="url(#arr6)"/>
+
+  <!-- 哇塞时刻 -->
+  <rect x="20" y="305" width="760" height="55" rx="8" fill="#fee2e2" stroke="#dc2626"/>
+  <text x="40" y="328" font-size="13" font-weight="700" fill="#7f1d1d">💥 哇塞时刻：</text>
+  <text x="40" y="350" font-size="11" fill="#7f1d1d">"原来 Agent 进化不需要 fine-tune、不需要 RLHF——把 prompt 字符串本身当成一条记忆，再用一个 LLM 去重写它，就实现了在线学习。"</text>
+</svg>
+
+</div>
+
+<h3 id="_10">这一节最大的"哇塞时刻"</h3>
+<blockquote>
+<p><strong>"我们一直把 system prompt 当成开发者写死的东西。但 system prompt 本身也可以是一种可学习、可更新的记忆——让 Agent 收集用户反馈，自己改写自己的 prompt。"</strong></p>
+</blockquote>
+<h3 id="procedural-memory">Procedural Memory 的实现路径</h3>
+<p><strong>第一步：初始 prompt 不写死，从 store 里拉</strong></p>
+<pre class="codehilite"><code class="language-python">prompt_instructions = {
+    &quot;ignore&quot;:  &quot;Ignore promotional emails and spam.&quot;,
+    &quot;notify&quot;:  &quot;Notify me for urgent issues regarding service downtime.&quot;,
+    &quot;respond&quot;: &quot;Respond to all customer support inquiries.&quot;,
+    &quot;agent&quot;:   &quot;You are a helpful email assistant. Write concise and professional emails.&quot;
+}
+
+def create_prompt(state, config, store):
+    user_id = config[&quot;configurable&quot;][&quot;langgraph_user_id&quot;]
+    namespace = (user_id,)
+    result = store.get(namespace, &quot;agent_instructions&quot;)
+    prompt = result.value[&quot;prompt&quot;] if result else prompt_instructions[&quot;agent&quot;]
+    return [{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: system_template.format(instructions=prompt)},
+            *state[&quot;messages&quot;]]
+</code></pre>
+
+<p><strong>第二步：用 <code>create_multi_prompt_optimizer</code> 根据反馈自动改写</strong></p>
+<pre class="codehilite"><code class="language-python">from langmem import create_multi_prompt_optimizer
+
+optimizer = create_multi_prompt_optimizer(
+    &quot;anthropic:claude-3-5-sonnet-latest&quot;,
+    kind=&quot;prompt_memory&quot;,
+)
+
+prompts = [
+    {
+        &quot;name&quot;: &quot;main_agent&quot;,
+        &quot;prompt&quot;: store.get((&quot;lance&quot;,), &quot;agent_instructions&quot;).value[&quot;prompt&quot;],
+        &quot;update_instructions&quot;: &quot;Keep the instructions concise and focused on key behaviors.&quot;,
+        &quot;when_to_update&quot;: &quot;Update when there is feedback on how the agent should write emails or schedule events.&quot;,
+    },
+    {
+        &quot;name&quot;: &quot;triage_ignore&quot;,
+        &quot;prompt&quot;: store.get((&quot;lance&quot;,), &quot;triage_ignore&quot;).value[&quot;prompt&quot;],
+        &quot;update_instructions&quot;: &quot;Keep the instructions short and to the point.&quot;,
+        &quot;when_to_update&quot;: &quot;Update whenever there is feedback on which emails should be ignored.&quot;,
+    },
+    # ... triage_notify, triage_respond
+]
+
+# trajectories = (前一次的 messages, 用户反馈)
+conversations = [
+    (response[&quot;messages&quot;], &quot;Always sign your emails 'Best regards, Lance'&quot;)
+]
+
+updated = optimizer.invoke({&quot;trajectories&quot;: conversations, &quot;prompts&quot;: prompts})
+
+for new_p, old_p in zip(updated, prompts):
+    if new_p[&quot;prompt&quot;] != old_p[&quot;prompt&quot;]:
+        store.put((&quot;lance&quot;,), f&quot;{old_p['name']}_instructions&quot;,
+                  {&quot;prompt&quot;: new_p[&quot;prompt&quot;]})
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：<strong><code>update_instructions</code> 和 <code>when_to_update</code> 是元规则</strong>——这两个字段直接喂给改写器作为 meta-prompt，让它知道"什么时候才改、改成什么风格"。这是从"规则编程"到"规则改写规则"的跃迁。</p>
+</blockquote>
+<hr />
+<h2 id="_11">二、两个反馈案例（课上完整演示）</h2>
+<h3 id="a">案例 A：邮件签名</h3>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>反馈</td>
+<td><code>"Always sign your emails as Lance"</code></td>
+</tr>
+<tr>
+<td>优化器判定</td>
+<td>动 <code>main_agent</code> prompt（因为 when_to_update 提到"how to write emails"）</td>
+</tr>
+<tr>
+<td>改写后的 prompt</td>
+<td><code>"You are a helpful email assistant. ... When sending emails, always sign them as 'Lance'."</code></td>
+</tr>
+<tr>
+<td>验证</td>
+<td>下一封邮件自动落款 Lance</td>
+</tr>
+</tbody>
+</table>
+<h3 id="b">案例 B：忽略某人邮件</h3>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>错误</td>
+<td>Agent 错误回复了 Alice Jones 的无关邮件</td>
+</tr>
+<tr>
+<td>反馈</td>
+<td><code>"Ignore any emails from Alice Jones."</code></td>
+</tr>
+<tr>
+<td>优化器判定</td>
+<td>动 <code>triage_ignore</code> prompt（when_to_update 命中"which emails should be ignored"）</td>
+</tr>
+<tr>
+<td>改写后的 prompt</td>
+<td><code>triage_ignore</code> 增加 <code>"Ignore all emails from Alice Jones."</code></td>
+</tr>
+<tr>
+<td>验证</td>
+<td>下次 Alice Jones 来邮件直接被 triage 路由到 ignore</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：整个过程<strong>没改一行代码，只改 store</strong>。这就是"把 prompt 当数据"的威力——Agent 进化不再需要重新部署，只需要写一条记忆。</p>
+</blockquote>
+<hr />
+<h2 id="memory-aware-agent_1">三、Memory-Aware Agent 完整架构</h2>
+
+<div class="svg-card">
+  <p class="svg-title">📐 图8：Memory-Aware Agent 完整架构（邮件助手三类记忆全装配）</p>
+  
+<svg viewBox="0 0 820 540" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:820px;height:auto;">
+  <defs>
+    <marker id="arr7" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <path d="M0,0 L9,3.5 L0,7 Z" fill="#0052d9"/>
+    </marker>
+  </defs>
+
+  <!-- 入口 -->
+  <rect x="320" y="20" width="180" height="40" rx="20" fill="#001a45"/>
+  <text x="410" y="45" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">📥 incoming email</text>
+  <line x1="410" y1="60" x2="410" y2="90" stroke="#0052d9" stroke-width="1.8" marker-end="url(#arr7)"/>
+
+  <!-- Triage Router -->
+  <rect x="220" y="90" width="380" height="120" rx="10" fill="#0052d9" stroke="#003cab" stroke-width="1.5"/>
+  <text x="410" y="115" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Triage Router（LangGraph 节点）</text>
+  <line x1="240" y1="125" x2="580" y2="125" stroke="#66b1ff" stroke-width="1"/>
+  <text x="240" y="148" font-size="11" fill="#d4e3fc">• 读 procedural memory: store.get("triage_ignore")</text>
+  <text x="240" y="168" font-size="11" fill="#d4e3fc">• 检索 episodic memory: store.search(examples)</text>
+  <text x="240" y="188" font-size="11" fill="#d4e3fc">• LLM 输出: ignore / notify / respond</text>
+
+  <line x1="410" y1="210" x2="410" y2="240" stroke="#0052d9" stroke-width="1.8" marker-end="url(#arr7)"/>
+  <text x="430" y="227" font-size="10" fill="#dc2626">respond 分支</text>
+
+  <!-- Response Agent -->
+  <rect x="160" y="240" width="500" height="160" rx="10" fill="#003cab" stroke="#001a45" stroke-width="1.5"/>
+  <text x="410" y="265" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Response Agent（ReAct）</text>
+  <line x1="180" y1="275" x2="640" y2="275" stroke="#66b1ff" stroke-width="1"/>
+
+  <text x="180" y="297" font-size="11" font-weight="600" fill="#66b1ff">prompt 函数（关键！）：</text>
+  <text x="195" y="313" font-size="10" fill="#d4e3fc">• 读 agent_instructions （procedural memory）</text>
+  <text x="195" y="328" font-size="10" fill="#d4e3fc">• search_memory_tool 取 semantic facts/preferences</text>
+
+  <text x="180" y="351" font-size="11" font-weight="600" fill="#66b1ff">tools:</text>
+  <text x="195" y="368" font-size="10" fill="#d4e3fc">write_email · schedule_meeting · check_availability</text>
+  <text x="195" y="384" font-size="10" fill="#fbbf24">manage_memory_tool ◀── hot path</text>
+  <text x="450" y="384" font-size="10" fill="#fbbf24">search_memory_tool ◀── hot path</text>
+
+  <line x1="410" y1="400" x2="410" y2="430" stroke="#0052d9" stroke-width="1.8" marker-end="url(#arr7)"/>
+  <text x="440" y="418" font-size="10" fill="#dc2626">user feedback</text>
+
+  <!-- Background Reflection -->
+  <rect x="160" y="430" width="500" height="100" rx="10" fill="#059669" stroke="#064e3b" stroke-width="1.5"/>
+  <text x="410" y="455" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Background Reflection</text>
+  <line x1="180" y1="465" x2="640" y2="465" stroke="#a7f3d0" stroke-width="1"/>
+  <text x="180" y="487" font-size="11" fill="#d1fae5">• create_memory_store_manager → semantic / episodic 整合</text>
+  <text x="180" y="505" font-size="11" fill="#d1fae5">• create_multi_prompt_optimizer → procedural 重写</text>
+  <text x="180" y="521" font-size="10" fill="#fbbf24">（由 ReflectionExecutor 调度，30s debounce）</text>
+
+  <!-- Store 标注 -->
+  <rect x="660" y="240" width="150" height="160" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="735" y="265" text-anchor="middle" font-size="12" font-weight="700" fill="#92400e">📦 Same Store</text>
+  <text x="735" y="285" text-anchor="middle" font-size="10" fill="#78350f">不同 namespace</text>
+  <line x1="675" y1="295" x2="795" y2="295" stroke="#f59e0b" stroke-width="0.8"/>
+  <text x="670" y="315" font-size="9" fill="#78350f">("lance",</text>
+  <text x="685" y="328" font-size="9" fill="#78350f">"agent_instructions")</text>
+  <text x="670" y="345" font-size="9" fill="#78350f">("lance",</text>
+  <text x="685" y="358" font-size="9" fill="#78350f">"triage_ignore")</text>
+  <text x="670" y="375" font-size="9" fill="#78350f">("email_asst",</text>
+  <text x="685" y="388" font-size="9" fill="#78350f">"lance", "collection")</text>
+</svg>
+
+</div>
+
+<h3 id="_12">各层分工表</h3>
+<table>
+<thead>
+<tr>
+<th>记忆类型</th>
+<th>在邮件助手里干什么</th>
+<th>实现</th>
+<th>操作路径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Semantic</strong></td>
+<td>"Alice 是 VIP"、"我落款叫 Lance"、"跟 Harrison 开 1h 会"</td>
+<td><code>create_manage_memory_tool</code> + <code>create_search_memory_tool</code> + Store collection/profile</td>
+<td>Hot path</td>
+</tr>
+<tr>
+<td><strong>Episodic</strong></td>
+<td>Triage 用过去成功/失败的邮件分类作为 few-shot</td>
+<td>Store 里存 <code>{email, label, response}</code>，每次 triage 用相似度搜出 top-k 注入 prompt</td>
+<td>Background</td>
+</tr>
+<tr>
+<td><strong>Procedural</strong></td>
+<td>Triage 的 ignore/notify/respond 三段提示 + Response Agent 主指令</td>
+<td>存在 store 里的 <code>{prompt: "..."}</code> 字符串，靠 <code>create_multi_prompt_optimizer</code> 自动改写</td>
+<td>Background</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ascii">完整架构图（ASCII）</h3>
+<pre class="codehilite"><code>                    ┌────────────────────────────────────┐
+   incoming email ─▶│   Triage Router (LangGraph 节点)   │
+                    │  ─────────────────────────────────  │
+                    │  • 读 procedural memory             │
+                    │    (store.get(&quot;triage_ignore&quot;))     │
+                    │  • 检索 episodic memory             │
+                    │    (store.search(examples))         │
+                    │  • LLM 输出 ignore/notify/respond   │
+                    └──────────────┬─────────────────────┘
+                                   │ respond
+                                   ▼
+                    ┌────────────────────────────────────┐
+                    │   Response Agent (ReAct)            │
+                    │  ─────────────────────────────────  │
+                    │  prompt 函数（关键！）：            │
+                    │   • 读 agent_instructions           │
+                    │     (procedural)                    │
+                    │   • search_memory_tool 取           │
+                    │     semantic facts/preferences      │
+                    │  tools:                             │
+                    │   write_email                       │
+                    │   schedule_meeting                  │
+                    │   check_availability                │
+                    │   manage_memory_tool ◀── hot       │
+                    │   search_memory_tool ◀── hot       │
+                    └──────────────┬─────────────────────┘
+                                   │ user feedback
+                                   ▼
+                    ┌────────────────────────────────────┐
+                    │  Background Reflection              │
+                    │  ─────────────────────────────────  │
+                    │  • create_memory_store_manager      │
+                    │    → semantic / episodic 整合       │
+                    │  • create_multi_prompt_optimizer    │
+                    │    → procedural 重写                │
+                    │  (由 ReflectionExecutor 调度)        │
+                    └────────────────────────────────────┘
+</code></pre>
+
+<h3 id="demo_1">完整组装代码（课上 demo 精简版）</h3>
+<pre class="codehilite"><code class="language-python">from langgraph.graph import StateGraph, START
+from langgraph.prebuilt import create_react_agent
+from langgraph.store.memory import InMemoryStore
+
+store = InMemoryStore(index={&quot;embed&quot;: &quot;openai:text-embedding-3-small&quot;})
+
+# Response Agent
+response_agent = create_react_agent(
+    &quot;anthropic:claude-3-5-sonnet-latest&quot;,
+    tools=[write_email, check_calendar_availability, schedule_meeting,
+           manage_memory_tool, search_memory_tool],
+    prompt=create_prompt,   # 内部从 store 拉 procedural memory
+    store=store,
+)
+
+# 整张图
+email_agent = StateGraph(State)
+email_agent.add_node(&quot;triage_router&quot;, triage_router)
+email_agent.add_node(&quot;response_agent&quot;, response_agent)
+email_agent.add_edge(START, &quot;triage_router&quot;)
+email_agent = email_agent.compile(store=store)
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：<code>triage_router</code> 和 <code>response_agent</code> 用<strong>同一个 store</strong> 但读<strong>不同 namespace</strong>——这就是为什么 namespace 设计对了，整套体系才优雅：
+- <code>(user_id, "agent_instructions")</code> → main_agent prompt
+- <code>(user_id, "triage_ignore")</code> → triage 忽略规则
+- <code>("email_assistant", user_id, "collection")</code> → semantic facts
+- <code>("email_assistant", user_id, "examples")</code> → episodic few-shot</p>
+</blockquote>
+<hr />
+<h1 id="_13">第六部分：课程总结</h1>
+<h2 id="harrison">Harrison 的收尾三点</h2>
+
+<div class="svg-card">
+  <p class="svg-title">📐 图9：从金鱼脑到完整 Memory-Aware Agent 的进化路径</p>
+  
+<svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:800px;height:auto;">
+  <defs>
+    <marker id="arr8" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#0052d9"/>
+    </marker>
+  </defs>
+
+  <!-- Stage 0 -->
+  <rect x="20" y="80" width="130" height="80" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+  <text x="85" y="105" text-anchor="middle" font-size="12" font-weight="700" fill="#dc2626">🐟 baseline</text>
+  <text x="85" y="125" text-anchor="middle" font-size="10" fill="#7f1d1d">金鱼脑助手</text>
+  <text x="85" y="143" text-anchor="middle" font-size="9" fill="#7f1d1d">每次都从零开始</text>
+  <line x1="155" y1="120" x2="195" y2="120" stroke="#0052d9" stroke-width="1.8" marker-end="url(#arr8)"/>
+
+  <!-- Stage 1 -->
+  <rect x="200" y="80" width="130" height="80" rx="8" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="265" y="105" text-anchor="middle" font-size="12" font-weight="700" fill="#0052d9">+ Semantic</text>
+  <text x="265" y="125" text-anchor="middle" font-size="10" fill="#003cab">记住事实/偏好</text>
+  <text x="265" y="143" text-anchor="middle" font-size="9" fill="#003cab">"落款 Lance"</text>
+  <line x1="335" y1="120" x2="375" y2="120" stroke="#0052d9" stroke-width="1.8" marker-end="url(#arr8)"/>
+
+  <!-- Stage 2 -->
+  <rect x="380" y="80" width="130" height="80" rx="8" fill="#dbeafe" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="445" y="105" text-anchor="middle" font-size="12" font-weight="700" fill="#0052d9">+ Episodic</text>
+  <text x="445" y="125" text-anchor="middle" font-size="10" fill="#003cab">few-shot 历史</text>
+  <text x="445" y="143" text-anchor="middle" font-size="9" fill="#003cab">Triage 越用越准</text>
+  <line x1="515" y1="120" x2="555" y2="120" stroke="#0052d9" stroke-width="1.8" marker-end="url(#arr8)"/>
+
+  <!-- Stage 3 -->
+  <rect x="560" y="80" width="130" height="80" rx="8" fill="#bfdbfe" stroke="#003cab" stroke-width="1.5"/>
+  <text x="625" y="105" text-anchor="middle" font-size="12" font-weight="700" fill="#003cab">+ Procedural</text>
+  <text x="625" y="125" text-anchor="middle" font-size="10" fill="#001a45">prompt 自改写</text>
+  <text x="625" y="143" text-anchor="middle" font-size="9" fill="#001a45">Agent 自我进化</text>
+  <line x1="690" y1="120" x2="730" y2="120" stroke="#0052d9" stroke-width="1.8" marker-end="url(#arr8)"/>
+
+  <!-- 终点 -->
+  <circle cx="765" cy="120" r="20" fill="#001a45"/>
+  <text x="765" y="125" text-anchor="middle" font-size="14" fill="#fff">🎯</text>
+
+  <!-- 标题 -->
+  <text x="400" y="40" text-anchor="middle" font-size="14" font-weight="700" fill="#003cab">邮件助手的逐层进化</text>
+  <text x="400" y="60" text-anchor="middle" font-size="11" fill="#4b4b4b">三类记忆共用同一个 Store，靠 namespace 隔离</text>
+
+  <!-- 底部说明 -->
+  <text x="400" y="200" text-anchor="middle" font-size="12" font-weight="600" fill="#dc2626">💡 进化原则：先想清楚"该记什么、什么时候记"，再选 hot / background</text>
+  <text x="400" y="225" text-anchor="middle" font-size="11" fill="#4b4b4b">别上来就铺三类记忆——按场景需求逐层叠加</text>
+  <text x="400" y="248" text-anchor="middle" font-size="10" fill="#9ca3af">— Andrew Ng & Harrison Chase</text>
+</svg>
+
+</div>
+
+<h3 id="1-agent">1. 记忆是让 Agent "越用越懂你"的关键基建</h3>
+<blockquote>
+<p><strong>"记忆是让 Agent 从'每次都从零开始'，变成'越用越懂你'的关键基建。"</strong></p>
+</blockquote>
+<p>整门课的进化路径就是把一个<strong>金鱼版邮件助手</strong>逐层升级：</p>
+<pre class="codehilite"><code>baseline 助手（金鱼脑）
+   ↓ 加 Semantic Memory（事实/偏好）
+能记住&quot;我落款写 Lance&quot;
+   ↓ 加 Episodic Memory（few-shot 例子）
+Triage 越用越准
+   ↓ 加 Procedural Memory（prompt 自我改写）
+Agent 自己根据反馈进化
+   ↓
+完整 Memory-Aware Agent
+</code></pre>
+
+<h3 id="2">2. 推荐生态工具</h3>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>用途</th>
+<th>地址</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LangGraph</strong></td>
+<td>编排 Agent / 多节点工作流的底层框架</td>
+<td>langchain-ai.github.io/langgraph/</td>
+</tr>
+<tr>
+<td><strong>LangSmith</strong></td>
+<td>追踪、评测、调试 Agent</td>
+<td>smith.langchain.com</td>
+</tr>
+<tr>
+<td><strong>LangMem</strong></td>
+<td>三类记忆 + hot/background + prompt optimization</td>
+<td>langchain-ai.github.io/langmem/</td>
+</tr>
+</tbody>
+</table>
+<h3 id="3-andrew">3. Andrew 的下一步建议</h3>
+<ul>
+<li>把课程仓库 fork 下来跑通邮件助手；</li>
+<li>替换成自己的真实场景（客服、研究、代码 Agent）；</li>
+<li>关键：<strong>先想清楚"该记什么、什么时候记"，再选 hot / background</strong>——别上来就铺三类记忆。</li>
+</ul>
+<hr />
+<h2 id="_14">三个最值得带走的"恍然大悟"</h2>
+<ol>
+<li>
+<p><strong>Procedural Memory 就是把 prompt 字符串本身当数据</strong>
+   在 P6 才会真正打通。在此之前学生大多以为 prompt 是开发期产物。一旦想通"system prompt 也可以是记忆"，整个 Agent 自我进化的逻辑就通了。</p>
+</li>
+<li>
+<p><strong>Hot Path 慢，Background "当前轮 0 延迟"，但 Background 的"快"是用"下一轮才见效"换来的</strong>
+   ReflectionExecutor + debounce 是这门课唯一稍微"反直觉"的工程细节。理解了这个 tradeoff，才能在生产里做出正确的选择。</p>
+</li>
+<li>
+<p><strong>三类记忆其实是同一个 Store 不同 namespace</strong>
+   P6 收束时才会意识到。所以<strong>namespace 设计是吃透整门课的关键</strong>——它不只是命名，而是数据隔离、访问控制、记忆生命周期的总纲。</p>
+</li>
+</ol>
+<hr />
+<h2 id="25">附录：专有名词速查（25 个）</h2>
+<table>
+<thead>
+<tr>
+<th>名词</th>
+<th>全称</th>
+<th>一句话白话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agent</td>
+<td>Agent</td>
+<td>能自主调用工具、做决策的 LLM 程序</td>
+</tr>
+<tr>
+<td>Agentic Memory</td>
+<td>Agentic Memory</td>
+<td>给 Agent 装的长期记忆系统（≠ RAG，≠ 上下文窗口）</td>
+</tr>
+<tr>
+<td>Andrew Ng</td>
+<td>吴恩达</td>
+<td>这门课的开场讲师，DeepLearning.AI 创始人</td>
+</tr>
+<tr>
+<td>Background</td>
+<td>Background Memory</td>
+<td>后台异步整合记忆的模式（"回家路上复盘"）</td>
+</tr>
+<tr>
+<td>Checkpointer</td>
+<td>Checkpointer</td>
+<td>LangGraph 的短期存储，按 thread_id 隔离</td>
+</tr>
+<tr>
+<td>Collection</td>
+<td>Collection</td>
+<td>追加式记忆存储（朋友圈式）</td>
+</tr>
+<tr>
+<td>Debounce</td>
+<td>防抖</td>
+<td>一段时间内的多次触发只执行一次</td>
+</tr>
+<tr>
+<td>Episodic Memory</td>
+<td>情景记忆</td>
+<td>记住"具体经历过的事"，常用作 few-shot 例子</td>
+</tr>
+<tr>
+<td>Few-shot</td>
+<td>Few-shot</td>
+<td>在 prompt 里塞几个示例让模型模仿</td>
+</tr>
+<tr>
+<td>Harrison Chase</td>
+<td>Harrison Chase</td>
+<td>LangChain 联合创始人，这门课主讲</td>
+</tr>
+<tr>
+<td>Hot Path</td>
+<td>Hot Path</td>
+<td>Agent 在对话中实时写记忆的模式（"边聊边记"）</td>
+</tr>
+<tr>
+<td>InMemoryStore</td>
+<td>InMemoryStore</td>
+<td>LangGraph 内存版 Store（生产用 PostgresStore）</td>
+</tr>
+<tr>
+<td>LangGraph</td>
+<td>LangGraph</td>
+<td>LangChain 的图式 Agent 编排框架</td>
+</tr>
+<tr>
+<td>LangMem</td>
+<td>LangMem</td>
+<td>LangChain 出的长期记忆 SDK</td>
+</tr>
+<tr>
+<td>LangSmith</td>
+<td>LangSmith</td>
+<td>LangChain 的追踪/评测/调试平台</td>
+</tr>
+<tr>
+<td>Namespace</td>
+<td>命名空间</td>
+<td>LangMem 用 tuple 表示的"目录路径"，组织记忆</td>
+</tr>
+<tr>
+<td>Procedural Memory</td>
+<td>程序记忆</td>
+<td>记 Agent 的"操作规则 / system prompt 本身"</td>
+</tr>
+<tr>
+<td>Profile</td>
+<td>Profile</td>
+<td>覆盖式记忆存储（身份证式）</td>
+</tr>
+<tr>
+<td>Prompt Optimization</td>
+<td>Prompt 优化</td>
+<td>让 LLM 根据反馈自动改写 prompt</td>
+</tr>
+<tr>
+<td>RAG</td>
+<td>Retrieval-Augmented Generation</td>
+<td>检索外部文档增强生成（≠ 长期记忆）</td>
+</tr>
+<tr>
+<td>ReAct</td>
+<td>Reason + Act</td>
+<td>推理-行动-观察循环的 Agent 范式</td>
+</tr>
+<tr>
+<td>ReflectionExecutor</td>
+<td>ReflectionExecutor</td>
+<td>LangMem 的后台反思调度器（含 debounce）</td>
+</tr>
+<tr>
+<td>Semantic Memory</td>
+<td>语义记忆</td>
+<td>记"事实/偏好"的记忆类型</td>
+</tr>
+<tr>
+<td>Store</td>
+<td>Store</td>
+<td>LangGraph 的长期存储，跨 thread</td>
+</tr>
+<tr>
+<td>Update-in-place</td>
+<td>原地更新</td>
+<td>找到旧记录的 ID 改写而不是追加新条</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>笔记生成日期：2026-05-11 · 基于课程公开资料与 LangMem 官方文档整理</em></p>
+</div>
+
+<div class="footer">
+  生成日期：2026-05-11　·　基于 DeepLearning.AI 公开课程与 LangMem 官方文档整理
+</div>
+
+</div>
+</body>
+</html>

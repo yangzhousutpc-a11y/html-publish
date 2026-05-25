@@ -5,29 +5,64 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HTML文件发布 - 导航</title>
 <style>
-  body { font-family: Arial, "PingFang SC", sans-serif; max-width: 760px; margin: 60px auto; padding: 0 24px; color: #1a1a1a; }
+  body { font-family: Arial, "PingFang SC", sans-serif; max-width: 880px; margin: 60px auto; padding: 0 24px; color: #1a1a1a; }
   h1 { color: #0052D9; border-bottom: 3px solid #0052D9; padding-bottom: 12px; }
+  h2 { color: #0052D9; font-size: 18px; margin-top: 32px; padding-left: 10px; border-left: 4px solid #0052D9; }
   ul { list-style: none; padding: 0; }
-  li { background: #f7f9fc; margin: 12px 0; padding: 16px 20px; border-radius: 8px; border-left: 4px solid #0052D9; transition: all 0.2s; }
+  li { background: #f7f9fc; margin: 10px 0; padding: 14px 18px; border-radius: 8px; border-left: 4px solid #0052D9; transition: all 0.2s; }
   li:hover { background: #eaf2ff; transform: translateX(4px); }
-  a { color: #0052D9; text-decoration: none; font-weight: 600; font-size: 16px; }
-  .desc { color: #666; font-size: 13px; margin-top: 4px; }
+  a { color: #0052D9; text-decoration: none; font-weight: 600; font-size: 15px; }
+  .desc { color: #666; font-size: 12px; margin-top: 4px; }
   .footer { color: #999; font-size: 12px; margin-top: 40px; text-align: center; }
+  .count { color: #999; font-weight: normal; font-size: 14px; }
 </style>
 </head>
 <body>
   <h1>📚 HTML文件发布</h1>
   <p style="color:#666">YangZhou 的公网托管页面集合</p>
+
+  <h2>🤖 Agent &amp; LLM 基础</h2>
   <ul>
-    <li>
-      <a href="./agent-memory/">Agent 记忆机制 学习笔记</a>
-      <div class="desc">2026-05-25 · 关于 Agent Memory 机制的系统性学习笔记</div>
-    </li>
-    <li>
-      <a href="./mcp-guide/">MCP 终极指南 学习笔记</a>
-      <div class="desc">2026-04-11 · MCP 协议基础+进阶+番外，系统性学习笔记</div>
-    </li>
+    <li><a href="./agent-memory/">Agent 记忆机制 学习笔记</a><div class="desc">Agent Memory 机制系统性笔记</div></li>
+    <li><a href="./agent-memory-basics/">Agent 记忆 学习笔记</a><div class="desc">Agent 记忆入门</div></li>
+    <li><a href="./agent-memory-advanced/">Agent 记忆机制深度解析</a><div class="desc">深入解析 Agent 记忆架构</div></li>
+    <li><a href="./ai-agent-sandbox/">AI Agent 沙箱 学习笔记</a><div class="desc">Agent Sandbox 隔离与执行环境</div></li>
+    <li><a href="./agent-skill-deep-dive/">Agent Skill 从使用到原理</a><div class="desc">Skill 机制由浅入深</div></li>
+    <li><a href="./llm-to-agent-skill/">从 LLM 到 Agent Skill</a><div class="desc">从大模型推理到 Skill 调度</div></li>
+    <li><a href="./claude-code-from-scratch/">从零打造简化版 Claude Code</a><div class="desc">手把手实现一个迷你 Claude Code</div></li>
+    <li><a href="./harness-engineering/">Harness Engineering 学习笔记</a><div class="desc">Agent Harness 工程实践</div></li>
+    <li><a href="./harness-engineering-v2/">Harness Engineering 学习笔记 v2</a><div class="desc">Harness Engineering 精读版</div></li>
   </ul>
-  <div class="footer">Powered by GitHub Pages · Last updated: 2026-05-25</div>
+
+  <h2>🔌 协议与工具</h2>
+  <ul>
+    <li><a href="./mcp-guide/">MCP 终极指南</a><div class="desc">MCP 协议基础+进阶+番外</div></li>
+    <li><a href="./temperature-top-p/">Temperature 与 Top-p</a><div class="desc">采样参数原理与调优</div></li>
+  </ul>
+
+  <h2>📖 RAG 检索增强</h2>
+  <ul>
+    <li><a href="./rag-mechanism/">RAG 工作机制详解</a><div class="desc">RAG 工作原理与流程</div></li>
+    <li><a href="./rag-architecture/">RAG 架构深度解析</a><div class="desc">RAG 系统架构剖析</div></li>
+    <li><a href="./ng-rag/">吴恩达 · RAG 检索增强生成</a><div class="desc">DeepLearning.AI RAG 课程笔记</div></li>
+  </ul>
+
+  <h2>🎓 吴恩达系列课程</h2>
+  <ul>
+    <li><a href="./ng-agent-skills/">Agent Skills 学习笔记</a><div class="desc">DeepLearning.AI Agent Skills 课程</div></li>
+    <li><a href="./ng-agentic-ai/">Agentic AI 智能体</a><div class="desc">Agentic AI 系统课</div></li>
+    <li><a href="./ng-genai-for-everyone/">Generative AI for Everyone</a><div class="desc">面向所有人的生成式 AI 入门</div></li>
+    <li><a href="./ng-genai-with-llms/">Generative AI with LLMs（完整版）</a><div class="desc">生成式 AI 与大语言模型完整笔记</div></li>
+    <li><a href="./ng-transformer/">Transformer 工作原理</a><div class="desc">Transformer 架构图解</div></li>
+    <li><a href="./ng-prompt-engineering/">提示词工程</a><div class="desc">Prompt Engineering 实战课</div></li>
+    <li><a href="./ng-deep-learning/">深度学习专项课程</a><div class="desc">Deep Learning Specialization 完整笔记</div></li>
+  </ul>
+
+  <h2>🧠 李宏毅</h2>
+  <ul>
+    <li><a href="./hyl-self-attention/">Self-Attention 与 Transformer</a><div class="desc">李宏毅 Self-Attention 课程</div></li>
+  </ul>
+
+  <div class="footer">Powered by GitHub Pages · Last updated: 2026-05-25 · 共 22 篇</div>
 </body>
 </html>

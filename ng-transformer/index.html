@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>吴恩达 How Transformers Work 工作原理</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;background:#f3f4f6;color:#242424;line-height:1.8}
+a{color:#0052d9;text-decoration:none}a:hover{text-decoration:underline;color:#003cab}
+.header{background:linear-gradient(135deg,#001a45 0%,#0052d9 60%,#0077ff 100%);color:white;padding:52px 32px;text-align:center}
+.header h1{font-size:22px;font-weight:700;max-width:800px;margin:0 auto;letter-spacing:0.5px}
+.header .sub{font-size:13px;opacity:.85;margin-top:12px;max-width:700px;margin-left:auto;margin-right:auto}
+.stats{display:flex;justify-content:center;gap:28px;margin-top:18px;flex-wrap:wrap}
+.stats .s{font-size:12px;opacity:.8}.stats .s strong{font-size:18px;color:#66b1ff;display:block}
+.container{max-width:1000px;margin:0 auto;padding:24px}
+.content{background:white;border-radius:10px;padding:32px 36px;margin-top:20px;border:1px solid #e5e6eb;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
+.content h1{font-size:22px;color:#0052d9;margin:36px 0 16px;padding-bottom:10px;border-bottom:2px solid #0052d9;font-weight:700}
+.content h1:first-child{margin-top:0}
+.content h2{font-size:18px;color:#242424;margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid #e5e6eb;font-weight:600}
+.content h3{font-size:15px;color:#0052d9;margin:20px 0 8px;font-weight:600}
+.content p{font-size:14px;color:#4b4b4b;margin:8px 0}
+.content ul,.content ol{padding-left:22px;margin:8px 0}
+.content li{font-size:14px;color:#4b4b4b;margin:4px 0}
+.content strong{color:#242424}
+.content em{color:#0052d9;font-style:normal}
+.content blockquote{background:#edf4ff;border-left:4px solid #0052d9;padding:12px 18px;margin:12px 0;border-radius:0 8px 8px 0;font-size:14px;color:#003cab}
+.content blockquote p{color:#003cab;margin:4px 0}
+.content hr{border:none;border-top:1px solid #e5e6eb;margin:28px 0}
+.content table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+.content th{background:#edf4ff;text-align:left;padding:10px 14px;font-weight:600;color:#0052d9;border-bottom:1px solid #d4e3fc}
+.content td{padding:10px 14px;border-bottom:1px solid #f0f1f2;color:#4b4b4b}
+.content tr:hover td{background:#f5f9ff}
+.content pre{background:#0d1b2a;border-radius:8px;padding:14px 18px;margin:10px 0;font-family:"SF Mono",Consolas,monospace;font-size:12.5px;line-height:1.6;overflow-x:auto;color:#c9d1d9}
+.content code{font-family:"SF Mono",Consolas,monospace;font-size:12.5px;background:#edf4ff;padding:2px 6px;border-radius:4px;color:#0052d9}
+.content pre code{background:none;padding:0;color:#c9d1d9}
+.footer{text-align:center;padding:30px 0;color:#8f959e;font-size:12px}</style>
+</head>
+<body>
+<div class="header">
+<h1>吴恩达 How Transformers Work 工作原理</h1>
+<div class="sub">DeepLearning.AI | <a href="https://www.bilibili.com/video/BV1bxRpYdEbT/" target="_blank" style="color:#66b1ff">B站 BV1bxRpYdEbT</a> | 13集约1.5小时</div>
+<div class="stats">
+<div class="s"><strong>13</strong>集视频</div>
+<div class="s"><strong>6</strong>核心组件</div>
+<div class="s"><strong>15</strong>专有名词</div>
+<div class="s"><strong>10</strong>大章节</div>
+</div>
+</div>
+<div class="container">
+<div class="content">
+<div style="margin:0 0 24px;padding:20px 24px;background:linear-gradient(135deg,#edf4ff 0%,#f0f7ff 50%,#f5f9ff 100%);border-radius:10px;border:1px solid #d4e3fc">
+<h2 id="_1">📖 内容综述</h2>
+<p>Transformer是所有现代大语言模型（GPT、Claude、LLaMA）的底层引擎。这份笔记把它从头拆到尾：先从<strong>语言模型的进化史</strong>讲起（词袋→词嵌入→注意力→Transformer），让你明白为什么Transformer能成为"唯一的王"；然后逐步拆解<strong>六个核心组件</strong>——分词、嵌入、位置编码、自注意力、多头注意力、前馈网络；最后讲<strong>文本生成的自回归过程</strong>和最新的<strong>优化技术</strong>（KV Cache、MoE）。</p>
+<p>理解Transformer不需要数学博士学位——每个公式都会配上白话解释和具体例子，复杂的架构会先拆成小块理解，最后再串成完整全貌。</p>
+
+</div>
+
+<hr />
+<h1 id="transformer_1">一、语言模型进化史：为什么需要Transformer</h1>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Transformer完整架构总览</p>
+<svg viewBox="0 0 700 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <defs><marker id="tr2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="180" y="140" width="340" height="30" rx="6" fill="#edf4ff" stroke="#0052d9"/><text x="350" y="160" text-anchor="middle" font-size="9" fill="#003cab" font-weight="600">输入: Token Embedding + Positional Encoding</text>
+  <line x1="350" y1="140" x2="350" y2="125" stroke="#0052d9" stroke-width="1.5" marker-end="url(#tr2)"/>
+  <rect x="40" y="50" width="280" height="70" rx="10" fill="#0052d9"/><text x="180" y="75" text-anchor="middle" font-size="13" fill="white" font-weight="700">Encoder 编码器</text><text x="180" y="95" text-anchor="middle" font-size="8" fill="#66b1ff">Multi-Head Self-Attention + FFN + Norm</text><text x="180" y="110" text-anchor="middle" font-size="7" fill="#a3d0ff">×N层堆叠</text>
+  <rect x="380" y="50" width="280" height="70" rx="10" fill="#1a6fe8"/><text x="520" y="75" text-anchor="middle" font-size="13" fill="white" font-weight="700">Decoder 解码器</text><text x="520" y="95" text-anchor="middle" font-size="8" fill="#a3d0ff">Masked Self-Attn + Cross-Attn + FFN</text><text x="520" y="110" text-anchor="middle" font-size="7" fill="#a3d0ff">×N层堆叠</text>
+  <line x1="320" y1="85" x2="380" y2="85" stroke="#0052d9" stroke-width="2" marker-end="url(#tr2)"/><text x="350" y="80" text-anchor="middle" font-size="7" fill="#0052d9">编码结果</text>
+  <line x1="520" y1="50" x2="520" y2="35" stroke="#0052d9" stroke-width="1.5" marker-end="url(#tr2)"/>
+  <rect x="400" y="5" width="240" height="26" rx="6" fill="#059669"/><text x="520" y="23" text-anchor="middle" font-size="10" fill="white" font-weight="700">Softmax → 输出概率 → 下一个词</text>
+  <rect x="20" y="5" width="250" height="35" rx="6" fill="#f0f7ff" stroke="#d4e3fc"/><text x="145" y="20" text-anchor="middle" font-size="9" fill="#0052d9" font-weight="600">核心突破: Self-Attention</text><text x="145" y="34" text-anchor="middle" font-size="7" fill="#4b4b4b">让每个词都能"看到"所有其他词</text>
+</svg></div>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 语言模型进化四步: 从词袋到Transformer</p>
+<svg viewBox="0 0 700 68" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <defs><marker id="evo" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="8" width="140" height="38" rx="6" fill="#9ca3af"/><text x="80" y="24" text-anchor="middle" font-size="8" fill="white" font-weight="700">词袋模型(BoW)</text><text x="80" y="38" text-anchor="middle" font-size="6" fill="white">忽略顺序·只数频率</text>
+  <line x1="150" y1="27" x2="168" y2="27" stroke="#0052d9" stroke-width="1.5" marker-end="url(#evo)"/>
+  <rect x="173" y="8" width="140" height="38" rx="6" fill="#4d94ff"/><text x="243" y="24" text-anchor="middle" font-size="8" fill="white" font-weight="700">RNN/LSTM</text><text x="243" y="38" text-anchor="middle" font-size="6" fill="white">顺序处理·有记忆</text>
+  <line x1="313" y1="27" x2="331" y2="27" stroke="#0052d9" stroke-width="1.5" marker-end="url(#evo)"/>
+  <rect x="336" y="8" width="140" height="38" rx="6" fill="#1a6fe8"/><text x="406" y="24" text-anchor="middle" font-size="8" fill="white" font-weight="700">Attention机制</text><text x="406" y="38" text-anchor="middle" font-size="6" fill="white">能看远·加权关注</text>
+  <line x1="476" y1="27" x2="494" y2="27" stroke="#0052d9" stroke-width="1.5" marker-end="url(#evo)"/>
+  <rect x="499" y="8" width="190" height="38" rx="8" fill="#0052d9" stroke="#003cab" stroke-width="1.5"/><text x="594" y="24" text-anchor="middle" font-size="8" fill="white" font-weight="700">Transformer(2017)</text><text x="594" y="38" text-anchor="middle" font-size="6" fill="#66b1ff">全并行·Self-Attention</text>
+  <text x="350" y="62" text-anchor="middle" font-size="7" fill="#4b4b4b">关键突破: RNN必须一步步算 → Transformer可以并行看所有词 → 训练速度飞跃</text>
+</svg></div>
+<h3 id="transformer_2">从词袋到Transformer的四步跳跃</h3>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>技术</th>
+<th>核心思想</th>
+<th>致命缺陷</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>词袋模型</strong></td>
+<td>Bag of Words</td>
+<td>统计每个词出现的次数</td>
+<td>"我爱你"和"你爱我"完全一样——丢失了顺序</td>
+</tr>
+<tr>
+<td><strong>词嵌入</strong></td>
+<td>Word2Vec</td>
+<td>用向量表示词，语义相近的词距离近</td>
+<td>一个词永远只有一个向量——"苹果"(水果)和"苹果"(公司)分不开</td>
+</tr>
+<tr>
+<td><strong>RNN+注意力</strong></td>
+<td>Seq2Seq+Attention</td>
+<td>按顺序处理+关注重要部分</td>
+<td>必须串行计算——像排队过独木桥，慢得要命</td>
+</tr>
+<tr>
+<td><strong>Transformer</strong></td>
+<td>Self-Attention</td>
+<td>所有位置并行处理，每个词直接看到所有其他词</td>
+<td>✅ 无明显缺陷，成为"唯一的王"</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：Transformer的革命性在于一个字——<strong>并</strong>。RNN是一个词一个词排队处理（串行），Transformer是所有词同时处理（并行）。这就是为什么Transformer能训练千亿参数模型，而RNN做不到。</p>
+</blockquote>
+<hr />
+<h1 id="tokenization">二、分词（Tokenization）：拆乐高积木</h1>
+<p><strong>一句话</strong>：分词就是把人类可读的文字切成模型能处理的"碎片"（Token），像把一堆乐高积木拆成单个零件。</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 输入处理三步: 分词→嵌入→位置编码</p>
+<svg viewBox="0 0 700 75" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <defs><marker id="in2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="10" width="150" height="40" rx="8" fill="#0052d9"/><text x="85" y="28" text-anchor="middle" font-size="10" fill="white" font-weight="700">Tokenization</text><text x="85" y="42" text-anchor="middle" font-size="7" fill="#66b1ff">"Hello"→[7592]</text>
+  <line x1="160" y1="30" x2="180" y2="30" stroke="#0052d9" stroke-width="2" marker-end="url(#in2)"/>
+  <rect x="185" y="10" width="170" height="40" rx="8" fill="#1a6fe8"/><text x="270" y="28" text-anchor="middle" font-size="10" fill="white" font-weight="700">Embedding</text><text x="270" y="42" text-anchor="middle" font-size="7" fill="#a3d0ff">ID→768维语义向量</text>
+  <line x1="355" y1="30" x2="375" y2="30" stroke="#0052d9" stroke-width="2" marker-end="url(#in2)"/>
+  <rect x="380" y="10" width="180" height="40" rx="8" fill="#3380e6"/><text x="470" y="28" text-anchor="middle" font-size="10" fill="white" font-weight="700">+ Position Encoding</text><text x="470" y="42" text-anchor="middle" font-size="7" fill="#a3d0ff">加位置信息(第几个词)</text>
+  <line x1="560" y1="30" x2="580" y2="30" stroke="#0052d9" stroke-width="2" marker-end="url(#in2)"/>
+  <rect x="585" y="10" width="90" height="40" rx="8" fill="#059669"/><text x="630" y="28" text-anchor="middle" font-size="10" fill="white" font-weight="700">输入就绪</text><text x="630" y="42" text-anchor="middle" font-size="7" fill="#a7f3d0">含义+位置</text>
+  <text x="350" y="68" text-anchor="middle" font-size="7" fill="#4b4b4b">位置编码让模型知道"bank"在句首和句尾可能含义不同</text>
+</svg></div>
+<h3 id="_2">三种分词策略</h3>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>例子</th>
+<th>优劣</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>按词</strong></td>
+<td>["This", "is", "a", "cat"]</td>
+<td>语义清晰，但词表巨大</td>
+</tr>
+<tr>
+<td><strong>按字符</strong></td>
+<td>["T","h","i","s",...]</td>
+<td>词表小，但丢失语义</td>
+</tr>
+<tr>
+<td><strong>子词(BPE)</strong> ✅</td>
+<td>["un", "happi", "ness"]</td>
+<td>平衡词法和语义，主流选择</td>
+</tr>
+</tbody>
+</table>
+<p>现代LLM（GPT/LLaMA）几乎都用<strong>BPE</strong>（字节对编码）——它能把"unhappiness"拆成有意义的子词，既保留语义又控制词表大小。</p>
+<hr />
+<h1 id="embedding">三、嵌入（Embedding）：给积木块赋予特征</h1>
+<p><strong>一句话</strong>：嵌入就是把离散的Token ID变成一个高维向量——让"苹果"和"梨"因为都有"水果"特征而在数学空间里靠近。</p>
+<pre class="codehilite"><code>Token: &quot;apple&quot;
+  ↓ 查嵌入表
+向量: [0.99, -0.05, 0.23, ..., -0.12]  (300-12288维)
+</code></pre>
+
+<p>整个句子变成一个矩阵：</p>
+<pre class="codehilite"><code>&quot;This is a cute cat&quot; → 分词 → 查嵌入表 →
+
+[0.12, -0.45, ...]  ← This
+[-0.67, 0.12, ...]  ← is
+[0.89, -0.01, ...]  ← a
+[0.23, -0.89, ...]  ← cute
+[0.56, -0.76, ...]  ← cat
+
+→ 矩阵形状: (5, d_model)
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：嵌入不是随机初始化后不变的——它在训练过程中不断更新。训练结束后，语义相似的词（如"国王"和"女王"）在向量空间中真的很近，这就是Word2Vec发现的"king - man + woman = queen"现象。</p>
+</blockquote>
+<hr />
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Embedding: 语义空间中的词向量 — 含义相近的词距离更近</p>
+<svg viewBox="0 0 650 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;font-family:-apple-system,sans-serif">
+  <!-- 坐标轴 -->
+  <line x1="60" y1="110" x2="600" y2="110" stroke="#e5e6eb" stroke-width="1"/><text x="610" y="114" font-size="7" fill="#9ca3af">维度1</text>
+  <line x1="60" y1="110" x2="60" y2="10" stroke="#e5e6eb" stroke-width="1"/><text x="45" y="10" font-size="7" fill="#9ca3af">维度2</text>
+  <!-- 动物簇 -->
+  <circle cx="150" cy="35" r="5" fill="#059669"/><text x="162" y="38" font-size="8" fill="#059669" font-weight="600">cat</text>
+  <circle cx="180" cy="45" r="5" fill="#059669"/><text x="192" y="48" font-size="8" fill="#059669" font-weight="600">dog</text>
+  <circle cx="130" cy="55" r="5" fill="#059669"/><text x="142" y="58" font-size="8" fill="#059669" font-weight="600">puppy</text>
+  <ellipse cx="155" cy="45" rx="55" ry="28" fill="none" stroke="#059669" stroke-dasharray="3,2" opacity="0.5"/>
+  <text x="155" y="80" text-anchor="middle" font-size="7" fill="#059669">动物</text>
+  <!-- 食物簇 -->
+  <circle cx="350" cy="70" r="5" fill="#dc2626"/><text x="362" y="73" font-size="8" fill="#dc2626" font-weight="600">apple</text>
+  <circle cx="380" cy="85" r="5" fill="#dc2626"/><text x="392" y="88" font-size="8" fill="#dc2626" font-weight="600">banana</text>
+  <circle cx="330" cy="90" r="5" fill="#dc2626"/><text x="342" y="93" font-size="8" fill="#dc2626" font-weight="600">orange</text>
+  <ellipse cx="355" cy="82" rx="50" ry="25" fill="none" stroke="#dc2626" stroke-dasharray="3,2" opacity="0.5"/>
+  <text x="355" y="112" text-anchor="middle" font-size="7" fill="#dc2626">水果</text>
+  <!-- 国家簇 -->
+  <circle cx="500" cy="30" r="5" fill="#0052d9"/><text x="512" y="33" font-size="8" fill="#0052d9" font-weight="600">China</text>
+  <circle cx="530" cy="45" r="5" fill="#0052d9"/><text x="542" y="48" font-size="8" fill="#0052d9" font-weight="600">Japan</text>
+  <circle cx="490" cy="50" r="5" fill="#0052d9"/><text x="502" y="53" font-size="8" fill="#0052d9" font-weight="600">Korea</text>
+  <ellipse cx="510" cy="42" rx="45" ry="25" fill="none" stroke="#0052d9" stroke-dasharray="3,2" opacity="0.5"/>
+  <text x="510" y="75" text-anchor="middle" font-size="7" fill="#0052d9">国家</text>
+  <!-- 说明 -->
+  <text x="350" y="125" text-anchor="middle" font-size="7" fill="#4b4b4b">768维空间中: king - man + woman ≈ queen · 向量运算可以做语义推理</text>
+</svg></div>
+<h1 id="positional-encoding">四、位置编码（Positional Encoding）：给积木贴身份证</h1>
+<p><strong>一句话</strong>：Transformer并行处理所有Token，导致"我吃苹果"和"苹果吃我"看起来一样——必须手动注入位置信息来区分顺序。</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 位置编码: 为什么Transformer需要"身份证"</p>
+<svg viewBox="0 0 650 80" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="8" width="280" height="42" rx="8" fill="#dc2626"/><text x="150" y="25" text-anchor="middle" font-size="9" fill="white" font-weight="700">没有位置编码</text><text x="150" y="40" text-anchor="middle" font-size="7" fill="#fca5a5">"我爱你" 和 "你爱我" 一样! ❌</text>
+  <text x="315" y="32" font-size="14" fill="#059669" font-weight="900">→</text>
+  <rect x="340" y="8" width="300" height="42" rx="8" fill="#059669"/><text x="490" y="25" text-anchor="middle" font-size="9" fill="white" font-weight="700">加入位置编码</text><text x="490" y="40" text-anchor="middle" font-size="7" fill="#a7f3d0">"我(位置0)爱(位置1)你(位置2)" 有序! ✅</text>
+  <text x="325" y="68" text-anchor="middle" font-size="7" fill="#4b4b4b">方法: 用sin/cos生成位置向量 + 直接加到Embedding上 · 相近位置的编码也相近</text>
+</svg></div>
+<h3 id="_3">为什么需要位置编码？</h3>
+<p>自注意力机制是"置换不变"的——它不关心Token的前后顺序。但语言严重依赖顺序！所以必须给每个Token贴一张"身份证"标明它是第几个。</p>
+<h3 id="_4">正弦位置编码的设计</h3>
+<pre class="codehilite"><code>PE(pos, 2i) = sin(pos / 10000^(2i/d))
+PE(pos, 2i+1) = cos(pos / 10000^(2i/d))
+</code></pre>
+
+<p><strong>白话解释</strong>：像收音机的多频道设计——
+- <strong>低维度（低频）</strong>：变化慢，捕捉长距离位置差（第1词 vs 第100词）
+- <strong>高维度（高频）</strong>：变化快，捕捉短距离位置差（相邻两词）
+- 每个位置的"频率组合"像指纹一样独一无二</p>
+<p><strong>核心优势</strong>：支持<strong>相对位置</strong>学习——模型学会"隔两个词"的关系后，能自动泛化到任意位置。</p>
+<hr />
+<h1 id="self-attention">五、自注意力（Self-Attention）：图书馆检索系统</h1>
+<p><strong>一句话</strong>：自注意力让序列中的每个词都能"看到"所有其他词，并根据相关性自动分配权重。</p>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 自注意力 Q/K/V 计算流程</p>
+
+<svg viewBox="0 0 650 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px">
+  <defs><marker id="q1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="20" y="60" width="100" height="50" rx="8" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="70" y="82" text-anchor="middle" font-size="11" fill="#003cab" font-weight="600">输入向量 X</text>
+  <text x="70" y="100" text-anchor="middle" font-size="9" fill="#0052d9">每个Token</text>
+  <line x1="120" y1="72" x2="160" y2="50" stroke="#0052d9" stroke-width="1.5" marker-end="url(#q1)"/>
+  <line x1="120" y1="85" x2="160" y2="85" stroke="#0052d9" stroke-width="1.5" marker-end="url(#q1)"/>
+  <line x1="120" y1="98" x2="160" y2="118" stroke="#0052d9" stroke-width="1.5" marker-end="url(#q1)"/>
+  <rect x="165" y="25" width="80" height="40" rx="6" fill="#0052d9"/>
+  <text x="205" y="50" text-anchor="middle" font-size="12" fill="white" font-weight="700">Q 查询</text>
+  <rect x="165" y="70" width="80" height="40" rx="6" fill="#1a6fe8"/>
+  <text x="205" y="95" text-anchor="middle" font-size="12" fill="white" font-weight="700">K 键</text>
+  <rect x="165" y="115" width="80" height="40" rx="6" fill="#3380e6"/>
+  <text x="205" y="140" text-anchor="middle" font-size="12" fill="white" font-weight="700">V 值</text>
+  <line x1="245" y1="45" x2="290" y2="65" stroke="#0052d9" stroke-width="1.5" marker-end="url(#q1)"/>
+  <line x1="245" y1="90" x2="290" y2="75" stroke="#0052d9" stroke-width="1.5" marker-end="url(#q1)"/>
+  <rect x="295" y="50" width="100" height="40" rx="6" fill="#0052d9"/>
+  <text x="345" y="67" text-anchor="middle" font-size="10" fill="white" font-weight="600">QK^T / √d</text>
+  <text x="345" y="82" text-anchor="middle" font-size="8" fill="#66b1ff">计算相似度</text>
+  <line x1="395" y1="70" x2="430" y2="70" stroke="#0052d9" stroke-width="1.5" marker-end="url(#q1)"/>
+  <rect x="435" y="50" width="80" height="40" rx="6" fill="#1a6fe8"/>
+  <text x="475" y="67" text-anchor="middle" font-size="10" fill="white" font-weight="600">Softmax</text>
+  <text x="475" y="82" text-anchor="middle" font-size="8" fill="#a3d0ff">→ 权重</text>
+  <line x1="515" y1="70" x2="545" y2="85" stroke="#0052d9" stroke-width="1.5" marker-end="url(#q1)"/>
+  <line x1="245" y1="135" x2="545" y2="100" stroke="#3380e6" stroke-width="1.5" marker-end="url(#q1)"/>
+  <rect x="550" y="70" width="80" height="50" rx="6" fill="#059669"/>
+  <text x="590" y="92" text-anchor="middle" font-size="10" fill="white" font-weight="600">权重 × V</text>
+  <text x="590" y="108" text-anchor="middle" font-size="8" fill="#a7f3d0">= 输出</text>
+</svg>
+</div>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Self-Attention: Q·K·V 三步计算</p>
+<svg viewBox="0 0 700 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <defs><marker id="qk2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="20" y="10" width="120" height="45" rx="8" fill="#0052d9"/><text x="80" y="30" text-anchor="middle" font-size="12" fill="white" font-weight="700">Q Query</text><text x="80" y="46" text-anchor="middle" font-size="7" fill="#66b1ff">"我在找什么?"</text>
+  <rect x="160" y="10" width="120" height="45" rx="8" fill="#1a6fe8"/><text x="220" y="30" text-anchor="middle" font-size="12" fill="white" font-weight="700">K Key</text><text x="220" y="46" text-anchor="middle" font-size="7" fill="#a3d0ff">"我有什么标签?"</text>
+  <rect x="300" y="10" width="120" height="45" rx="8" fill="#3380e6"/><text x="360" y="30" text-anchor="middle" font-size="12" fill="white" font-weight="700">V Value</text><text x="360" y="46" text-anchor="middle" font-size="7" fill="#a3d0ff">"我的实际内容"</text>
+  <rect x="40" y="65" width="220" height="24" rx="5" fill="#f59e0b"/><text x="150" y="81" text-anchor="middle" font-size="9" fill="white" font-weight="700">Q·K^T/sqrt(d) → 注意力分数</text>
+  <line x1="260" y1="77" x2="290" y2="77" stroke="#0052d9" stroke-width="1.5" marker-end="url(#qk2)"/>
+  <rect x="295" y="65" width="120" height="24" rx="5" fill="#dc2626"/><text x="355" y="81" text-anchor="middle" font-size="9" fill="white" font-weight="700">Softmax→权重</text>
+  <text x="425" y="81" font-size="10" fill="#4b4b4b">×V =</text>
+  <rect x="465" y="65" width="110" height="24" rx="5" fill="#059669"/><text x="520" y="81" text-anchor="middle" font-size="9" fill="white" font-weight="700">加权求和输出</text>
+  <text x="350" y="105" text-anchor="middle" font-size="7" fill="#4b4b4b">图书馆比喻: Q=你的问题 · K=书名 · V=书内容 · Q·K=匹配度→取最相关的V</text>
+</svg></div>
+<h3 id="qkv">Q、K、V三剑客（图书馆比喻）</h3>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>全称</th>
+<th>比喻</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Q</strong> (Query)</td>
+<td>查询向量</td>
+<td>你手中的搜索关键词</td>
+<td>"我要找什么？"</td>
+</tr>
+<tr>
+<td><strong>K</strong> (Key)</td>
+<td>键向量</td>
+<td>每本书的标题/索引</td>
+<td>"我是什么？"</td>
+</tr>
+<tr>
+<td><strong>V</strong> (Value)</td>
+<td>值向量</td>
+<td>书的具体内容</td>
+<td>"我有什么信息？"</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_5">计算过程</h3>
+<pre class="codehilite"><code>Attention(Q, K, V) = softmax(QK^T / √d_k) × V
+</code></pre>
+
+<p><strong>白话四步</strong>：
+1. 用你的Q去和所有书的K"对暗号"（点积计算相似度）
+2. 除以√d_k防止数值太大（缩放因子）
+3. Softmax把分数变成概率（权重）
+4. 按权重从V中加权提取信息</p>
+<h3 id="ai">具体例子："我爱学习AI"</h3>
+<pre class="codehilite"><code>目标词：「爱」
+对各词的关注度：
+  我：0.1   ← 主语，有关联
+  爱：0.2   ← 自己
+  学习：0.4  ← 主要对象，高权重 ⭐
+  AI：0.3   ← 学习的内容，有关联
+
+结果 = 0.1×&quot;我&quot; + 0.2×&quot;爱&quot; + 0.4×&quot;学习&quot; + 0.3×&quot;AI&quot;
+     = 「爱」在这句话中的上下文表示
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：自注意力的精髓是——每个词不再是孤立的，而是带着整句话的语境。"苹果"出现在"吃苹果"里和"苹果公司"里，得到的向量是完全不同的——因为上下文中其他词的影响不同。</p>
+</blockquote>
+<hr />
+<h1 id="multi-head-attention">六、多头注意力（Multi-Head Attention）：多个观察员</h1>
+<p><strong>一句话</strong>：单头注意力只能捕捉一种关系模式。多头让模型同时从不同"视角"观察信息——一个头看语法、一个头看指代、一个头看长距离依赖。</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 多头注意力: 多视角并行观察</p>
+<svg viewBox="0 0 650 85" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="8" width="85" height="38" rx="6" fill="#0052d9"/><text x="53" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">Head 1</text><text x="53" y="38" text-anchor="middle" font-size="6" fill="#66b1ff">语法关系</text>
+  <rect x="105" y="8" width="85" height="38" rx="6" fill="#1a6fe8"/><text x="148" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">Head 2</text><text x="148" y="38" text-anchor="middle" font-size="6" fill="#a3d0ff">语义关系</text>
+  <rect x="200" y="8" width="85" height="38" rx="6" fill="#3380e6"/><text x="243" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">Head 3</text><text x="243" y="38" text-anchor="middle" font-size="6" fill="#a3d0ff">指代关系</text>
+  <rect x="295" y="8" width="85" height="38" rx="6" fill="#4d94ff"/><text x="338" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">Head ...</text><text x="338" y="38" text-anchor="middle" font-size="6" fill="#d4e3fc">其他模式</text>
+  <text x="405" y="30" font-size="14" fill="#0052d9" font-weight="700">→</text>
+  <rect x="430" y="5" width="200" height="45" rx="8" fill="#059669"/><text x="530" y="24" text-anchor="middle" font-size="10" fill="white" font-weight="700">Concat + Linear</text><text x="530" y="40" text-anchor="middle" font-size="8" fill="#a7f3d0">拼接→投影回原维度</text>
+  <text x="325" y="65" text-anchor="middle" font-size="7" fill="#4b4b4b">每个Head独立做Self-Attention · GPT-3有96头 · 像96个专家同时分析一句话</text>
+  <text x="325" y="80" text-anchor="middle" font-size="7" fill="#0052d9">Head1关注"他→张三"(指代) · Head2关注"跑→快"(修饰) · Head3关注"银行→金融"(语义)</text>
+</svg></div>
+<h3 id="_6">为什么需要多头？</h3>
+<pre class="codehilite"><code>Head 1：关注语法关系（主谓宾）
+Head 2：关注指代关系（&quot;他&quot;指谁）
+Head 3：关注短语搭配（&quot;机器学习&quot;是一个整体）
+Head 4：关注长距离依赖（句首和句尾的关系）
+...
+多个头的输出拼接 → 融合层 → 丰富的综合表示
+</code></pre>
+
+<h3 id="_7">计算流程</h3>
+<pre class="codehilite"><code>输入 X (seq_len, 512)
+  ↓
+分成8个头，每头维度=512/8=64
+  ├─ Head1: Attention(Q1,K1,V1) → (seq_len, 64)
+  ├─ Head2: Attention(Q2,K2,V2) → (seq_len, 64)
+  ├─ ...
+  └─ Head8: Attention(Q8,K8,V8) → (seq_len, 64)
+  ↓
+拼接所有头 → (seq_len, 512)
+  ↓
+线性融合层 W^O → (seq_len, 512)
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：多头注意力不增加总计算量（每个头处理512/8=64维），但大幅提升表达能力。这就像8个人同时从不同角度看同一个问题，比1个人看得全面得多。</p>
+</blockquote>
+<hr />
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 三种Transformer变体对比</p>
+<svg viewBox="0 0 700 80" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="8" width="210" height="48" rx="8" fill="#0052d9"/><text x="115" y="26" text-anchor="middle" font-size="10" fill="white" font-weight="700">Encoder-Only</text><text x="115" y="42" text-anchor="middle" font-size="7" fill="#66b1ff">BERT · 理解型</text><text x="115" y="52" text-anchor="middle" font-size="6" fill="#a3d0ff">分类/情感/NER</text>
+  <rect x="240" y="8" width="210" height="48" rx="8" fill="#1a6fe8"/><text x="345" y="26" text-anchor="middle" font-size="10" fill="white" font-weight="700">Decoder-Only</text><text x="345" y="42" text-anchor="middle" font-size="7" fill="#a3d0ff">GPT · 生成型</text><text x="345" y="52" text-anchor="middle" font-size="6" fill="#a3d0ff">对话/代码/创作</text>
+  <rect x="470" y="8" width="220" height="48" rx="8" fill="#3380e6"/><text x="580" y="26" text-anchor="middle" font-size="10" fill="white" font-weight="700">Encoder-Decoder</text><text x="580" y="42" text-anchor="middle" font-size="7" fill="#a3d0ff">T5/BART · 转换型</text><text x="580" y="52" text-anchor="middle" font-size="6" fill="#a3d0ff">翻译/摘要/问答</text>
+  <text x="350" y="74" text-anchor="middle" font-size="7" fill="#0052d9">2024主流: Decoder-Only(GPT-4/Claude/Gemini) · 生成能力最通用</text>
+</svg></div>
+<h1 id="transformer_3">七、Transformer块：组装完整引擎</h1>
+<p>每一层Transformer由两个子模块组成，堆叠N层（6到96层不等）：</p>
+<pre class="codehilite"><code>输入 X
+  ↓
+┌─────────────────────────┐
+│  多头注意力               │
+│  + 残差连接 (X + Attn(X)) │
+│  + 层归一化 (LayerNorm)   │
+└─────────────────────────┘
+  ↓
+┌─────────────────────────┐
+│  前馈网络 (FFN)          │
+│  Linear(升维512→2048)    │
+│  ReLU激活                │
+│  Linear(降维2048→512)    │
+│  + 残差连接 + LayerNorm  │
+└─────────────────────────┘
+  ↓
+输出（送入下一层）
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>作用</th>
+<th>比喻</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>多头注意力</strong></td>
+<td>捕捉词间关系</td>
+<td>采购员：全球搜集最佳食材</td>
+</tr>
+<tr>
+<td><strong>前馈网络(FFN)</strong></td>
+<td>深度加工信息</td>
+<td>大厨：将食材高温烹饪</td>
+</tr>
+<tr>
+<td><strong>残差连接</strong></td>
+<td>防梯度消失</td>
+<td>保底通道：万一加工出错还有原料</td>
+</tr>
+<tr>
+<td><strong>LayerNorm</strong></td>
+<td>稳定训练</td>
+<td>质检员：确保半成品合格</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Transformer块: 一层的完整计算流</p>
+<svg viewBox="0 0 700 80" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <defs><marker id="tb1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="15" width="90" height="38" rx="6" fill="#edf4ff" stroke="#0052d9"/><text x="55" y="38" text-anchor="middle" font-size="8" fill="#003cab" font-weight="600">输入</text>
+  <line x1="100" y1="34" x2="115" y2="34" stroke="#0052d9" stroke-width="1.5" marker-end="url(#tb1)"/>
+  <rect x="120" y="10" width="140" height="48" rx="6" fill="#0052d9"/><text x="190" y="30" text-anchor="middle" font-size="9" fill="white" font-weight="700">Multi-Head Attn</text><text x="190" y="46" text-anchor="middle" font-size="7" fill="#66b1ff">96头并行注意力</text>
+  <line x1="260" y1="34" x2="275" y2="34" stroke="#0052d9" stroke-width="1.5" marker-end="url(#tb1)"/>
+  <rect x="280" y="15" width="60" height="38" rx="6" fill="#f59e0b"/><text x="310" y="30" text-anchor="middle" font-size="7" fill="white" font-weight="700">Add&amp;</text><text x="310" y="42" text-anchor="middle" font-size="7" fill="white" font-weight="700">Norm</text>
+  <line x1="340" y1="34" x2="355" y2="34" stroke="#0052d9" stroke-width="1.5" marker-end="url(#tb1)"/>
+  <rect x="360" y="10" width="130" height="48" rx="6" fill="#1a6fe8"/><text x="425" y="30" text-anchor="middle" font-size="9" fill="white" font-weight="700">Feed Forward</text><text x="425" y="46" text-anchor="middle" font-size="7" fill="#a3d0ff">全连接+ReLU</text>
+  <line x1="490" y1="34" x2="505" y2="34" stroke="#0052d9" stroke-width="1.5" marker-end="url(#tb1)"/>
+  <rect x="510" y="15" width="60" height="38" rx="6" fill="#f59e0b"/><text x="540" y="30" text-anchor="middle" font-size="7" fill="white" font-weight="700">Add&amp;</text><text x="540" y="42" text-anchor="middle" font-size="7" fill="white" font-weight="700">Norm</text>
+  <line x1="570" y1="34" x2="585" y2="34" stroke="#0052d9" stroke-width="1.5" marker-end="url(#tb1)"/>
+  <rect x="590" y="15" width="90" height="38" rx="6" fill="#059669"/><text x="635" y="38" text-anchor="middle" font-size="8" fill="white" font-weight="600">输出</text>
+  <text x="350" y="72" text-anchor="middle" font-size="7" fill="#4b4b4b">残差连接(Add): 防梯度消失 · LayerNorm: 稳定训练 · 这个块×N层堆叠=完整Transformer</text>
+</svg></div>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：Transformer的核心突破不是"性能更好"，而是<strong>"可以并行"</strong>。RNN必须一个词一个词地顺序处理（前一个算完才能算后一个），而Transformer通过Self-Attention让所有词同时互相关注，训练速度提升了几十倍。没有这个并行化，今天的GPT-4/Claude这种万亿参数的模型根本训练不出来。</p>
+</blockquote>
+<h1 id="_8">八、文本生成：自回归的"逐字接龙"</h1>
+<p><strong>一句话</strong>：模型用自己之前输出的词作为下一轮的输入——一个词一个词地"接龙"出完整句子。</p>
+<pre class="codehilite"><code>人写文章的过程：
+想好 → &quot;我&quot; → 看着&quot;我&quot;想 → &quot;爱&quot; → 看着&quot;我爱&quot;想 → &quot;学习&quot; → ...
+
+模型也是这样：
+&lt;start&gt; → 模型预测&quot;我&quot;
+&lt;start&gt;我 → 模型预测&quot;爱&quot;
+&lt;start&gt;我爱 → 模型预测&quot;学习&quot;
+&lt;start&gt;我爱学习 → 模型预测&quot;AI&quot;
+&lt;start&gt;我爱学习AI → 模型预测&lt;end&gt;
+</code></pre>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 自回归生成: 逐词预测过程</p>
+<svg viewBox="0 0 650 70" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;font-family:-apple-system,sans-serif">
+  <defs><marker id="ar2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="10" width="50" height="30" rx="4" fill="#edf4ff" stroke="#0052d9"/><text x="35" y="29" text-anchor="middle" font-size="9" fill="#003cab">I</text>
+  <line x1="60" y1="25" x2="72" y2="25" stroke="#0052d9" stroke-width="1.5" marker-end="url(#ar2)"/>
+  <rect x="77" y="10" width="60" height="30" rx="4" fill="#0052d9"/><text x="107" y="29" text-anchor="middle" font-size="9" fill="white" font-weight="600">love</text>
+  <line x1="137" y1="25" x2="149" y2="25" stroke="#0052d9" stroke-width="1.5" marker-end="url(#ar2)"/>
+  <rect x="154" y="10" width="80" height="30" rx="4" fill="#1a6fe8"/><text x="194" y="29" text-anchor="middle" font-size="9" fill="white" font-weight="600">machine</text>
+  <line x1="234" y1="25" x2="246" y2="25" stroke="#0052d9" stroke-width="1.5" marker-end="url(#ar2)"/>
+  <rect x="251" y="10" width="80" height="30" rx="4" fill="#3380e6"/><text x="291" y="29" text-anchor="middle" font-size="9" fill="white" font-weight="600">learning</text>
+  <line x1="331" y1="25" x2="343" y2="25" stroke="#0052d9" stroke-width="1.5" marker-end="url(#ar2)"/>
+  <rect x="348" y="10" width="50" height="30" rx="4" fill="#059669"/><text x="373" y="29" text-anchor="middle" font-size="9" fill="white" font-weight="600">EOS</text>
+  <text x="325" y="58" text-anchor="middle" font-size="7" fill="#4b4b4b">每次生成1个词→加入输入→再预测→直到EOS · 每个词只能"看到"它之前的词(Causal Masking)</text>
+</svg></div>
+<h3 id="causal-masking">掩蔽自注意力（Causal Masking）</h3>
+<p>生成时模型只能看前面的词，不能"偷看"后面：</p>
+<pre class="codehilite"><code>      我   爱   学习  AI
+我    ✅   ❌   ❌   ❌
+爱    ✅   ✅   ❌   ❌
+学习  ✅   ✅   ✅   ❌
+AI    ✅   ✅   ✅   ✅
+</code></pre>
+
+<p>下三角掩码保证了单向信息流——这就是GPT等"仅解码器"模型的核心机制。</p>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：自回归是"逐步构建上下文"的过程。每生成一个词，上下文就多了一个词，下一次预测就有更多信息可参考。这既是模型"越写越顺"的原因，也是生成速度慢的根源（必须一个个生成，无法并行）。</p>
+</blockquote>
+<hr />
+<h1 id="_9">九、最新优化技术</h1>
+<table>
+<thead>
+<tr>
+<th>技术</th>
+<th>解决什么问题</th>
+<th>核心思路</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>KV Cache</strong></td>
+<td>重复计算历史Token的K/V</td>
+<td>缓存已计算的K/V，新Token只算自己的</td>
+</tr>
+<tr>
+<td><strong>Multi-Query Attention</strong></td>
+<td>KV缓存占内存太大</td>
+<td>多个Query头共享一组K/V</td>
+</tr>
+<tr>
+<td><strong>Grouped-Query Attention</strong></td>
+<td>MQA质量损失</td>
+<td>折中：每组几个头共享K/V</td>
+</tr>
+<tr>
+<td><strong>Sparse Attention</strong></td>
+<td>超长序列O(n²)太慢</td>
+<td>只关注局部或稀疏位置</td>
+</tr>
+<tr>
+<td><strong>MoE（混合专家）</strong></td>
+<td>参数太多推理太慢</td>
+<td>每次只激活部分"专家"网络</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="_10">十、核心洞察</h1>
+<h3 id="1-transformer">1. 并行计算是Transformer的命脉</h3>
+<p>自注意力让所有位置同时交互——这是它能训练千亿参数的根本原因。</p>
+<h3 id="2">2. 位置编码是"补丁"</h3>
+<p>Transformer天生不知道顺序，位置编码是后打的补丁。但正弦编码的巧妙设计让它能学会"相对位置"。</p>
+<h3 id="3">3. 多头=多视角</h3>
+<p>8个头 ≈ 8个不同角度的观察员，总计算量不变但信息量翻倍。</p>
+<h3 id="4-ffn">4. FFN是"知识存储"</h3>
+<p>注意力负责"关系建模"，FFN负责"深度加工"。研究表明，FFN层存储了大量事实性知识。</p>
+<h3 id="5">5. 自回归是双刃剑</h3>
+<p>逐词生成保证了质量（每步都有上下文），但也限制了速度（无法并行生成）。KV Cache等优化正是为了缓解这个问题。</p>
+<hr />
+<h2 id="15">附录：专有名词速查（15个）</h2>
+<table>
+<thead>
+<tr>
+<th>名词</th>
+<th>全称</th>
+<th>一句话白话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Transformer</td>
+<td>-</td>
+<td>基于自注意力的深度学习架构，所有现代LLM的底层</td>
+</tr>
+<tr>
+<td>Self-Attention</td>
+<td>自注意力</td>
+<td>让每个词看到所有其他词并计算关联权重</td>
+</tr>
+<tr>
+<td>Multi-Head Attention</td>
+<td>多头注意力</td>
+<td>多个独立的注意力头从不同角度观察</td>
+</tr>
+<tr>
+<td>Q/K/V</td>
+<td>Query/Key/Value</td>
+<td>查询/键/值，自注意力的三个核心向量</td>
+</tr>
+<tr>
+<td>Tokenization</td>
+<td>分词</td>
+<td>把文本切成模型能处理的最小单位</td>
+</tr>
+<tr>
+<td>BPE</td>
+<td>Byte Pair Encoding</td>
+<td>字节对编码，主流的子词分词算法</td>
+</tr>
+<tr>
+<td>Embedding</td>
+<td>嵌入</td>
+<td>把离散的Token ID变成连续向量</td>
+</tr>
+<tr>
+<td>Positional Encoding</td>
+<td>位置编码</td>
+<td>给Token注入位置信息（正弦函数）</td>
+</tr>
+<tr>
+<td>FFN</td>
+<td>Feed-Forward Network</td>
+<td>前馈网络，对每个Token独立做非线性变换</td>
+</tr>
+<tr>
+<td>LayerNorm</td>
+<td>层归一化</td>
+<td>稳定训练的归一化技术</td>
+</tr>
+<tr>
+<td>Residual Connection</td>
+<td>残差连接</td>
+<td>Y=X+F(X)，防止深层梯度消失</td>
+</tr>
+<tr>
+<td>Autoregressive</td>
+<td>自回归</td>
+<td>用自己的输出作为下一步输入逐词生成</td>
+</tr>
+<tr>
+<td>Causal Masking</td>
+<td>因果掩蔽</td>
+<td>下三角掩码，防止"偷看"未来的词</td>
+</tr>
+<tr>
+<td>KV Cache</td>
+<td>键值缓存</td>
+<td>缓存已算的K/V加速推理</td>
+</tr>
+<tr>
+<td>MoE</td>
+<td>Mixture of Experts</td>
+<td>混合专家模型，只激活部分参数</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="footer">学习笔记由 WorkBuddy AI 助手整理 · 2026-04-11 · 通俗叙事风格 · 腾讯云商务蓝配色</div>
+</div>
+</body>
+</html>

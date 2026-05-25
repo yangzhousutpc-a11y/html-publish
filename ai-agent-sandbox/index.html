@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Agent沙箱学习笔记</title>
+<style>
+  :root {
+    --brand: #0052d9;
+    --brand-dark: #003cab;
+    --brand-light: #d4e3fc;
+    --bg-page: #f3f4f6;
+    --bg-card: #ffffff;
+    --bg-blue: #edf4ff;
+    --bg-blue2: #f0f7ff;
+    --bg-blue3: #f5f9ff;
+    --border-blue: #d4e3fc;
+    --border-gray: #e5e6eb;
+    --text-title: #242424;
+    --text-body: #4b4b4b;
+    --text-light: #8a8a8a;
+    --code-bg: #0d1b2a;
+    --stat-color: #66b1ff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg-page); color: var(--text-body); line-height: 1.8; }
+  .container { max-width: 900px; margin: 0 auto; padding: 0 20px 40px; }
+
+  /* Header */
+  .header { background: linear-gradient(135deg, #001a45 0%, #0052d9 50%, #0077ff 100%); color: #fff; padding: 48px 0 36px; border-radius: 0 0 20px 20px; margin-bottom: 32px; }
+  .header-inner { max-width: 860px; margin: 0 auto; padding: 0 20px; }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 12px; letter-spacing: 0.5px; }
+  .header .meta { font-size: 13px; color: rgba(255,255,255,0.75); margin-bottom: 20px; }
+  .header .meta a { color: var(--stat-color); text-decoration: none; }
+  .header .meta a:hover { text-decoration: underline; }
+  .stats { display: flex; gap: 16px; flex-wrap: wrap; }
+  .stat-card { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 12px 20px; text-align: center; min-width: 100px; backdrop-filter: blur(8px); }
+  .stat-card .num { font-size: 22px; font-weight: 700; color: var(--stat-color); }
+  .stat-card .label { font-size: 12px; color: rgba(255,255,255,0.65); margin-top: 2px; }
+
+  /* 综述区 */
+  .overview { background: linear-gradient(135deg, var(--bg-blue) 0%, var(--bg-blue2) 50%, var(--bg-blue3) 100%); border: 1px solid var(--border-blue); border-radius: 12px; padding: 24px 28px; margin-bottom: 28px; }
+  .overview h2 { font-size: 16px; color: var(--brand); margin-bottom: 12px; font-weight: 600; }
+  .overview p { font-size: 14.5px; color: var(--text-body); margin-bottom: 10px; line-height: 1.9; }
+  .overview p:last-child { margin-bottom: 0; }
+  .overview strong { color: var(--brand-dark); }
+
+  /* 内容区 */
+  .card { background: var(--bg-card); border: 1px solid var(--border-gray); border-radius: 12px; padding: 28px 32px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+  h1.section { font-size: 22px; color: var(--brand); font-weight: 700; border-bottom: 3px solid var(--brand); padding-bottom: 8px; margin-bottom: 20px; }
+  h2.sub { font-size: 17px; color: var(--text-title); font-weight: 600; margin: 24px 0 12px; }
+  h3.sub2 { font-size: 15px; color: var(--brand-dark); font-weight: 600; margin: 18px 0 10px; }
+  p { font-size: 14.5px; margin-bottom: 12px; }
+  strong { color: var(--text-title); }
+  a { color: var(--brand); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code { font-family: 'SF Mono', 'Fira Code', monospace; background: #f0f2f5; padding: 2px 6px; border-radius: 4px; font-size: 13px; color: #c7254e; }
+  pre { background: var(--code-bg); color: #e0e0e0; padding: 18px 20px; border-radius: 8px; font-size: 13px; line-height: 1.7; overflow-x: auto; margin: 12px 0; font-family: 'SF Mono', 'Fira Code', monospace; }
+  pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+
+  /* 表格 */
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13.5px; }
+  th { background: var(--bg-blue); color: var(--brand-dark); font-weight: 600; padding: 10px 12px; text-align: left; border: 1px solid var(--border-blue); }
+  td { padding: 9px 12px; border: 1px solid var(--border-gray); }
+  tr:nth-child(even) td { background: #fafbfc; }
+  tr:hover td { background: var(--bg-blue3); }
+
+  /* 引用 */
+  blockquote { background: linear-gradient(135deg, var(--bg-blue), var(--bg-blue3)); border-left: 4px solid var(--brand); padding: 14px 18px; margin: 14px 0; border-radius: 0 8px 8px 0; font-size: 14px; color: var(--brand-dark); }
+
+  /* SVG容器 */
+  .svg-card { background: var(--bg-blue3); border: 1px solid var(--border-blue); border-radius: 10px; padding: 16px 20px; margin: 18px 0; }
+  .svg-card .svg-title { font-size: 13px; font-weight: 600; color: var(--brand); margin-bottom: 10px; }
+  .svg-card svg { width: 100%; height: auto; display: block; }
+
+  /* 分隔线 */
+  hr { border: none; border-top: 1px solid var(--border-gray); margin: 28px 0; }
+
+  /* Footer */
+  .footer { text-align: center; padding: 24px 0; color: var(--text-light); font-size: 12px; }
+
+  /* 名词速查 */
+  .appendix { background: var(--bg-card); border: 1px solid var(--border-gray); border-radius: 12px; padding: 28px 32px; margin-bottom: 24px; }
+  .appendix h1 { font-size: 20px; color: var(--brand); font-weight: 700; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <h1>AI Agent沙箱学习笔记</h1>
+    <div class="meta">
+      来源：抖音 · 小白debug ｜ 
+      视频：<a href="https://www.douyin.com/video/7633406306220608820">AI Agent的沙箱是什么？和容器/虚拟机有什么区别？</a>（7分06秒） ｜ 
+      标签：#CubeSandbox #腾讯云 #沙箱 #开源 ｜ 发布：2026-04-27
+    </div>
+    <div class="stats">
+      <div class="stat-card"><div class="num">5</div><div class="label">章节</div></div>
+      <div class="stat-card"><div class="num">18</div><div class="label">专有名词</div></div>
+      <div class="stat-card"><div class="num">8</div><div class="label">架构图</div></div>
+      <div class="stat-card"><div class="num">5</div><div class="label">💡关键认知</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- 综述 -->
+<div class="overview">
+  <h2>📖 内容综述</h2>
+  <p>这篇笔记回答一个越来越紧迫的问题：<strong>AI Agent写出来的代码，到底敢不敢直接在你的机器上跑？</strong>视频从一个经典的"翻车现场"切入——AI Agent执行了<code>sudo rm -rf /</code>，如果没有沙箱保护，你的服务器直接变空壳。但有了沙箱，这段代码只在"围栏"里折腾，删完一键重置，宿主机毫发无损。</p>
+  <p>接着视频把<strong>沙箱、虚拟机、容器</strong>三者拉到一起做硬核对比，引出腾讯云2026年4月开源的<strong>CubeSandbox</strong>——一个用MicroVM路线实现"硬件级隔离+亚百毫秒启动"的AI Agent沙箱。笔记会拆解它的架构、冷启动60ms的秘密、5MB内存开销的原理，以及实测部署的全流程。</p>
+</div>
+
+<!-- 第一章 -->
+<div class="card">
+<h1 class="section">一、沙箱是什么</h1>
+
+<h2 class="sub">1.1 一句话定义</h2>
+<p>沙箱（Sandbox）就是一个<strong>给代码画的"围栏"</strong>——程序在围栏里怎么折腾都行，但翻不出围栏、碰不到宿主机、也影响不到旁边的其他围栏。</p>
+
+<div class="svg-card">
+  <p class="svg-title">📐 沙箱核心概念——围栏隔离</p>
+  <svg viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg">
+    <!-- 宿主机 -->
+    <rect x="20" y="20" width="660" height="220" rx="12" fill="#f0f4ff" stroke="#0052d9" stroke-width="2"/>
+    <text x="40" y="48" font-size="14" font-weight="600" fill="#0052d9">🖥️ 宿主机（Host Machine）</text>
+    <!-- 沙箱A -->
+    <rect x="50" y="70" width="180" height="140" rx="10" fill="#d4e3fc" stroke="#0052d9" stroke-width="1.5" stroke-dasharray="6 3"/>
+    <text x="80" y="98" font-size="13" font-weight="600" fill="#003cab">🟦 沙箱 A</text>
+    <rect x="70" y="110" width="140" height="30" rx="5" fill="#fff" stroke="#0052d9" stroke-width="1"/>
+    <text x="95" y="130" font-size="11" fill="#4b4b4b">Agent 代码</text>
+    <rect x="70" y="150" width="140" height="30" rx="5" fill="#ffebee" stroke="#dc2626" stroke-width="1"/>
+    <text x="82" y="170" font-size="11" fill="#dc2626">rm -rf / 🔥</text>
+    <text x="80" y="200" font-size="10" fill="#059669">✓ 只删自己里面的</text>
+    <!-- 沙箱B -->
+    <rect x="260" y="70" width="180" height="140" rx="10" fill="#d4e3fc" stroke="#0052d9" stroke-width="1.5" stroke-dasharray="6 3"/>
+    <text x="290" y="98" font-size="13" font-weight="600" fill="#003cab">🟦 沙箱 B</text>
+    <rect x="280" y="110" width="140" height="30" rx="5" fill="#fff" stroke="#0052d9" stroke-width="1"/>
+    <text x="305" y="130" font-size="11" fill="#4b4b4b">Agent 代码</text>
+    <rect x="280" y="150" width="140" height="30" rx="5" fill="#fff" stroke="#0052d9" stroke-width="1"/>
+    <text x="298" y="170" font-size="11" fill="#4b4b4b">正常执行 ✅</text>
+    <text x="290" y="200" font-size="10" fill="#059669">✓ 不受A影响</text>
+    <!-- 宿主OS -->
+    <rect x="470" y="70" width="180" height="140" rx="10" fill="#e8f5e9" stroke="#059669" stroke-width="1.5"/>
+    <text x="500" y="98" font-size="13" font-weight="600" fill="#059669">🛡️ 宿主OS</text>
+    <text x="490" y="130" font-size="11" fill="#4b4b4b">系统文件</text>
+    <text x="490" y="155" font-size="11" fill="#4b4b4b">数据库</text>
+    <text x="490" y="180" font-size="11" fill="#4b4b4b">网络配置</text>
+    <text x="500" y="200" font-size="10" fill="#059669">✓ 毫发无损</text>
+  </svg>
+</div>
+
+<h2 class="sub">1.2 为什么AI Agent特别需要沙箱</h2>
+<p>视频用一个"翻车现场"开场：AI Agent执行了<code>sudo rm -rf /</code>。如果没有沙箱，宿主机直接被清空；有了沙箱，代码只在围栏里跑，删完一键重置，宿主机毫发无损。</p>
+
+<table>
+  <tr><th>风险类型</th><th>说明</th><th>例子</th></tr>
+  <tr><td><strong>代码来源不可信</strong></td><td>LLM生成的代码可能是幻觉、注入或攻击载荷</td><td>Prompt注入让Agent执行恶意Shell命令</td></tr>
+  <tr><td><strong>自主性风险</strong></td><td>Agent会执行代码、访问网络、连数据库、删文件</td><td>一次提示词注入=不可挽回的后果</td></tr>
+  <tr><td><strong>安全边界失效</strong></td><td>用户习惯性批准权限弹窗</td><td>Anthropic统计：93%的权限弹窗被盲目批准</td></tr>
+</table>
+
+<blockquote>💡 <strong>关键认知</strong>：沙箱不是某一个具体技术，而是一种<strong>安全理念</strong>——"默认不信任，隔离后再执行"。虚拟机、容器、MicroVM都是沙箱的不同实现形态。</blockquote>
+
+<h2 class="sub">1.3 沙箱的本质——从技术谱系看</h2>
+
+<table>
+  <tr><th>实现形态</th><th>隔离原理</th><th>隔离强度</th></tr>
+  <tr><td>chroot/namespaces</td><td>进程级视图隔离</td><td>最弱</td></tr>
+  <tr><td>Docker容器</td><td>Namespace+Cgroup</td><td>一般</td></tr>
+  <tr><td>MicroVM</td><td>独立Guest内核+KVM</td><td>强</td></tr>
+  <tr><td>完整虚拟机</td><td>硬件虚拟化</td><td>最强</td></tr>
+</table>
+
+<p>关键矛盾：<strong>隔离越强，开销越大</strong>。传统VM安全但启动要几秒到几分钟、内存几百MB到几GB；Docker轻快但共享内核，逃逸风险高。CubeSandbox要解决的，就是在这个"不可能三角"里找第四条路。</p>
+</div>
+
+<!-- 第二章 -->
+<div class="card">
+<h1 class="section">二、沙箱 vs 虚拟机 vs 容器</h1>
+
+<h2 class="sub">2.1 核心比喻</h2>
+
+<table>
+  <tr><th>技术</th><th>比喻</th><th>含义</th></tr>
+  <tr><td><strong>虚拟机（VM）</strong></td><td>"给你一间全封闭的独立别墅"</td><td>安全性最高，开销最大</td></tr>
+  <tr><td><strong>Docker容器</strong></td><td>"给你的房间装上防盗门和监控，但大家共用一套供水排水系统"</td><td>性能和兼容性的平衡点，但内核共享有风险</td></tr>
+  <tr><td><strong>CubeSandbox（MicroVM）</strong></td><td>"给你一间极速搭建的独立小公寓"</td><td>独立内核+启动飞快+极低开销</td></tr>
+</table>
+
+<h2 class="sub">2.2 硬核对比数据</h2>
+
+<table>
+  <tr><th>维度</th><th>Docker容器</th><th>传统虚拟机</th><th>CubeSandbox（MicroVM）</th></tr>
+  <tr><td><strong>隔离级别</strong></td><td>低（共享内核）</td><td>高（独立内核+硬件虚拟化）</td><td>极高（独立内核+eBPF）</td></tr>
+  <tr><td><strong>隔离原理</strong></td><td>Namespace+Cgroup（视图隔离）</td><td>KVM/QEMU硬件虚拟化</td><td>KVM MicroVM+eBPF</td></tr>
+  <tr><td><strong>启动速度</strong></td><td>~200ms</td><td>秒级~分钟级</td><td><strong>&lt;60ms</strong></td></tr>
+  <tr><td><strong>单实例内存</strong></td><td>低（共享内核，几MB）</td><td>高（完整OS，数百MB~GB）</td><td><strong>&lt;5MB</strong>（CoW复用）</td></tr>
+  <tr><td><strong>部署密度</strong></td><td>高</td><td>低</td><td><strong>极高</strong>（96核跑2000+实例）</td></tr>
+  <tr><td><strong>逃逸风险</strong></td><td><strong>高</strong>（共享内核，CVE频发）</td><td>低</td><td><strong>极低</strong>（独立内核）</td></tr>
+</table>
+
+<h2 class="sub">2.3 容器逃逸——最关键的那个"坑"</h2>
+
+<p><strong>Docker隔离的本质是"共享内核"</strong>，这是很多初学者搞混的地方：</p>
+<p>Docker用Namespace做进程隔离、用Cgroup做资源限制——这看起来像"隔离"，但本质是<strong>视图隔离</strong>（看不到别人），不是<strong>安全隔离</strong>（无法防止别人攻击你）。Linux内核文档明确说明：Namespace是为了"封装"，不是"安全隔离"。</p>
+
+<div class="svg-card">
+  <p class="svg-title">📐 Docker共享内核 vs CubeSandbox独立内核</p>
+  <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg">
+    <!-- Docker侧 -->
+    <rect x="10" y="15" width="330" height="250" rx="10" fill="#fff3f3" stroke="#dc2626" stroke-width="1.5"/>
+    <text x="30" y="42" font-size="14" font-weight="700" fill="#dc2626">❌ Docker（共享内核）</text>
+    <rect x="30" y="170" width="290" height="50" rx="6" fill="#ffebee" stroke="#dc2626" stroke-width="1"/>
+    <text x="120" y="200" font-size="13" font-weight="600" fill="#dc2626">Host Kernel（共享）</text>
+    <rect x="40" y="60" width="80" height="90" rx="6" fill="#fff" stroke="#e53935" stroke-width="1"/>
+    <text x="55" y="95" font-size="11" fill="#4b4b4b">Cont A</text>
+    <text x="48" y="115" font-size="9" fill="#8a8a8a">Namespace</text>
+    <rect x="140" y="60" width="80" height="90" rx="6" fill="#fff" stroke="#e53935" stroke-width="1"/>
+    <text x="155" y="95" font-size="11" fill="#4b4b4b">Cont B</text>
+    <text x="148" y="115" font-size="9" fill="#8a8a8a">Namespace</text>
+    <rect x="240" y="60" width="80" height="90" rx="6" fill="#ffebee" stroke="#dc2626" stroke-width="1.5"/>
+    <text x="252" y="90" font-size="11" fill="#dc2626" font-weight="600">Cont C</text>
+    <text x="250" y="110" font-size="9" fill="#dc2626">(恶意🔥)</text>
+    <text x="250" y="130" font-size="9" fill="#dc2626">逃逸↓</text>
+    <!-- 箭头指向内核 -->
+    <line x1="280" y1="155" x2="280" y2="168" stroke="#dc2626" stroke-width="2" marker-end="url(#arrowRed)"/>
+    <text x="30" y="240" font-size="11" fill="#dc2626">⚠️ 一个内核漏洞 = 全部沦陷</text>
+
+    <!-- CubeSandbox侧 -->
+    <rect x="370" y="15" width="340" height="250" rx="10" fill="#f0fff4" stroke="#059669" stroke-width="1.5"/>
+    <text x="390" y="42" font-size="14" font-weight="700" fill="#059669">✅ CubeSandbox（独立内核）</text>
+    <rect x="390" y="60" width="90" height="100" rx="6" fill="#fff" stroke="#059669" stroke-width="1"/>
+    <text x="400" y="85" font-size="10" fill="#059669" font-weight="600">Guest OS 1</text>
+    <text x="400" y="105" font-size="9" fill="#4b4b4b">独立内核</text>
+    <text x="400" y="125" font-size="9" fill="#4b4b4b">Agent A</text>
+    <rect x="495" y="60" width="90" height="100" rx="6" fill="#fff" stroke="#059669" stroke-width="1"/>
+    <text x="505" y="85" font-size="10" fill="#059669" font-weight="600">Guest OS 2</text>
+    <text x="505" y="105" font-size="9" fill="#4b4b4b">独立内核</text>
+    <text x="505" y="125" font-size="9" fill="#4b4b4b">Agent B</text>
+    <rect x="600" y="60" width="90" height="100" rx="6" fill="#fff" stroke="#059669" stroke-width="1"/>
+    <text x="610" y="85" font-size="10" fill="#059669" font-weight="600">Guest OS 3</text>
+    <text x="610" y="105" font-size="9" fill="#4b4b4b">独立内核</text>
+    <text x="610" y="125" font-size="9" fill="#dc2626">Agent C🔥</text>
+    <rect x="390" y="175" width="300" height="40" rx="6" fill="#e8f5e9" stroke="#059669" stroke-width="1"/>
+    <text x="440" y="200" font-size="13" font-weight="600" fill="#059669">Host Kernel + KVM</text>
+    <text x="390" y="240" font-size="11" fill="#059669">🔒 硬件级隔离，逃逸不了</text>
+
+    <defs>
+      <marker id="arrowRed" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#dc2626"/></marker>
+    </defs>
+  </svg>
+</div>
+
+<p><strong>真实逃逸案例</strong>：CVE-2024-21626（runc容器逃逸）、CVE-2022-0492（cgroup容器逃逸）——每年都有新的容器逃逸漏洞被发现。</p>
+
+<blockquote>💡 <strong>关键认知</strong>：Docker的Namespace是"视图隔离"（看不到别人），不是"安全隔离"（防不住别人）。Linux内核文档自己都说了Namespace是为"封装"设计的，不是"安全隔离"。一个内核漏洞 = 全部容器沦陷。</blockquote>
+
+<h2 class="sub">2.4 沙箱分级体系</h2>
+
+<div class="svg-card">
+  <p class="svg-title">📐 沙箱四级隔离谱系</p>
+  <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg">
+    <!-- Level 1 -->
+    <rect x="20" y="20" width="150" height="60" rx="8" fill="#fff3e0" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="40" y="45" font-size="12" font-weight="600" fill="#e65100">Level 1</text>
+    <text x="40" y="65" font-size="10" fill="#4b4b4b">进程级隔离</text>
+    <text x="40" y="78" font-size="9" fill="#8a8a8a">chroot/namespaces</text>
+    <!-- Level 2 -->
+    <rect x="190" y="50" width="150" height="60" rx="8" fill="#fff8e1" stroke="#ffb300" stroke-width="1.5"/>
+    <text x="210" y="75" font-size="12" font-weight="600" fill="#e65100">Level 2</text>
+    <text x="210" y="95" font-size="10" fill="#4b4b4b">容器 Docker</text>
+    <text x="210" y="108" font-size="9" fill="#8a8a8a">共享内核有逃逸风险</text>
+    <!-- Level 3 -->
+    <rect x="360" y="80" width="160" height="70" rx="8" fill="#e8f5e9" stroke="#059669" stroke-width="2"/>
+    <text x="375" y="105" font-size="12" font-weight="700" fill="#059669">Level 3 ⭐</text>
+    <text x="375" y="125" font-size="10" fill="#4b4b4b">MicroVM</text>
+    <text x="375" y="140" font-size="9" fill="#059669">CubeSandbox在这！</text>
+    <!-- Level 4 -->
+    <rect x="540" y="110" width="150" height="60" rx="8" fill="#e3f2fd" stroke="#0052d9" stroke-width="1.5"/>
+    <text x="560" y="135" font-size="12" font-weight="600" fill="#0052d9">Level 4</text>
+    <text x="560" y="155" font-size="10" fill="#4b4b4b">完整VM</text>
+    <text x="560" y="168" font-size="9" fill="#8a8a8a">最安全但最重</text>
+    <!-- 箭头 -->
+    <line x1="170" y1="60" x2="188" y2="68" stroke="#8a8a8a" stroke-width="1" marker-end="url(#arrowGray)"/>
+    <line x1="340" y1="90" x2="358" y2="100" stroke="#8a8a8a" stroke-width="1" marker-end="url(#arrowGray)"/>
+    <line x1="520" y1="120" x2="538" y2="128" stroke="#8a8a8a" stroke-width="1" marker-end="url(#arrowGray)"/>
+    <!-- 安全性标注 -->
+    <text x="20" y="205" font-size="10" fill="#8a8a8a">安全性 →→→→→→→→→→→→→→→→→→→→→→→→→→ 最强</text>
+    <text x="20" y="192" font-size="10" fill="#8a8a8a">速度  ←←←←←←←←←←←←←←←←←←←←←←←←← 最慢</text>
+    <defs>
+      <marker id="arrowGray" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#8a8a8a"/></marker>
+    </defs>
+  </svg>
+</div>
+
+<p><strong>CubeSandbox做的事</strong>：把Level 3的隔离级别，压到接近Level 2的启动速度和内存开销。这是"不可能三角"中的第四条路。</p>
+</div>
+
+<!-- 第三章 -->
+<div class="card">
+<h1 class="section">三、CubeSandbox是什么</h1>
+
+<h2 class="sub">3.1 基本信息</h2>
+
+<table>
+  <tr><th>项目</th><th>详情</th></tr>
+  <tr><td><strong>全称</strong></td><td>Cube Sandbox</td></tr>
+  <tr><td><strong>开发者</strong></td><td>腾讯云</td></tr>
+  <tr><td><strong>开源时间</strong></td><td>2026年4月21日</td></tr>
+  <tr><td><strong>开源协议</strong></td><td>Apache 2.0（商用无限制）</td></tr>
+  <tr><td><strong>GitHub</strong></td><td><a href="https://github.com/TencentCloud/CubeSandbox">TencentCloud/CubeSandbox</a></td></tr>
+  <tr><td><strong>Star数</strong></td><td>4.8K+（开源4天即破4000）</td></tr>
+  <tr><td><strong>定位</strong></td><td>业内首个兼顾硬件级隔离与亚百毫秒启动的开源AI Agent沙箱</td></tr>
+</table>
+
+<h2 class="sub">3.2 产品定位——专为AI Agent设计</h2>
+<p>CubeSandbox不是通用虚拟化方案，而是专门面向AI Agent场景的执行环境底座：</p>
+<p>• <strong>不是</strong>"如何安全跑一段代码"<br>• <strong>而是</strong>"如何治理一个长时间存在、会持有状态、会不断做外部调用的Agent执行过程"</p>
+
+<h2 class="sub">3.3 核心性能指标</h2>
+
+<div class="svg-card">
+  <p class="svg-title">📐 CubeSandbox核心性能指标 vs 竞品</p>
+  <svg viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg">
+    <!-- 标题 -->
+    <text x="30" y="30" font-size="13" font-weight="600" fill="#0052d9">冷启动时间对比（越短越好）</text>
+    <!-- 坐标轴 -->
+    <line x1="170" y1="50" x2="680" y2="50" stroke="#e5e6eb" stroke-width="1"/>
+    <text x="170" y="46" font-size="9" fill="#8a8a8a">0ms</text>
+    <text x="320" y="46" font-size="9" fill="#8a8a8a">500ms</text>
+    <text x="470" y="46" font-size="9" fill="#8a8a8a">1000ms</text>
+    <!-- CubeSandbox bar -->
+    <rect x="170" y="60" width="18" height="28" rx="3" fill="#0052d9"/>
+    <text x="192" y="79" font-size="10" font-weight="600" fill="#0052d9">60ms</text>
+    <text x="30" y="79" font-size="11" fill="#4b4b4b">CubeSandbox</text>
+    <!-- Docker bar -->
+    <rect x="170" y="95" width="60" height="28" rx="3" fill="#f59e0b"/>
+    <text x="234" y="114" font-size="10" fill="#e65100">200ms</text>
+    <text x="30" y="114" font-size="11" fill="#4b4b4b">Docker</text>
+    <!-- E2B bar -->
+    <rect x="170" y="130" width="52" height="28" rx="3" fill="#3b82f6"/>
+    <text x="226" y="149" font-size="10" fill="#3b82f6">175ms</text>
+    <text x="30" y="149" font-size="11" fill="#4b4b4b">E2B（闭源）</text>
+    <!-- 传统VM bar -->
+    <rect x="170" y="165" width="450" height="28" rx="3" fill="#dc2626" opacity="0.3"/>
+    <text x="624" y="184" font-size="10" fill="#dc2626">秒~分钟级</text>
+    <text x="30" y="184" font-size="11" fill="#4b4b4b">传统VM</text>
+
+    <!-- 内存开销 -->
+    <text x="30" y="225" font-size="13" font-weight="600" fill="#0052d9">单实例内存开销（越小越好）</text>
+    <rect x="170" y="237" width="5" height="20" rx="2" fill="#0052d9"/>
+    <text x="180" y="252" font-size="10" font-weight="600" fill="#0052d9">&lt;5MB</text>
+    <text x="30" y="252" font-size="11" fill="#4b4b4b">CubeSandbox</text>
+    <rect x="310" y="237" width="120" height="20" rx="2" fill="#dc2626" opacity="0.3"/>
+    <text x="434" y="252" font-size="10" fill="#dc2626">数百MB~GB</text>
+    <text x="310" y="252" font-size="11" fill="#4b4b4b">传统VM</text>
+  </svg>
+</div>
+
+<h2 class="sub">3.4 E2B兼容——零成本迁移</h2>
+
+<p>这是CubeSandbox最重要的生态特性：原生兼容E2B SDK，开发者<strong>仅需修改一个环境变量</strong>即可迁移。</p>
+
+<div class="svg-card">
+  <p class="svg-title">📐 E2B→CubeSandbox 零成本迁移</p>
+  <svg viewBox="0 0 700 160" xmlns="http://www.w3.org/2000/svg">
+    <!-- E2B -->
+    <rect x="20" y="30" width="200" height="100" rx="10" fill="#e3f2fd" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="50" y="58" font-size="14" font-weight="600" fill="#3b82f6">E2B SDK</text>
+    <text x="40" y="82" font-size="11" fill="#4b4b4b">E2B_API_URL=</text>
+    <text x="40" y="100" font-size="10" fill="#4b4b4b" font-family="monospace">https://api.e2b.dev</text>
+    <!-- Arrow -->
+    <text x="240" y="80" font-size="24" fill="#0052d9">→</text>
+    <text x="240" y="100" font-size="10" fill="#059669" font-weight="600">改1个变量</text>
+    <!-- CubeSandbox -->
+    <rect x="290" y="30" width="220" height="100" rx="10" fill="#e8f5e9" stroke="#059669" stroke-width="1.5"/>
+    <text x="320" y="58" font-size="14" font-weight="600" fill="#059669">CubeSandbox</text>
+    <text x="310" y="82" font-size="11" fill="#4b4b4b">E2B_API_URL=</text>
+    <text x="310" y="100" font-size="10" fill="#059669" font-family="monospace">http://127.0.0.1:3000</text>
+    <!-- 代码不动 -->
+    <rect x="540" y="50" width="140" height="60" rx="8" fill="#fff3e0" stroke="#f59e0b" stroke-width="1"/>
+    <text x="560" y="75" font-size="12" font-weight="600" fill="#e65100">业务代码</text>
+    <text x="560" y="95" font-size="11" fill="#059669">一行不用动 ✅</text>
+  </svg>
+</div>
+
+<blockquote>💡 <strong>关键认知</strong>：不是造一个新的SDK，而是直接兼容现有标准，改一个环境变量就迁移。这在商业上是极具攻击性的策略——你不用学新东西，只要换一个地址。</blockquote>
+
+<h2 class="sub">3.5 生产验证</h2>
+<p>• 诞生于腾讯云Serverless体系，承载过<strong>百亿级调用</strong><br>• 支撑<strong>腾讯元宝</strong>等亿级用户产品<br>• 支撑<strong>MiniMax</strong>在Agentic RL训练中分钟级调度<strong>数十万实例</strong></p>
+</div>
+
+<!-- 第四章 -->
+<div class="card">
+<h1 class="section">四、CubeSandbox架构详解</h1>
+
+<h2 class="sub">4.1 分层架构总览</h2>
+
+<div class="svg-card">
+  <p class="svg-title">📐 CubeSandbox六层架构</p>
+  <svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg">
+    <!-- SDK层 -->
+    <rect x="150" y="15" width="400" height="42" rx="8" fill="#e3f2fd" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="280" y="42" font-size="13" font-weight="600" fill="#3b82f6">SDK（E2B Compatible）</text>
+    <text x="155" y="42" font-size="10" fill="#8a8a8a">应用层</text>
+    <!-- Arrow -->
+    <line x1="350" y1="57" x2="350" y2="70" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+    <!-- CubeAPI -->
+    <rect x="150" y="72" width="400" height="42" rx="8" fill="#d4e3fc" stroke="#0052d9" stroke-width="1.5"/>
+    <text x="265" y="99" font-size="13" font-weight="600" fill="#0052d9">CubeAPI（Rust REST Gateway）</text>
+    <text x="155" y="99" font-size="10" fill="#8a8a8a">网关层</text>
+    <!-- Arrow -->
+    <line x1="350" y1="114" x2="350" y2="127" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+    <!-- CubeMaster -->
+    <rect x="150" y="129" width="400" height="42" rx="8" fill="#c5d9f7" stroke="#0052d9" stroke-width="1.5"/>
+    <text x="252" y="156" font-size="13" font-weight="600" fill="#003cab">CubeMaster（Cluster Orchestrator）</text>
+    <text x="155" y="156" font-size="10" fill="#8a8a8a">调度层</text>
+    <!-- Arrow -->
+    <line x1="350" y1="171" x2="350" y2="184" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+    <!-- CubeProxy -->
+    <rect x="150" y="186" width="400" height="42" rx="8" fill="#b0c9f2" stroke="#0052d9" stroke-width="1.5"/>
+    <text x="268" y="213" font-size="13" font-weight="600" fill="#003cab">CubeProxy（Reverse Proxy）</text>
+    <text x="155" y="213" font-size="10" fill="#8a8a8a">代理层</text>
+    <!-- Arrow -->
+    <line x1="350" y1="228" x2="350" y2="241" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+    <!-- Cubelet -->
+    <rect x="150" y="243" width="400" height="42" rx="8" fill="#9bbaed" stroke="#0052d9" stroke-width="1.5"/>
+    <text x="252" y="270" font-size="13" font-weight="600" fill="#003cab">Cubelet（Node Lifecycle Manager）</text>
+    <text x="155" y="270" font-size="10" fill="#8a8a8a">节点层</text>
+    <!-- Arrow -->
+    <line x1="350" y1="285" x2="350" y2="298" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+    <!-- 底层三组件 -->
+    <rect x="100" y="300" width="150" height="42" rx="8" fill="#7fa8e2" stroke="#003cab" stroke-width="1.5"/>
+    <text x="112" y="327" font-size="12" font-weight="600" fill="#fff">CubeShim</text>
+    <rect x="275" y="300" width="150" height="42" rx="8" fill="#5e8fd4" stroke="#003cab" stroke-width="1.5"/>
+    <text x="282" y="327" font-size="12" font-weight="600" fill="#fff">CubeHypervisor</text>
+    <rect x="450" y="300" width="150" height="42" rx="8" fill="#4a7bc4" stroke="#003cab" stroke-width="1.5"/>
+    <text x="492" y="327" font-size="12" font-weight="600" fill="#fff">CubeVS</text>
+    <text x="105" y="360" font-size="9" fill="#8a8a8a">containerd Shim</text>
+    <text x="275" y="360" font-size="9" fill="#8a8a8a">KVM MicroVM</text>
+    <text x="465" y="360" font-size="9" fill="#8a8a8a">eBPF Network</text>
+
+    <defs>
+      <marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#0052d9"/></marker>
+    </defs>
+  </svg>
+</div>
+
+<h2 class="sub">4.2 六大核心组件</h2>
+
+<table>
+  <tr><th>组件</th><th>语言</th><th>职责</th><th>技术细节</th></tr>
+  <tr><td><strong>CubeAPI</strong></td><td>Rust（Axum）</td><td>兼容E2B的REST API网关</td><td>高并发网关；30秒全局超时</td></tr>
+  <tr><td><strong>CubeMaster</strong></td><td>Go</td><td>集群编排调度器</td><td>对标kube-apiserver+scheduler</td></tr>
+  <tr><td><strong>CubeProxy</strong></td><td>OpenResty+Lua</td><td>反向代理</td><td>解析Host头路由到目标沙箱</td></tr>
+  <tr><td><strong>Cubelet</strong></td><td>Go</td><td>单节点生命周期管理</td><td>对标kubelet；管理创建/暂停/销毁</td></tr>
+  <tr><td><strong>CubeVS</strong></td><td>eBPF+C</td><td>内核态虚拟交换机</td><td>XDP内核级网络隔离</td></tr>
+  <tr><td><strong>CubeHypervisor & CubeShim</strong></td><td>Rust</td><td>虚拟化层</td><td>KVM MicroVM + containerd Shim v2</td></tr>
+</table>
+
+<h2 class="sub">4.3 冷启动60ms的秘密——4步拆解</h2>
+
+<div class="svg-card">
+  <p class="svg-title">📐 冷启动60ms的4步流水线</p>
+  <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg">
+    <!-- Step 1 -->
+    <rect x="20" y="40" width="140" height="100" rx="10" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+    <text x="40" y="65" font-size="13" font-weight="600" fill="#0052d9">Step 1</text>
+    <text x="40" y="85" font-size="11" fill="#4b4b4b">资源池查询</text>
+    <text x="40" y="105" font-size="10" fill="#8a8a8a">O(1)查表获取</text>
+    <text x="40" y="125" font-size="12" font-weight="600" fill="#059669">&lt;1ms</text>
+    <!-- Arrow -->
+    <line x1="160" y1="90" x2="185" y2="90" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+    <!-- Step 2 -->
+    <rect x="190" y="40" width="140" height="100" rx="10" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+    <text x="210" y="65" font-size="13" font-weight="600" fill="#0052d9">Step 2</text>
+    <text x="210" y="85" font-size="11" fill="#4b4b4b">快照克隆</text>
+    <text x="210" y="105" font-size="10" fill="#8a8a8a">CoW元数据复制</text>
+    <text x="210" y="125" font-size="12" font-weight="600" fill="#f59e0b">&lt;10ms</text>
+    <!-- Arrow -->
+    <line x1="330" y1="90" x2="355" y2="90" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+    <!-- Step 3 -->
+    <rect x="360" y="40" width="140" height="100" rx="10" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+    <text x="380" y="65" font-size="13" font-weight="600" fill="#0052d9">Step 3</text>
+    <text x="380" y="85" font-size="11" fill="#4b4b4b">网络配置</text>
+    <text x="380" y="105" font-size="10" fill="#8a8a8a">eBPF规则注入</text>
+    <text x="380" y="125" font-size="12" font-weight="600" fill="#f59e0b">&lt;5ms</text>
+    <!-- Arrow -->
+    <line x1="500" y1="90" x2="525" y2="90" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+    <!-- Step 4 -->
+    <rect x="530" y="40" width="150" height="100" rx="10" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+    <text x="550" y="65" font-size="13" font-weight="600" fill="#0052d9">Step 4</text>
+    <text x="550" y="85" font-size="11" fill="#4b4b4b">启动沙箱</text>
+    <text x="550" y="105" font-size="10" fill="#8a8a8a">Guest OS恢复运行</text>
+    <text x="550" y="125" font-size="12" font-weight="600" fill="#dc2626">&lt;40ms</text>
+    <!-- 总计 -->
+    <text x="20" y="175" font-size="13" font-weight="700" fill="#0052d9">总计 &lt;60ms ⚡</text>
+    <text x="160" y="175" font-size="11" fill="#8a8a8a">关键：资源池预分配 + 快照克隆CoW + EPT Lazy Load + 全栈锁优化</text>
+  </svg>
+</div>
+
+<h2 class="sub">4.4 5MB内存开销的原理——CoW内存复用</h2>
+
+<div class="svg-card">
+  <p class="svg-title">📐 CoW写时复制——1000个沙箱共享1份基础内存</p>
+  <svg viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg">
+    <!-- Base Snapshot -->
+    <rect x="230" y="15" width="240" height="55" rx="10" fill="#d4e3fc" stroke="#0052d9" stroke-width="2"/>
+    <text x="270" y="40" font-size="13" font-weight="600" fill="#0052d9">📦 Base Snapshot（只读共享）</text>
+    <text x="270" y="58" font-size="10" fill="#8a8a8a">所有沙箱共享这一份内存页</text>
+    <!-- Arrows -->
+    <line x1="290" y1="70" x2="130" y2="100" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+    <line x1="350" y1="70" x2="350" y2="100" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+    <line x1="410" y1="70" x2="570" y2="100" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+    <!-- Sandbox 1 -->
+    <rect x="50" y="105" width="160" height="80" rx="8" fill="#edf4ff" stroke="#0052d9" stroke-width="1"/>
+    <text x="70" y="128" font-size="12" font-weight="600" fill="#0052d9">Sandbox 1</text>
+    <rect x="65" y="140" width="130" height="25" rx="4" fill="#fff" stroke="#059669" stroke-width="1"/>
+    <text x="75" y="157" font-size="10" fill="#059669">仅差异页（CoW）</text>
+    <text x="70" y="180" font-size="10" fill="#059669" font-weight="600">&lt;5MB</text>
+    <!-- Sandbox 2 -->
+    <rect x="270" y="105" width="160" height="80" rx="8" fill="#edf4ff" stroke="#0052d9" stroke-width="1"/>
+    <text x="290" y="128" font-size="12" font-weight="600" fill="#0052d9">Sandbox 2</text>
+    <rect x="285" y="140" width="130" height="25" rx="4" fill="#fff" stroke="#059669" stroke-width="1"/>
+    <text x="295" y="157" font-size="10" fill="#059669">仅差异页（CoW）</text>
+    <text x="290" y="180" font-size="10" fill="#059669" font-weight="600">&lt;5MB</text>
+    <!-- Sandbox 3 -->
+    <rect x="490" y="105" width="160" height="80" rx="8" fill="#edf4ff" stroke="#0052d9" stroke-width="1"/>
+    <text x="510" y="128" font-size="12" font-weight="600" fill="#0052d9">Sandbox 3</text>
+    <rect x="505" y="140" width="130" height="25" rx="4" fill="#fff" stroke="#059669" stroke-width="1"/>
+    <text x="515" y="157" font-size="10" fill="#059669">仅差异页（CoW）</text>
+    <text x="510" y="180" font-size="10" fill="#059669" font-weight="600">&lt;5MB</text>
+    <!-- 底部说明 -->
+    <text x="50" y="215" font-size="10" fill="#8a8a8a">💡 基础快照不计入单沙箱开销，只有各自修改的内存页才单独分配 → 1000个沙箱只需1份基础页 + 1000份差异页</text>
+  </svg>
+</div>
+
+<h2 class="sub">4.5 eBPF网络隔离——CubeVS</h2>
+
+<table>
+  <tr><th>层级</th><th>功能</th><th>技术手段</th></tr>
+  <tr><td>沙箱间隔离</td><td>不同沙箱间网络流量完全隔离</td><td>eBPF XDP</td></tr>
+  <tr><td>出站流量过滤</td><td>精细控制沙箱能访问的外部地址/端口</td><td>域名白名单</td></tr>
+  <tr><td>内核级性能</td><td>在网络栈最早期介入</td><td>XDP（eXpress Data Path）</td></tr>
+</table>
+
+<blockquote>💡 <strong>关键认知</strong>：沙箱不只是"启动安全"。Pause/Resume、网络策略、快照回滚——这些才是Agent长时间运行时真正需要的<strong>运行时治理</strong>能力。</blockquote>
+
+<h2 class="sub">4.6 沙箱生命周期管理</h2>
+
+<p><strong>创建流程</strong>（关键代码）：</p>
+<pre><code>async fn create(&self, req: CreateTaskRequest) -&gt; Result&lt;CreateTaskResponse&gt; {
+    let config = SandboxConfig::from_bundle(&amp;req.bundle)?;
+    let vm = self.resource_pool.acquire(config.template_id).await?;  // 1.资源池获取
+    let sandbox = vm.snapshot_clone(SnapshotConfig { ... }).await?;   // 2.快照克隆
+    self.network_agent.assign_ip(&amp;sandbox).await?;                   // 3.网络配置
+    sandbox.start().await?;                                           // 4.启动
+    Ok(CreateTaskResponse { pid: sandbox.pid(), ..Default::default() })
+}</code></pre>
+
+<p><strong>销毁流程</strong>（关键：快照回收复用）：</p>
+<pre><code>async fn delete(&self, req: DeleteRequest) -&gt; Result&lt;DeleteResponse&gt; {
+    let sandbox = self.remove_sandbox(&amp;req.id)?;
+    sandbox.destroy().await?;                                       // 清理差异页
+    self.resource_pool.recycle(sandbox.base_snapshot()).await;       // 回收基础快照
+    Ok(DeleteResponse::default())
+}</code></pre>
+
+<p>销毁不是真正删除，而是清理差异页；基础快照保留并回收到资源池；下一个请求可立即复用该快照。</p>
+</div>
+
+<!-- 第五章 -->
+<div class="card">
+<h1 class="section">五、实测CubeSandbox</h1>
+
+<h2 class="sub">5.1 四步跑起来</h2>
+
+<pre><code># 步骤1：克隆并准备环境
+git clone https://github.com/TencentCloud/CubeSandbox.git
+cd CubeSandbox/dev-env
+./prepare_image.sh &amp;&amp; ./run_vm.sh &amp;&amp; ./login.sh
+
+# 步骤2：一键安装
+curl -sL https://cnb.cool/CubeSandbox/CubeSandbox/-/git/raw/master/deploy/one-click/online-install.sh | MIRROR=cn bash
+
+# 步骤3：创建模板
+cubemastercli tpl create-from-image \
+  --image cube-sandbox-cn.tencentcloudcr.com/cube-sandbox/sandbox-code:latest \
+  --writable-layer-size 1G --expose-port 49999 --expose-port 49983 --probe 49999
+
+# 步骤4：用E2B SDK执行代码
+export E2B_API_URL="http://127.0.0.1:3000"
+export E2B_API_KEY="dummy"
+python3 -c "
+from e2b_code_interpreter import Sandbox
+import os
+with Sandbox.create(template=os.environ['CUBE_TEMPLATE_ID']) as sb:
+    print(sb.run_code('print(\"Hello from Cube Sandbox!\")'))
+"</code></pre>
+
+<h2 class="sub">5.2 性能实测数据</h2>
+
+<table>
+  <tr><th>场景</th><th>延迟</th></tr>
+  <tr><td>单并发创建</td><td>60ms</td></tr>
+  <tr><td>50并发平均</td><td>67ms</td></tr>
+  <tr><td>50并发P95</td><td>90ms</td></tr>
+  <tr><td>50并发P99</td><td>137ms</td></tr>
+  <tr><td>100并发P99（96vCPU）</td><td>&lt;200ms</td></tr>
+</table>
+
+<h2 class="sub">5.3 生产迁移效果</h2>
+
+<div class="svg-card">
+  <p class="svg-title">📐 腾讯元宝迁移CubeSandbox效果</p>
+  <svg viewBox="0 0 700 180" xmlns="http://www.w3.org/2000/svg">
+    <!-- 迁移前 -->
+    <rect x="30" y="30" width="280" height="120" rx="10" fill="#ffebee" stroke="#dc2626" stroke-width="1.5"/>
+    <text x="60" y="55" font-size="13" font-weight="600" fill="#dc2626">迁移前（传统方案）</text>
+    <rect x="50" y="70" width="240" height="30" rx="5" fill="#fff" stroke="#e53935" stroke-width="1"/>
+    <rect x="50" y="70" width="228" height="30" rx="5" fill="#ffcdd2"/>
+    <text x="60" y="90" font-size="11" fill="#dc2626">资源核时消耗 100%</text>
+    <text x="50" y="130" font-size="11" fill="#4b4b4b">启动慢、内存占用高</text>
+    <!-- Arrow -->
+    <text x="330" y="95" font-size="28" fill="#0052d9">→</text>
+    <!-- 迁移后 -->
+    <rect x="380" y="30" width="290" height="120" rx="10" fill="#e8f5e9" stroke="#059669" stroke-width="1.5"/>
+    <text x="410" y="55" font-size="13" font-weight="600" fill="#059669">迁移后（CubeSandbox）</text>
+    <rect x="400" y="70" width="250" height="30" rx="5" fill="#fff" stroke="#059669" stroke-width="1"/>
+    <rect x="400" y="70" width="10" height="30" rx="5" fill="#a5d6a7"/>
+    <text x="420" y="90" font-size="11" fill="#059669" font-weight="600">资源核时消耗 4.2%（↓95.8%）</text>
+    <text x="400" y="130" font-size="11" fill="#4b4b4b">&lt;60ms启动 + &lt;5MB/实例</text>
+  </svg>
+</div>
+
+<p>• <strong>腾讯元宝</strong>：资源核时消耗降低95.8%<br>• <strong>MiniMax RL训练</strong>：分钟级调度数十万异构沙箱（Linux/Windows/Android），性能相比同类方案提升数倍</p>
+
+<h2 class="sub">5.4 当前限制</h2>
+
+<table>
+  <tr><th>限制</th><th>说明</th></tr>
+  <tr><td>架构支持</td><td>仅x86_64，ARM暂不支持</td></tr>
+  <tr><td>硬件要求</td><td>需KVM硬件虚拟化支持（裸金属或支持嵌套虚拟化的云主机）</td></tr>
+  <tr><td>GPU直通</td><td>暂不支持</td></tr>
+  <tr><td>替代方案</td><td>无裸金属时可通过WSL 2+QEMU虚拟机体验</td></tr>
+</table>
+
+<blockquote>💡 <strong>关键认知</strong>：CubeSandbox的"不可能三角"突破不是魔法，而是4个工程技巧的组合拳：资源池预分配+快照克隆CoW+EPT Lazy Load+全栈锁优化。每个技巧单独看不新鲜，但组合在一起就实现了MicroVM级别的安全+容器级别的性能。</blockquote>
+</div>
+
+<!-- 附录 -->
+<div class="appendix">
+<h1>附录：专有名词速查（18个）</h1>
+
+<table>
+  <tr><th>名词</th><th>全称</th><th>一句话白话</th></tr>
+  <tr><td>沙箱</td><td>Sandbox</td><td>给代码画的围栏，在里面怎么折腾都不影响外面</td></tr>
+  <tr><td>MicroVM</td><td>Micro Virtual Machine</td><td>迷你虚拟机，有独立内核但比传统VM轻得多</td></tr>
+  <tr><td>KVM</td><td>Kernel-based Virtual Machine</td><td>Linux内核自带的虚拟化模块，让Linux变成Hypervisor</td></tr>
+  <tr><td>Namespace</td><td>Linux Namespace</td><td>Linux的"隔断墙"，让进程只能看到自己的世界</td></tr>
+  <tr><td>Cgroup</td><td>Control Group</td><td>Linux的资源"配餐盘"，限制进程能用多少CPU/内存</td></tr>
+  <tr><td>CoW</td><td>Copy-on-Write</td><td>写时复制——大家共享同一份只读副本，谁要改谁再自己拷一份</td></tr>
+  <tr><td>eBPF</td><td>extended Berkeley Packet Filter</td><td>内核里的"可编程守门员"，在网络数据包到达前就做拦截</td></tr>
+  <tr><td>XDP</td><td>eXpress Data Path</td><td>网卡驱动层的极速包处理框架，比iptables快得多</td></tr>
+  <tr><td>EPT</td><td>Extended Page Table</td><td>Intel的硬件虚拟化页表，让虚拟机的内存访问走硬件加速</td></tr>
+  <tr><td>E2B</td><td>E2B Dev</td><td>AI代码执行沙箱SDK，行业事实标准之一</td></tr>
+  <tr><td>RustVMM</td><td>Rust Virtual Machine Manager</td><td>用Rust写的虚拟机组件库，Firecracker和CubeSandbox共用底层</td></tr>
+  <tr><td>Firecracker</td><td>AWS Firecracker</td><td>AWS 2018年开源的MicroVM方案，CubeSandbox的技术前辈</td></tr>
+  <tr><td>CubeAPI</td><td>Cube Sandbox API</td><td>CubeSandbox的REST网关，兼容E2B接口</td></tr>
+  <tr><td>CubeMaster</td><td>Cube Sandbox Master</td><td>集群调度器，类似K8s的api-server+scheduler</td></tr>
+  <tr><td>Cubelet</td><td>Cube Sandbox Kubelet</td><td>单节点管理器，类似K8s的kubelet</td></tr>
+  <tr><td>CubeVS</td><td>Cube Virtual Switch</td><td>内核态虚拟交换机，用eBPF做网络隔离</td></tr>
+  <tr><td>CVE</td><td>Common Vulnerabilities and Exposures</td><td>公开披露的网络安全漏洞编号</td></tr>
+  <tr><td>reflink</td><td>Reference Link</td><td>文件系统的引用链接，类似CoW但作用于磁盘文件</td></tr>
+</table>
+</div>
+
+<div class="footer">
+  生成日期：2026-05-21 ｜ AI Agent沙箱学习笔记
+</div>
+
+</div>
+</body>
+</html>

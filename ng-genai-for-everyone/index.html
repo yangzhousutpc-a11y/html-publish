@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>吴恩达 Generative AI for Everyone</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;background:#f3f4f6;color:#242424;line-height:1.8}
+a{color:#0052d9;text-decoration:none}a:hover{text-decoration:underline;color:#003cab}
+.header{background:linear-gradient(135deg,#001a45 0%,#0052d9 60%,#0077ff 100%);color:white;padding:52px 32px;text-align:center}
+.header h1{font-size:22px;font-weight:700;max-width:800px;margin:0 auto;letter-spacing:0.5px}
+.header .sub{font-size:13px;opacity:.85;margin-top:12px;max-width:700px;margin-left:auto;margin-right:auto}
+.stats{display:flex;justify-content:center;gap:28px;margin-top:18px;flex-wrap:wrap}
+.stats .s{font-size:12px;opacity:.8}.stats .s strong{font-size:18px;color:#66b1ff;display:block}
+.container{max-width:1000px;margin:0 auto;padding:24px}
+.content{background:white;border-radius:10px;padding:32px 36px;margin-top:20px;border:1px solid #e5e6eb;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
+.content h1{font-size:22px;color:#0052d9;margin:36px 0 16px;padding-bottom:10px;border-bottom:2px solid #0052d9;font-weight:700}
+.content h1:first-child{margin-top:0}
+.content h2{font-size:18px;color:#242424;margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid #e5e6eb;font-weight:600}
+.content h3{font-size:15px;color:#0052d9;margin:20px 0 8px;font-weight:600}
+.content p{font-size:14px;color:#4b4b4b;margin:8px 0}
+.content ul,.content ol{padding-left:22px;margin:8px 0}
+.content li{font-size:14px;color:#4b4b4b;margin:4px 0}
+.content strong{color:#242424}
+.content em{color:#0052d9;font-style:normal}
+.content blockquote{background:#edf4ff;border-left:4px solid #0052d9;padding:12px 18px;margin:12px 0;border-radius:0 8px 8px 0;font-size:14px;color:#003cab}
+.content blockquote p{color:#003cab;margin:4px 0}
+.content hr{border:none;border-top:1px solid #e5e6eb;margin:28px 0}
+.content table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+.content th{background:#edf4ff;text-align:left;padding:10px 14px;font-weight:600;color:#0052d9;border-bottom:1px solid #d4e3fc}
+.content td{padding:10px 14px;border-bottom:1px solid #f0f1f2;color:#4b4b4b}
+.content tr:hover td{background:#f5f9ff}
+.content pre{background:#0d1b2a;border-radius:8px;padding:14px 18px;margin:10px 0;font-family:"SF Mono",Consolas,monospace;font-size:12.5px;line-height:1.6;overflow-x:auto;color:#c9d1d9}
+.content code{font-family:"SF Mono",Consolas,monospace;font-size:12.5px;background:#edf4ff;padding:2px 6px;border-radius:4px;color:#0052d9}
+.content pre code{background:none;padding:0;color:#c9d1d9}
+.footer{text-align:center;padding:30px 0;color:#8f959e;font-size:12px}</style>
+</head>
+<body>
+<div class="header">
+<h1>吴恩达 Generative AI for Everyone</h1>
+<div class="sub">DeepLearning.AI / Coursera | <a href="https://www.bilibili.com/video/BV1mADSYQEsr/" target="_blank" style="color:#66b1ff">B站 BV1mADSYQEsr</a> | 31集约3小时</div>
+<div class="stats">
+<div class="s"><strong>31</strong>集视频</div>
+<div class="s"><strong>3</strong>周课程</div>
+<div class="s"><strong>12</strong>专有名词</div>
+<div class="s"><strong>12</strong>大章节</div>
+</div>
+</div>
+<div class="container">
+<div class="content">
+<div style="margin:0 0 24px;padding:20px 24px;background:linear-gradient(135deg,#edf4ff 0%,#f0f7ff 50%,#f5f9ff 100%);border-radius:10px;border:1px solid #d4e3fc">
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 AGI三个理由: 为什么还很远</p>
+<svg viewBox="0 0 700 60" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="8" width="215" height="32" rx="6" fill="#0052d9"/><text x="118" y="28" text-anchor="middle" font-size="8" fill="white" font-weight="700">1. 当前AI只是统计模式匹配</text>
+  <rect x="235" y="8" width="220" height="32" rx="6" fill="#1a6fe8"/><text x="345" y="28" text-anchor="middle" font-size="8" fill="white" font-weight="700">2. 缺乏真正的推理和规划能力</text>
+  <rect x="465" y="8" width="225" height="32" rx="6" fill="#3380e6"/><text x="578" y="28" text-anchor="middle" font-size="8" fill="white" font-weight="700">3. 没有物理世界的感知和体验</text>
+  <text x="350" y="56" text-anchor="middle" font-size="7" fill="#4b4b4b">吴恩达: AGI可能还需要几十年 · 但窄域AI已经在改变世界 · 别被AGI炒作分散注意力</text>
+</svg></div>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：吴恩达用了一个精妙的框架分析就业影响——不是看"哪些岗位会消失"，而是把每个岗位拆成具体任务(tasks)，分析"哪些任务能被AI完成"。大多数岗位不会完全消失，而是被重新定义。<strong>AI不会替代你，但会用AI的人会替代不会用AI的人。</strong></p>
+</blockquote>
+<h2 id="_1">📖 内容综述</h2>
+<p>这是一门面向<strong>所有人</strong>的AI通识课——不需要编程基础，不需要数学背景。吴恩达用三周时间回答了三个递进的问题：<strong>生成式AI是什么</strong>（它能做什么、不能做什么）、<strong>怎么用它做项目</strong>（从Prompt到RAG到微调的技术选择）、<strong>它如何影响工作和社会</strong>（哪些工作受影响、AGI还有多远、如何负责任地使用AI）。</p>
+<p>第1周「认识AI」让你从"听过AI"变成"懂AI"；第2周「用AI做事」让你从"会聊天"变成"能做项目"；第3周「AI与社会」让你从"用AI"变成"理解AI对世界的影响"。整门课的核心论断是：<strong>生成式AI将成为像网络搜索一样的基础技能——每个雇主都会期望你会用。</strong></p>
+
+</div>
+
+<hr />
+<h1 id="1ai">第1周：生成式AI是什么</h1>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 课程三周结构: 认知→实践→社会</p>
+<svg viewBox="0 0 700 68" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="8" width="210" height="38" rx="8" fill="#0052d9"/><text x="115" y="24" text-anchor="middle" font-size="10" fill="white" font-weight="700">第1周: AI是什么</text><text x="115" y="38" text-anchor="middle" font-size="7" fill="#66b1ff">LLM原理/应用/局限</text>
+  <rect x="235" y="8" width="220" height="38" rx="8" fill="#1a6fe8"/><text x="345" y="24" text-anchor="middle" font-size="10" fill="white" font-weight="700">第2周: AI项目实战</text><text x="345" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">可行性/技术选择/成本</text>
+  <rect x="470" y="8" width="220" height="38" rx="8" fill="#3380e6"/><text x="580" y="24" text-anchor="middle" font-size="10" fill="white" font-weight="700">第3周: AI与社会</text><text x="580" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">就业/AGI/负责任AI</text>
+  <text x="350" y="62" text-anchor="middle" font-size="8" fill="#4b4b4b">非技术人员的AI通识课 · 从"理解"到"应用"到"反思"的递进</text>
+</svg></div>
+<h2 id="llm">一、LLM如何工作</h2>
+<p><strong>一句话</strong>：LLM基于监督学习构建，通过反复预测下一个词来生成文本——本质上是一个"超级文字接龙机"。</p>
+<p>训练需要<strong>千亿甚至万亿个词</strong>的数据集。从这些数据中，模型学会了语言的统计规律。</p>
+<h3 id="llm_1">LLM作为"思想伙伴"</h3>
+<p><strong>什么时候用搜索引擎？</strong> 当问题有现成网页答案时（如食谱）
+<strong>什么时候用LLM？</strong> 当问题没有现成答案、需要创意组合时（如创新的食谱搭配）</p>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：LLM不是知识库，而是"推理引擎"。它的价值在于帮你思考和创造，而不是查找确切事实。事实性信息应该用搜索引擎或RAG验证。</p>
+</blockquote>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 LLM训练全流程: 从预训练到RLHF</p>
+<svg viewBox="0 0 680 68" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:680px;font-family:-apple-system,sans-serif">
+  <defs><marker id="ge1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="8" width="180" height="38" rx="8" fill="#0052d9"/><text x="100" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">预训练(数千亿Token)</text><text x="100" y="38" text-anchor="middle" font-size="7" fill="#66b1ff">学会"接龙" · 数千万$</text>
+  <line x1="190" y1="27" x2="210" y2="27" stroke="#0052d9" stroke-width="2" marker-end="url(#ge1)"/>
+  <rect x="215" y="8" width="180" height="38" rx="8" fill="#1a6fe8"/><text x="305" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">指令微调(千级数据)</text><text x="305" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">学会"听话" · 数千$</text>
+  <line x1="395" y1="27" x2="415" y2="27" stroke="#0052d9" stroke-width="2" marker-end="url(#ge1)"/>
+  <rect x="420" y="8" width="180" height="38" rx="8" fill="#059669"/><text x="510" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">RLHF(人类反馈)</text><text x="510" y="38" text-anchor="middle" font-size="7" fill="#a7f3d0">学会"讨好" · 安全对齐</text>
+  <text x="340" y="62" text-anchor="middle" font-size="7" fill="#4b4b4b">从"能说话"→"听指令"→"说人话" · 每步成本递减但效果递增</text>
+</svg></div>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：LLM的"智能"来自<strong>监督学习</strong>（输入→输出的映射）在海量文本上的扩展——本质上它在做"文字接龙"。但这种简单机制在足够大的规模下产生了"涌现能力"——这是AI领域最让人惊讶的发现。</p>
+</blockquote>
+<h2 id="llm_2">二、LLM的三大应用类别</h2>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>能做什么</th>
+<th>课上例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>写作</strong></td>
+<td>头脑风暴、翻译、改写</td>
+<td>翻译成"英语海盗话"</td>
+</tr>
+<tr>
+<td><strong>阅读</strong></td>
+<td>校对、摘要、情感分析</td>
+<td>分析客户投诉邮件</td>
+</tr>
+<tr>
+<td><strong>聊天</strong></td>
+<td>客服、规划、订单处理</td>
+<td>旅游规划机器人</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_2">"循环中的人"安全模式</h3>
+<pre class="codehilite"><code>机器人生成建议回复 → 人工员工检查编辑 → 批准 → 发送给用户
+</code></pre>
+
+<p>这是课上反复强调的安全部署模式——先让AI辅助，人类把关，建立信心后再逐步自动化。</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 LLM三大应用: 写/读/聊</p>
+<svg viewBox="0 0 650 68" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="8" width="195" height="38" rx="8" fill="#0052d9"/><text x="108" y="24" text-anchor="middle" font-size="10" fill="white" font-weight="700">写(Writing)</text><text x="108" y="38" text-anchor="middle" font-size="7" fill="#66b1ff">翻译/摘要/代码/文案</text>
+  <rect x="220" y="8" width="195" height="38" rx="8" fill="#1a6fe8"/><text x="318" y="24" text-anchor="middle" font-size="10" fill="white" font-weight="700">读(Reading)</text><text x="318" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">情感分析/分类/提取</text>
+  <rect x="430" y="8" width="200" height="38" rx="8" fill="#3380e6"/><text x="530" y="24" text-anchor="middle" font-size="10" fill="white" font-weight="700">聊(Chatting)</text><text x="530" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">客服/教育/医疗咨询</text>
+  <text x="325" y="62" text-anchor="middle" font-size="8" fill="#4b4b4b">所有LLM应用都是这三类的组合 · Web UI vs API两种使用方式</text>
+</svg></div>
+<h2 id="llm_3">三、LLM的五大局限</h2>
+<table>
+<thead>
+<tr>
+<th>局限</th>
+<th>具体表现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>知识截止</strong></td>
+<td>只知道训练数据截止日期前的事（如GPT-3.5仅知2022年1月前）</td>
+</tr>
+<tr>
+<td><strong>幻觉</strong></td>
+<td>自信地编造不存在的事实</td>
+</tr>
+<tr>
+<td><strong>长度限制</strong></td>
+<td>Context Window有上限</td>
+</tr>
+<tr>
+<td><strong>结构化数据差</strong></td>
+<td>处理Excel表格等不如处理文本</td>
+</tr>
+<tr>
+<td><strong>偏见与安全</strong></td>
+<td>可能输出有害或偏见内容</td>
+</tr>
+</tbody>
+</table>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 LLM五大局限 — 它做不到什么</p>
+<svg viewBox="0 0 700 70" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="8" width="125" height="38" rx="6" fill="#dc2626"/><text x="73" y="24" text-anchor="middle" font-size="8" fill="white" font-weight="700">幻觉</text><text x="73" y="36" text-anchor="middle" font-size="6" fill="#fca5a5">一本正经胡说</text>
+  <rect x="145" y="8" width="125" height="38" rx="6" fill="#f59e0b"/><text x="208" y="24" text-anchor="middle" font-size="8" fill="white" font-weight="700">知识过时</text><text x="208" y="36" text-anchor="middle" font-size="6" fill="white">训练截止日期</text>
+  <rect x="280" y="8" width="125" height="38" rx="6" fill="#0052d9"/><text x="343" y="24" text-anchor="middle" font-size="8" fill="white" font-weight="700">数学薄弱</text><text x="343" y="36" text-anchor="middle" font-size="6" fill="#66b1ff">概率≠精确计算</text>
+  <rect x="415" y="8" width="130" height="38" rx="6" fill="#3380e6"/><text x="480" y="24" text-anchor="middle" font-size="8" fill="white" font-weight="700">上下文有限</text><text x="480" y="36" text-anchor="middle" font-size="6" fill="#a3d0ff">Context Window</text>
+  <rect x="555" y="8" width="135" height="38" rx="6" fill="#4d94ff"/><text x="623" y="24" text-anchor="middle" font-size="8" fill="white" font-weight="700">偏见/毒性</text><text x="623" y="36" text-anchor="middle" font-size="6" fill="#d4e3fc">训练数据的锅</text>
+  <text x="350" y="62" text-anchor="middle" font-size="7" fill="#4b4b4b">吴恩达: 不要把LLM当作全知全能的神 · 理解局限才能用好它</text>
+</svg></div>
+<h2 id="_3">四、提示词三技巧</h2>
+<ol>
+<li><strong>详细且具体</strong>：提供充分上下文（不说"翻译"，说"用海盗英语翻译"）</li>
+<li><strong>引导逐步思考</strong>：给明确的分步说明</li>
+<li><strong>实验与迭代</strong>：提示词→回应→澄清→再试</li>
+</ol>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 提示词三技巧: 让AI更好地理解你</p>
+<svg viewBox="0 0 650 68" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="8" width="195" height="38" rx="8" fill="#0052d9"/><text x="108" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">技巧1: 具体详细</text><text x="108" y="38" text-anchor="middle" font-size="7" fill="#66b1ff">"300字"比"写短点"好</text>
+  <rect x="220" y="8" width="195" height="38" rx="8" fill="#1a6fe8"/><text x="318" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">技巧2: 角色扮演</text><text x="318" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">"你是资深编辑"改变语气</text>
+  <rect x="430" y="8" width="200" height="38" rx="8" fill="#3380e6"/><text x="530" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">技巧3: 给少量示例</text><text x="530" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">Few-shot: 给1-2个样本</text>
+  <text x="325" y="62" text-anchor="middle" font-size="7" fill="#4b4b4b">吴恩达: Prompt工程的核心是让机器理解你的意图 · 不是越长越好而是越清晰越好</text>
+</svg></div>
+<h2 id="_4">五、图像生成原理</h2>
+<p><strong>扩散模型的工作方式</strong>：</p>
+<pre class="codehilite"><code>训练：清晰图像 → 逐步加噪声 → 纯噪声（学会逆向去噪）
+生成：纯随机噪声 → 约100步迭代去噪 → 清晰图像
+</code></pre>
+
+<hr />
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 图像生成原理: 扩散模型(Diffusion) — 从噪声到图片</p>
+<svg viewBox="0 0 700 80" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <defs><marker id="ge2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="12" width="100" height="40" rx="6" fill="#9ca3af"/><text x="60" y="30" text-anchor="middle" font-size="9" fill="white" font-weight="700">纯噪声</text><text x="60" y="43" text-anchor="middle" font-size="7" fill="white">随机像素点</text>
+  <line x1="110" y1="32" x2="130" y2="32" stroke="#0052d9" stroke-width="2" marker-end="url(#ge2)"/>
+  <rect x="135" y="8" width="140" height="48" rx="8" fill="#0052d9"/><text x="205" y="28" text-anchor="middle" font-size="9" fill="white" font-weight="700">去噪Step 1</text><text x="205" y="43" text-anchor="middle" font-size="7" fill="#66b1ff">隐约有轮廓</text>
+  <line x1="275" y1="32" x2="295" y2="32" stroke="#0052d9" stroke-width="2" marker-end="url(#ge2)"/>
+  <rect x="300" y="8" width="140" height="48" rx="8" fill="#1a6fe8"/><text x="370" y="28" text-anchor="middle" font-size="9" fill="white" font-weight="700">去噪Step N</text><text x="370" y="43" text-anchor="middle" font-size="7" fill="#a3d0ff">越来越清晰</text>
+  <line x1="440" y1="32" x2="460" y2="32" stroke="#0052d9" stroke-width="2" marker-end="url(#ge2)"/>
+  <rect x="465" y="8" width="140" height="48" rx="8" fill="#059669"/><text x="535" y="28" text-anchor="middle" font-size="9" fill="white" font-weight="700">清晰图片</text><text x="535" y="43" text-anchor="middle" font-size="7" fill="#a7f3d0">与文字描述匹配</text>
+  <text x="320" y="72" text-anchor="middle" font-size="7" fill="#4b4b4b">训练: 学习"噪声长什么样" → 推理: 逆向去噪 → 文字提示引导去噪方向</text>
+</svg></div>
+<h1 id="2ai">第2周：生成式AI项目</h1>
+<p>第1周理解了"AI是什么"，第2周解决"怎么用AI做项目"——从可行性评估、技术选择、模型选型到成本计算，一条龙走完。</p>
+<h2 id="_5">六、时间成本的革命</h2>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>传统监督学习</th>
+<th>基于Prompt的AI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>数据收集</td>
+<td>1个月</td>
+<td>无需</td>
+</tr>
+<tr>
+<td>模型训练</td>
+<td>3个月</td>
+<td>无需</td>
+</tr>
+<tr>
+<td>部署运行</td>
+<td>3个月</td>
+<td>几小时~几天</td>
+</tr>
+<tr>
+<td><strong>总耗时</strong></td>
+<td><strong>7个月</strong></td>
+<td><strong>几小时</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：生成式AI最大的改变不是"AI更强了"，而是"门槛降低了"——以前需要ML团队花7个月做的事，现在一个人花几小时就能做出原型。这才是真正的范式转变。</p>
+</blockquote>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 AI带来的时间成本革命</p>
+<svg viewBox="0 0 650 70" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="8" width="280" height="38" rx="8" fill="#dc2626"/><text x="150" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">之前: 几周→几个月</text><text x="150" y="38" text-anchor="middle" font-size="7" fill="#fca5a5">写方案/做分析/开发原型</text>
+  <text x="320" y="30" font-size="16" fill="#059669" font-weight="900">→</text>
+  <rect x="355" y="8" width="280" height="38" rx="8" fill="#059669"/><text x="495" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">现在: 几小时→几天</text><text x="495" y="38" text-anchor="middle" font-size="7" fill="#a7f3d0">AI辅助+人工审核</text>
+  <text x="325" y="62" text-anchor="middle" font-size="7" fill="#0052d9" font-weight="600">POC(概念验证)成本大幅降低 → 值得尝试更多想法 → 创新速度加快</text>
+</svg></div>
+<h2 id="_6">七、技术选择阶梯（难度递增）</h2>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 技术选择阶梯（难度递增）</p>
+
+<svg viewBox="0 0 600 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px">
+  <rect x="20" y="90" width="120" height="40" rx="6" fill="#0052d9"/>
+  <text x="80" y="115" text-anchor="middle" font-size="11" fill="white" font-weight="700">Prompt工程</text>
+  <rect x="160" y="65" width="120" height="65" rx="6" fill="#1a6fe8"/>
+  <text x="220" y="95" text-anchor="middle" font-size="11" fill="white" font-weight="700">RAG</text>
+  <text x="220" y="115" text-anchor="middle" font-size="8" fill="#a3d0ff">检索+生成</text>
+  <rect x="300" y="40" width="120" height="90" rx="6" fill="#3380e6"/>
+  <text x="360" y="75" text-anchor="middle" font-size="11" fill="white" font-weight="700">微调</text>
+  <text x="360" y="95" text-anchor="middle" font-size="8" fill="#a3d0ff">千级数据</text>
+  <text x="360" y="115" text-anchor="middle" font-size="8" fill="#a3d0ff">改风格/领域知识</text>
+  <rect x="440" y="15" width="140" height="115" rx="6" fill="#4d94ff"/>
+  <text x="510" y="55" text-anchor="middle" font-size="11" fill="white" font-weight="700">预训练</text>
+  <text x="510" y="75" text-anchor="middle" font-size="8" fill="#d4e3fc">万亿级数据</text>
+  <text x="510" y="95" text-anchor="middle" font-size="8" fill="#d4e3fc">数千万美元</text>
+  <text x="510" y="115" text-anchor="middle" font-size="8" fill="#d4e3fc">仅大公司</text>
+  <text x="300" y="10" text-anchor="middle" font-size="9" fill="#0052d9">难度与成本 →→→</text>
+</svg>
+</div>
+<h3 id="1prompt">第1级：纯Prompt工程</h3>
+<p>最简单，直接调API。适合大多数初期场景。</p>
+<h3 id="2rag">第2级：RAG（检索增强生成）</h3>
+<pre class="codehilite"><code>用户提问 → 检索相关文档 → 文档+问题一起发给LLM → 基于文档的回答
+</code></pre>
+
+<p><strong>核心理念转变</strong>：把LLM当"推理引擎"而非"知识库"。</p>
+<h3 id="3fine-tuning">第3级：微调（Fine-tuning）</h3>
+<ul>
+<li>改变输出风格（如始终保持乐观）</li>
+<li>吸收领域知识（医疗缩写SOB=气短）</li>
+<li>让小模型在特定任务上媲美大模型</li>
+<li>仅需千/万级数据（vs 预训练需万亿级）</li>
+</ul>
+<h3 id="4">第4级：预训练</h3>
+<p>从零训练LLM。成本数千万美元，仅适合大公司。</p>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：吴恩达反复强调——<strong>先从Prompt工程开始</strong>。90%的应用场景Prompt工程就够了。只有当Prompt搞不定（如需要最新数据→RAG，需要特定领域风格→微调），才需要爬到更高的阶梯。不要一上来就想着微调或预训练。</p>
+</blockquote>
+<h2 id="_7">八、模型选择</h2>
+<p><strong>按参数规模</strong>：
+- 1B参数：简单任务（情感分类）
+- 10B参数：中等任务（订餐机器人）
+- 100B+参数：复杂推理（头脑风暴伙伴）</p>
+<p><strong>开源 vs 闭源</strong>：
+| 维度 | 闭源(API) | 开源 |
+|------|----------|------|
+| 优势 | 模型最强、易用、便宜 | 完全控制、本地部署、数据隐私 |
+| 劣势 | 供应商锁定 | 维护成本高 |</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 模型选择: 闭源 vs 开源</p>
+<svg viewBox="0 0 700 80" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <rect x="20" y="8" width="290" height="48" rx="8" fill="#0052d9"/><text x="165" y="26" text-anchor="middle" font-size="10" fill="white" font-weight="700">闭源API (GPT-4/Claude)</text><text x="165" y="42" text-anchor="middle" font-size="7" fill="#66b1ff">✅ 快速上手 · 最强性能</text><text x="165" y="52" text-anchor="middle" font-size="6" fill="#a3d0ff">❌ 数据隐私 · 供应商锁定</text>
+  <text x="350" y="35" text-anchor="middle" font-size="12" fill="#f59e0b" font-weight="700">vs</text>
+  <rect x="390" y="8" width="290" height="48" rx="8" fill="#059669"/><text x="535" y="26" text-anchor="middle" font-size="10" fill="white" font-weight="700">开源模型 (LLaMA/Mistral)</text><text x="535" y="42" text-anchor="middle" font-size="7" fill="#a7f3d0">✅ 可控/可微调 · 零API费</text><text x="535" y="52" text-anchor="middle" font-size="6" fill="#a7f3d0">❌ 需要GPU · 运维成本</text>
+  <text x="350" y="75" text-anchor="middle" font-size="7" fill="#4b4b4b">吴恩达建议: 先用闭源API快速验证 → 产品化时考虑开源替代 → 数据敏感场景优先开源</text>
+</svg></div>
+<h2 id="_8">九、成本计算</h2>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>价格</th>
+<th>阅读1小时文字(~3万词)的成本</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GPT-3.5</td>
+<td>0.2美分/千Token</td>
+<td>~$0.08</td>
+</tr>
+<tr>
+<td>GPT-4</td>
+<td>6美分/千Token</td>
+<td>~$2.40</td>
+</tr>
+</tbody>
+</table>
+<p>换算：1 Token ≈ 0.75个英文单词，词数+33% ≈ Token数。</p>
+<hr />
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 Token经济学: API成本计算</p>
+<svg viewBox="0 0 700 80" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <defs><marker id="gc1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="10" width="140" height="42" rx="8" fill="#0052d9"/><text x="80" y="28" text-anchor="middle" font-size="9" fill="white" font-weight="700">输入Token</text><text x="80" y="42" text-anchor="middle" font-size="7" fill="#66b1ff">$0.01/1K tokens</text>
+  <text x="165" y="34" font-size="10" fill="#0052d9" font-weight="700">+</text>
+  <rect x="185" y="10" width="140" height="42" rx="8" fill="#1a6fe8"/><text x="255" y="28" text-anchor="middle" font-size="9" fill="white" font-weight="700">输出Token</text><text x="255" y="42" text-anchor="middle" font-size="7" fill="#a3d0ff">$0.03/1K tokens</text>
+  <text x="340" y="34" font-size="10" fill="#0052d9" font-weight="700">=</text>
+  <rect x="360" y="10" width="155" height="42" rx="8" fill="#059669"/><text x="438" y="28" text-anchor="middle" font-size="9" fill="white" font-weight="700">单次调用费用</text><text x="438" y="42" text-anchor="middle" font-size="7" fill="#a7f3d0">通常$0.01-0.10</text>
+  <text x="530" y="34" font-size="10" fill="#0052d9" font-weight="700">×</text>
+  <rect x="545" y="10" width="145" height="42" rx="8" fill="#f59e0b"/><text x="618" y="28" text-anchor="middle" font-size="9" fill="white" font-weight="700">日均调用次数</text><text x="618" y="42" text-anchor="middle" font-size="7" fill="white">→ 月成本预估</text>
+  <text x="350" y="68" text-anchor="middle" font-size="7" fill="#4b4b4b">输出Token比输入贵3倍 · 100次对话≈$1-10 · 大多数应用月成本可控在$100以内</text>
+</svg></div>
+<h1 id="3ai">第3周：AI与社会</h1>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 负责任AI: 五维风险框架</p>
+<svg viewBox="0 0 700 60" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="8" width="125" height="35" rx="6" fill="#dc2626"/><text x="73" y="30" text-anchor="middle" font-size="9" fill="white" font-weight="700">偏见 Bias</text>
+  <rect x="145" y="8" width="125" height="35" rx="6" fill="#f59e0b"/><text x="208" y="30" text-anchor="middle" font-size="9" fill="white" font-weight="700">毒性 Toxicity</text>
+  <rect x="280" y="8" width="125" height="35" rx="6" fill="#0052d9"/><text x="343" y="30" text-anchor="middle" font-size="9" fill="white" font-weight="700">幻觉 Hallucination</text>
+  <rect x="415" y="8" width="125" height="35" rx="6" fill="#3380e6"/><text x="478" y="30" text-anchor="middle" font-size="9" fill="white" font-weight="700">版权 Copyright</text>
+  <rect x="550" y="8" width="140" height="35" rx="6" fill="#4d94ff"/><text x="620" y="30" text-anchor="middle" font-size="9" fill="white" font-weight="700">隐私 Privacy</text>
+</svg></div>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 AI对就业的影响: 任务替代而非岗位替代</p>
+<svg viewBox="0 0 700 90" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <rect x="20" y="8" width="200" height="48" rx="8" fill="#0052d9"/><text x="120" y="26" text-anchor="middle" font-size="9" fill="white" font-weight="700">一个岗位 = 多个任务</text><text x="120" y="42" text-anchor="middle" font-size="7" fill="#66b1ff">写报告+分析+沟通+决策</text>
+  <rect x="240" y="8" width="210" height="48" rx="8" fill="#f59e0b"/><text x="345" y="26" text-anchor="middle" font-size="9" fill="white" font-weight="700">AI替代部分任务</text><text x="345" y="42" text-anchor="middle" font-size="7" fill="white">写初稿 ✅ · 决策 ❌</text>
+  <rect x="470" y="8" width="210" height="48" rx="8" fill="#059669"/><text x="575" y="26" text-anchor="middle" font-size="9" fill="white" font-weight="700">人类升级为AI协作者</text><text x="575" y="42" text-anchor="middle" font-size="7" fill="#a7f3d0">审核AI输出+做AI做不了的</text>
+  <text x="350" y="75" text-anchor="middle" font-size="8" fill="#0052d9" font-weight="600">吴恩达: "AI不会替代你，但会用AI的人会替代不会用AI的人"</text>
+</svg></div>
+<h2 id="ai">十、AI对工作的影响</h2>
+<p><strong>核心框架</strong>：AI自动化的是"任务"而非"工作"。</p>
+<p><strong>受影响最大的反而是高薪知识工作</strong>：律师（文档起草）、程序员（代码编写）、营销人员（文案生成）、分析师（数据分析）。</p>
+<p><strong>吴恩达的建议</strong>：先用AI<strong>辅助</strong>（augment）工作→建立信心→再推动<strong>自动化</strong>（automate）。先增强后自动化，阻力更小。</p>
+<h2 id="agi">十一、AGI还有多远？</h2>
+<p>吴恩达暗示AGI距离还很远，三个理由：
+1. 当前LLM仍有明显局限（幻觉、知识界限）
+2. 通用智能需要超越文本的多模态推理
+3. 缺乏真正的长期规划和自主学习机制</p>
+<h2 id="ai_1">十二、负责任AI的五维度框架</h2>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>问题</th>
+<th>对策</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>偏见</strong></td>
+<td>性别/种族/年龄偏见</td>
+<td>多样化训练数据、审计检测</td>
+</tr>
+<tr>
+<td><strong>毒性</strong></td>
+<td>有害/仇恨内容</td>
+<td>RLHF优化、安全过滤</td>
+</tr>
+<tr>
+<td><strong>幻觉</strong></td>
+<td>编造事实</td>
+<td>RAG补充真实数据、事实核查</td>
+</tr>
+<tr>
+<td><strong>版权</strong></td>
+<td>未授权使用内容</td>
+<td>许可协议、来源标注</td>
+</tr>
+<tr>
+<td><strong>隐私</strong></td>
+<td>暴露敏感信息</td>
+<td>数据脱敏、本地部署</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：吴恩达的核心判断——未来是"会用AI的人取代不会用AI的人"，而非"AI取代人类"。生成式AI将成为每个职场人的基础技能，就像今天的网络搜索和Word一样。</p>
+</blockquote>
+<hr />
+<blockquote>
+<p>💡 <strong>关键认知</strong>：负责任AI不是"加一个安全滤镜"就完事——它需要贯穿产品的整个生命周期。吴恩达建议每个AI项目都应该有一个"负责任AI检查清单"，在设计、开发、测试、部署每个阶段都要审视五个维度的风险。</p>
+</blockquote>
+<h2 id="12">附录：专有名词速查（12个）</h2>
+<table>
+<thead>
+<tr>
+<th>名词</th>
+<th>全称</th>
+<th>一句话白话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LLM</td>
+<td>Large Language Model</td>
+<td>大语言模型，文字接龙机</td>
+</tr>
+<tr>
+<td>Generative AI</td>
+<td>生成式AI</td>
+<td>能生成文本/图像/音频的AI</td>
+</tr>
+<tr>
+<td>RAG</td>
+<td>Retrieval Augmented Generation</td>
+<td>先检索文档再让LLM回答</td>
+</tr>
+<tr>
+<td>Fine-tuning</td>
+<td>微调</td>
+<td>用少量数据调整模型风格/知识</td>
+</tr>
+<tr>
+<td>RLHF</td>
+<td>人类反馈强化学习</td>
+<td>用人类偏好让模型变得有帮助/诚实/无害</td>
+</tr>
+<tr>
+<td>Prompt</td>
+<td>提示词</td>
+<td>发给模型的指令</td>
+</tr>
+<tr>
+<td>Hallucination</td>
+<td>幻觉</td>
+<td>模型自信地编造不存在的事实</td>
+</tr>
+<tr>
+<td>Token</td>
+<td>词元</td>
+<td>模型处理的最小文本单位</td>
+</tr>
+<tr>
+<td>Diffusion Model</td>
+<td>扩散模型</td>
+<td>从噪声中"去噪"生成图像的技术</td>
+</tr>
+<tr>
+<td>AGI</td>
+<td>Artificial General Intelligence</td>
+<td>通用人工智能（目标但尚远）</td>
+</tr>
+<tr>
+<td>Context Window</td>
+<td>上下文窗口</td>
+<td>模型一次能处理的最大Token数</td>
+</tr>
+<tr>
+<td>Supervised Learning</td>
+<td>监督学习</td>
+<td>从"输入→输出"的标注数据中学习</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="footer">学习笔记由 WorkBuddy AI 助手整理 · 2026-04-11 · 通俗叙事风格 · 腾讯云商务蓝配色</div>
+</div>
+</body>
+</html>
