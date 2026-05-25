@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent记忆机制 学习笔记</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;color:#242424;line-height:1.8}
+.container{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+
+/* Header */
+.header{background:linear-gradient(135deg,#001a45 0%,#0052d9 50%,#0077ff 100%);border-radius:16px;padding:36px 32px 28px;margin-bottom:28px;color:#fff;position:relative;overflow:hidden}
+.header::after{content:'';position:absolute;top:-30px;right:-30px;width:180px;height:180px;background:rgba(255,255,255,0.04);border-radius:50%}
+.header h1{font-size:26px;font-weight:700;margin-bottom:10px;letter-spacing:0.5px}
+.header .meta{font-size:13px;opacity:0.85;line-height:1.9}
+.header .meta a{color:#a8cfff;text-decoration:none}
+.header .meta a:hover{color:#fff;text-decoration:underline}
+.stat-cards{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap}
+.stat-card{background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);border-radius:10px;padding:12px 18px;flex:1;min-width:110px}
+.stat-card .num{font-size:22px;font-weight:700;color:#66b1ff}
+.stat-card .label{font-size:11px;opacity:0.8;margin-top:2px}
+
+/* 综述区 */
+.summary-card{background:linear-gradient(135deg,#edf4ff 0%,#f0f7ff 50%,#f5f9ff 100%);border:1px solid #d4e3fc;border-radius:14px;padding:24px 28px;margin-bottom:28px}
+.summary-card h2{font-size:17px;color:#0052d9;margin-bottom:12px}
+.summary-card p{font-size:14.5px;color:#4b4b4b;line-height:1.9;margin-bottom:10px}
+.summary-card p:last-child{margin-bottom:0}
+.summary-card strong{color:#003cab}
+
+/* 内容卡片 */
+.card{background:#fff;border-radius:14px;padding:28px 30px;margin-bottom:24px;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.card h2{font-size:21px;color:#0052d9;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #edf4ff}
+.card h3{font-size:17px;color:#003cab;margin:22px 0 10px}
+.card h4{font-size:15px;color:#242424;margin:16px 0 8px}
+.card p{font-size:14.5px;color:#4b4b4b;line-height:1.9;margin-bottom:10px}
+.card p:last-child{margin-bottom:0}
+.card strong{color:#003cab}
+.card em{color:#0052d9;font-style:normal;font-weight:600}
+
+/* Part标题 */
+.part-title{background:linear-gradient(135deg,#0052d9,#0077ff);color:#fff;border-radius:14px;padding:24px 30px;margin-bottom:24px;font-size:22px;font-weight:700;text-align:center;letter-spacing:1px;box-shadow:0 2px 8px rgba(0,82,217,0.2)}
+
+/* 表格 */
+table{width:100%;border-collapse:collapse;margin:14px 0 18px;font-size:13.5px}
+th{background:#edf4ff;color:#003cab;font-weight:600;padding:10px 14px;text-align:left;border-bottom:2px solid #d4e3fc}
+td{padding:9px 14px;border-bottom:1px solid #e5e6eb;color:#4b4b4b}
+tr:hover td{background:#f8faff}
+
+/* 引用块 */
+blockquote{background:#edf4ff;border-left:4px solid #0052d9;border-radius:0 10px 10px 0;padding:14px 20px;margin:16px 0;font-size:14px;color:#003cab;line-height:1.8}
+
+/* 代码块 */
+pre{background:#0d1b2a;color:#e0e0e0;border-radius:10px;padding:16px 20px;margin:14px 0;overflow-x:auto;font-size:13px;line-height:1.7;font-family:"SF Mono",Menlo,Monaco,Consolas,monospace}
+
+/* SVG容器 */
+.svg-container{background:#edf4ff;border:1px solid #d4e3fc;border-radius:12px;padding:18px;margin:18px 0}
+.svg-container p{font-size:13px;color:#0052d9;font-weight:600;margin-bottom:10px;text-align:center}
+.svg-container svg{width:100%;height:auto;display:block}
+
+/* 名词速查 */
+.glossary{margin-top:10px}
+.glossary table{font-size:13px}
+.glossary td:nth-child(1){font-weight:600;color:#0052d9;white-space:nowrap}
+
+/* Footer */
+.footer{text-align:center;color:#999;font-size:12px;margin-top:40px;padding-top:20px;border-top:1px solid #e5e6eb}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- Header -->
+<div class="header">
+  <h1>🧠 Agent记忆机制 学习笔记</h1>
+  <div class="meta">
+    来源：B站 · 腾讯云开发者视频<br>
+    <a href="https://www.bilibili.com/video/BV1xfBkB4Etb?p=22" target="_blank">Agent记忆(memory)</a>（11分20秒） ·
+    <a href="https://www.bilibili.com/video/BV1vQ5rzfEew" target="_blank">全局记忆：大模型必争之地？</a>（9分22秒） ·
+    <a href="https://cloud.tencent.com/developer/video/83525" target="_blank">打造类脑AI</a><br>
+    适合人群：想理解AI Agent为什么"健忘"以及怎么让它"记住"的初学者
+  </div>
+  <div class="stat-cards">
+    <div class="stat-card"><div class="num">3</div><div class="label">视频来源</div></div>
+    <div class="stat-card"><div class="num">3</div><div class="label">核心模块</div></div>
+    <div class="stat-card"><div class="num">8</div><div class="label">架构图</div></div>
+    <div class="stat-card"><div class="num">22</div><div class="label">专有名词</div></div>
+  </div>
+</div>
+
+<!-- 综述 -->
+<div class="summary-card">
+  <h2>📋 内容综述</h2>
+  <p>这篇笔记回答三个问题：<strong>AI为什么健忘？记忆分几种？怎么给它装上记忆？</strong></p>
+  <p>第一部分"AI的失忆症"从最根本的问题切入——大模型每次对话都是全新开始，就像得了失忆症。<strong>短期记忆</strong>和<strong>长期记忆</strong>是两条解题路线：短期记忆是"当下记住"，靠上下文窗口；长期记忆是"跨次记住"，靠外部存储。</p>
+  <p>第二部分"四类记忆模型"是核心。类比人类大脑，AI的记忆不是一坨混沌，而是四种分工明确的系统：<strong>工作记忆</strong>管当下对话、<strong>情景记忆</strong>管经验回溯、<strong>语义记忆</strong>管事实知识、<strong>程序记忆</strong>管行为模式。四者协同，才让AI从"工具"变成"懂你的伙伴"。</p>
+  <p>第三部分"全局记忆的争夺战"把视角拉到行业层面——硅谷正在打响"数字海马体"之战，Anthropic、Google、Mem0、Engramme等各路玩家都在抢做AI的记忆基础设施，因为谁掌握了记忆，谁就掌握了下一代AI应用的主导权。</p>
+</div>
+
+<!-- 第一部分 -->
+<div class="part-title">第一部分：AI的失忆症</div>
+
+<div class="card">
+  <h2>一、为什么AI每次都不记得你？</h2>
+
+  <p><strong>一句话</strong>：大模型天生"无状态"——你关掉对话窗口，它就把你忘了。</p>
+
+  <p>想象一下：如果你每天醒来都忘记昨天的事，你还能正常生活吗？这就是现在AI的状态。你跟它聊了一个小时的偏好，关掉窗口再来，它问你是谁。</p>
+
+  <p>这背后有三层原因：</p>
+  <table>
+    <tr><th>问题</th><th>具体表现</th><th>根本原因</th></tr>
+    <tr><td>无上下文记忆</td><td>不记得前一轮对话说了什么</td><td>模型没有跨会话存储机制</td></tr>
+    <tr><td>无法从经验学习</td><td>同样的错误反复犯</td><td>没有"上次做错了"的记录</td></tr>
+    <tr><td>无法建立知识连接</td><td>孤立回答，不会联想</td><td>缺乏持久化的知识图谱</td></tr>
+  </table>
+
+  <p>而人类呢？我们有丰富的生活经验，能理解任务背景，会反思总结，能积累专业知识。<strong>根本差距就在记忆系统</strong>。</p>
+
+  <blockquote>💡 <strong>关键认知</strong>：给AI加记忆不是"加一个模块"，而是重构整个信息流架构。记忆是Agent技术栈的一等公民，不是附属品。</blockquote>
+</div>
+
+<div class="card">
+  <h2>二、短期记忆 vs 长期记忆</h2>
+
+  <h3>短期记忆：当下记住</h3>
+  <p><strong>一句话</strong>：短期记忆就是AI的"即时工作台"，只管当前这场对话。</p>
+  <p>就像你跟朋友聊天，你能记住刚才说的话，但聊完可能就忘了。短期记忆的核心是一个不断增长的对话记录本——你说一句，它加一条，AI每次回答前翻一遍整个记录本。</p>
+
+  <!-- SVG: 短期记忆工作流程 -->
+  <div class="svg-container">
+    <p>📐 短期记忆四步工作流程</p>
+    <svg viewBox="0 0 720 120" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="arrow1" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 Z" fill="#0052d9"/></marker></defs>
+      <!-- Step 1 -->
+      <rect x="10" y="25" width="145" height="70" rx="10" fill="#0052d9" opacity="0.9"/>
+      <text x="82" y="52" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">① 接收</text>
+      <text x="82" y="72" text-anchor="middle" fill="#d4e3fc" font-size="11">用户消息</text>
+      <!-- Arrow 1 -->
+      <line x1="155" y1="60" x2="175" y2="60" stroke="#0052d9" stroke-width="2" marker-end="url(#arrow1)"/>
+      <!-- Step 2 -->
+      <rect x="180" y="25" width="145" height="70" rx="10" fill="#0052d9" opacity="0.75"/>
+      <text x="252" y="52" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">② 累积</text>
+      <text x="252" y="72" text-anchor="middle" fill="#d4e3fc" font-size="11">到对话历史</text>
+      <!-- Arrow 2 -->
+      <line x1="325" y1="60" x2="345" y2="60" stroke="#0052d9" stroke-width="2" marker-end="url(#arrow1)"/>
+      <!-- Step 3 -->
+      <rect x="350" y="25" width="145" height="70" rx="10" fill="#0052d9" opacity="0.6"/>
+      <text x="422" y="52" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">③ 输入</text>
+      <text x="422" y="72" text-anchor="middle" fill="#d4e3fc" font-size="11">完整上下文→LLM</text>
+      <!-- Arrow 3 -->
+      <line x1="495" y1="60" x2="515" y2="60" stroke="#0052d9" stroke-width="2" marker-end="url(#arrow1)"/>
+      <!-- Step 4 -->
+      <rect x="520" y="25" width="145" height="70" rx="10" fill="#0052d9" opacity="0.45"/>
+      <text x="592" y="52" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">④ 生成</text>
+      <text x="592" y="72" text-anchor="middle" fill="#d4e3fc" font-size="11">并存储响应</text>
+    </svg>
+  </div>
+
+  <p><strong>最大问题</strong>：上下文窗口会填满。当对话太长，早期的内容会被"挤出去"，AI就开始"跟丢"了。</p>
+
+  <h3>长期记忆：跨次记住</h3>
+  <p><strong>一句话</strong>：长期记忆让AI能"昨天记住，今天还能用"，靠的是外部存储。</p>
+  <p>长期记忆解决的是"上下文窗口一关就忘"的问题。把对话中的关键信息提取出来，存到外部数据库，下次对话时先检索相关记忆再回答。</p>
+
+  <h3>短期 vs 长期：核心对比</h3>
+  <table>
+    <tr><th>对比项</th><th>短期记忆</th><th>长期记忆</th></tr>
+    <tr><td>持续时间</td><td>单次对话</td><td>跨会话持久</td></tr>
+    <tr><td>存储位置</td><td>上下文窗口（内存）</td><td>向量数据库/知识图谱（外部）</td></tr>
+    <tr><td>读取方式</td><td>直接可见</td><td>需要检索</td></tr>
+    <tr><td>容量</td><td>有限（几十K~1M token）</td><td>近乎无限</td></tr>
+    <tr><td>耦合性</td><td>与当前对话强耦合</td><td>独立存在，按需检索</td></tr>
+    <tr><td>典型实现</td><td>滑动窗口、摘要压缩</td><td>向量检索、RAG</td></tr>
+  </table>
+
+  <blockquote>💡 <strong>关键认知</strong>：短期记忆是"当下能想什么"，长期记忆是"过去能否被回溯"。短期记忆是所有记忆最终必须通过的瓶颈——长期记忆再丰富，如果检索不出来塞进上下文窗口，也等于没有。</blockquote>
+</div>
+
+<!-- 第二部分 -->
+<div class="part-title">第二部分：四类记忆模型</div>
+
+<div class="card">
+  <h2>一、从人类大脑到AI记忆</h2>
+
+  <p>前面讲了短期/长期二分法，但这太粗了。真正想让AI"像人一样记住"，需要更精细的分类。</p>
+
+  <p>心理学家把人类记忆分成四种：工作记忆、情景记忆、语义记忆、程序记忆。AI的记忆系统也可以照着这个来设计——这不是生搬硬套，而是因为人类大脑经过了几亿年进化，这四类分工确实高效。</p>
+
+  <!-- SVG: 人脑→AI映射 -->
+  <div class="svg-container">
+    <p>📐 人类大脑记忆 → AI记忆系统映射</p>
+    <svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="arrow2" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 Z" fill="#0052d9"/></marker></defs>
+      <!-- 左侧：人脑 -->
+      <rect x="10" y="10" width="180" height="220" rx="14" fill="#001a45" opacity="0.08" stroke="#d4e3fc" stroke-width="1.5"/>
+      <text x="100" y="38" text-anchor="middle" font-size="14" font-weight="700" fill="#003cab">人类大脑</text>
+      <rect x="25" y="52" width="150" height="36" rx="8" fill="#0052d9" opacity="0.15"/>
+      <text x="100" y="76" text-anchor="middle" font-size="12" fill="#003cab">🧠 工作记忆</text>
+      <rect x="25" y="96" width="150" height="36" rx="8" fill="#0052d9" opacity="0.15"/>
+      <text x="100" y="120" text-anchor="middle" font-size="12" fill="#003cab">📖 情景记忆</text>
+      <rect x="25" y="140" width="150" height="36" rx="8" fill="#0052d9" opacity="0.15"/>
+      <text x="100" y="164" text-anchor="middle" font-size="12" fill="#003cab">📚 语义记忆</text>
+      <rect x="25" y="184" width="150" height="36" rx="8" fill="#0052d9" opacity="0.15"/>
+      <text x="100" y="208" text-anchor="middle" font-size="12" fill="#003cab">⚡ 程序记忆</text>
+      <!-- 箭头 -->
+      <line x1="175" y1="70" x2="280" y2="70" stroke="#0052d9" stroke-width="1.8" stroke-dasharray="6,3" marker-end="url(#arrow2)"/>
+      <line x1="175" y1="114" x2="280" y2="114" stroke="#0052d9" stroke-width="1.8" stroke-dasharray="6,3" marker-end="url(#arrow2)"/>
+      <line x1="175" y1="158" x2="280" y2="158" stroke="#0052d9" stroke-width="1.8" stroke-dasharray="6,3" marker-end="url(#arrow2)"/>
+      <line x1="175" y1="202" x2="280" y2="202" stroke="#0052d9" stroke-width="1.8" stroke-dasharray="6,3" marker-end="url(#arrow2)"/>
+      <!-- 中间标签 -->
+      <text x="227" y="64" text-anchor="middle" font-size="10" fill="#0052d9">对应</text>
+      <text x="227" y="108" text-anchor="middle" font-size="10" fill="#0052d9">对应</text>
+      <text x="227" y="152" text-anchor="middle" font-size="10" fill="#0052d9">对应</text>
+      <text x="227" y="196" text-anchor="middle" font-size="10" fill="#0052d9">对应</text>
+      <!-- 右侧：AI -->
+      <rect x="285" y="10" width="420" height="220" rx="14" fill="#001a45" opacity="0.04" stroke="#d4e3fc" stroke-width="1.5"/>
+      <text x="495" y="38" text-anchor="middle" font-size="14" font-weight="700" fill="#003cab">AI Agent</text>
+      <rect x="300" y="52" width="390" height="36" rx="8" fill="#edf4ff"/>
+      <text x="495" y="76" text-anchor="middle" font-size="12" fill="#003cab">上下文窗口（Context Window）</text>
+      <rect x="300" y="96" width="390" height="36" rx="8" fill="#edf4ff"/>
+      <text x="495" y="120" text-anchor="middle" font-size="12" fill="#003cab">向量数据库（历史经验检索）</text>
+      <rect x="300" y="140" width="390" height="36" rx="8" fill="#edf4ff"/>
+      <text x="495" y="164" text-anchor="middle" font-size="12" fill="#003cab">RAG知识库（事实知识检索）</text>
+      <rect x="300" y="184" width="390" height="36" rx="8" fill="#edf4ff"/>
+      <text x="495" y="208" text-anchor="middle" font-size="12" fill="#003cab">系统指令 / Skills（行为模式）</text>
+    </svg>
+  </div>
+</div>
+
+<div class="card">
+  <h2>二、工作记忆：AI的当下意识</h2>
+
+  <p><strong>一句话</strong>：工作记忆就是AI此刻正在想什么，是所有记忆的"必经之门"。</p>
+
+  <p>你在和朋友聊天，你会自然记住刚才说的话——这就是工作记忆。AI的工作记忆就是上下文窗口里那些当前可见的文字。</p>
+
+  <p>举个具体例子：用户说"我叫彦祖"，AI把它加到记录本里；用户问"我叫什么？"，AI翻记录本找到答案。</p>
+
+  <!-- SVG: 工作记忆四步 -->
+  <div class="svg-container">
+    <p>📐 工作记忆：信息在上下文窗口中的流转</p>
+    <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="arrow3" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 Z" fill="#0052d9"/></marker></defs>
+      <!-- 用户输入 -->
+      <rect x="20" y="20" width="160" height="50" rx="10" fill="#0052d9"/>
+      <text x="100" y="50" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">用户说："我叫彦祖"</text>
+      <line x1="180" y1="45" x2="210" y2="45" stroke="#0052d9" stroke-width="2" marker-end="url(#arrow3)"/>
+      <!-- 对话历史 -->
+      <rect x="215" y="15" width="200" height="60" rx="10" fill="#edf4ff" stroke="#d4e3fc" stroke-width="1.5"/>
+      <text x="315" y="38" text-anchor="middle" font-size="12" fill="#003cab" font-weight="600">对话记录本</text>
+      <text x="315" y="58" text-anchor="middle" font-size="11" fill="#4b4b4b">[用户: 我叫彦祖]</text>
+      <line x1="415" y1="45" x2="445" y2="45" stroke="#0052d9" stroke-width="2" marker-end="url(#arrow3)"/>
+      <!-- LLM -->
+      <rect x="450" y="15" width="130" height="60" rx="10" fill="#003cab"/>
+      <text x="515" y="42" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">LLM</text>
+      <text x="515" y="60" text-anchor="middle" fill="#d4e3fc" font-size="11">推理+生成</text>
+      <line x1="580" y1="45" x2="610" y2="45" stroke="#0052d9" stroke-width="2" marker-end="url(#arrow3)"/>
+      <!-- 输出 -->
+      <rect x="615" y="20" width="90" height="50" rx="10" fill="#059669"/>
+      <text x="660" y="42" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">输出</text>
+      <text x="660" y="58" text-anchor="middle" fill="#d1fae5" font-size="10">"你好彦祖！"</text>
+      <!-- 下方：窗口限制说明 -->
+      <rect x="100" y="105" width="520" height="80" rx="10" fill="#fff8f0" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="360" y="130" text-anchor="middle" font-size="13" fill="#92400e" font-weight="600">⚠️ 上下文窗口有限</text>
+      <text x="360" y="150" text-anchor="middle" font-size="11.5" fill="#78350f">GPT-4：约128K token | Claude：约1M token</text>
+      <text x="360" y="170" text-anchor="middle" font-size="11.5" fill="#78350f">对话太长→早期内容被"挤出去"→AI开始跟丢</text>
+    </svg>
+  </div>
+
+  <blockquote>💡 <strong>关键认知</strong>：没有工作记忆，AI就像每次见面都不认识你的陌生人。工作记忆是其他所有高级记忆的基石——长期记忆检索出来的内容，最终也要塞进工作记忆才能被AI"看到"。</blockquote>
+</div>
+
+<div class="card">
+  <h2>三、情景记忆：AI的日记本</h2>
+
+  <p><strong>一句话</strong>：情景记忆让AI能从过往经历中学习，是"上次做错了，这次别再犯"的关键。</p>
+
+  <p>就像你的日记本，记录"发生了什么"和"事情是怎么发生的"。不只是"那天发生了X"，而是"我试了方法A失败了，方法B成功了"。</p>
+
+  <!-- SVG: 情景记忆机制 -->
+  <div class="svg-container">
+    <p>📐 情景记忆：自我反思 + 经验回溯</p>
+    <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="arrow4" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 Z" fill="#0052d9"/></marker></defs>
+      <!-- 上半：存储过程 -->
+      <text x="360" y="20" text-anchor="middle" font-size="12" fill="#003cab" font-weight="600">── 存储经验 ──</text>
+      <rect x="20" y="30" width="130" height="44" rx="8" fill="#0052d9" opacity="0.85"/>
+      <text x="85" y="57" text-anchor="middle" fill="#fff" font-size="12">对话结束</text>
+      <line x1="150" y1="52" x2="180" y2="52" stroke="#0052d9" stroke-width="1.8" marker-end="url(#arrow4)"/>
+      <rect x="185" y="30" width="160" height="44" rx="8" fill="#0052d9" opacity="0.6"/>
+      <text x="265" y="50" text-anchor="middle" fill="#fff" font-size="11">AI自动分析</text>
+      <text x="265" y="66" text-anchor="middle" fill="#d4e3fc" font-size="10">哪好？哪差？</text>
+      <line x1="345" y1="52" x2="375" y2="52" stroke="#0052d9" stroke-width="1.8" marker-end="url(#arrow4)"/>
+      <rect x="380" y="30" width="160" height="44" rx="8" fill="#0052d9" opacity="0.4"/>
+      <text x="460" y="50" text-anchor="middle" fill="#003cab" font-size="11">提取经验</text>
+      <text x="460" y="66" text-anchor="middle" fill="#4b4b4b" font-size="10">成功规律+失败教训</text>
+      <line x1="540" y1="52" x2="570" y2="52" stroke="#0052d9" stroke-width="1.8" marker-end="url(#arrow4)"/>
+      <rect x="575" y="30" width="130" height="44" rx="8" fill="#059669" opacity="0.8"/>
+      <text x="640" y="50" text-anchor="middle" fill="#fff" font-size="11">存入</text>
+      <text x="640" y="66" text-anchor="middle" fill="#d1fae5" font-size="10">向量数据库</text>
+      <!-- 下半：检索过程 -->
+      <text x="360" y="110" text-anchor="middle" font-size="12" fill="#003cab" font-weight="600">── 回溯经验 ──</text>
+      <rect x="20" y="120" width="130" height="44" rx="8" fill="#0052d9" opacity="0.85"/>
+      <text x="85" y="147" text-anchor="middle" fill="#fff" font-size="12">用户新问题</text>
+      <line x1="150" y1="142" x2="180" y2="142" stroke="#0052d9" stroke-width="1.8" marker-end="url(#arrow4)"/>
+      <rect x="185" y="120" width="160" height="44" rx="8" fill="#edf4ff" stroke="#d4e3fc"/>
+      <text x="265" y="140" text-anchor="middle" fill="#003cab" font-size="11">语义相似度搜索</text>
+      <text x="265" y="156" text-anchor="middle" fill="#4b4b4b" font-size="10">在记忆库中找相似</text>
+      <line x1="345" y1="142" x2="375" y2="142" stroke="#0052d9" stroke-width="1.8" marker-end="url(#arrow4)"/>
+      <rect x="380" y="120" width="160" height="44" rx="8" fill="#edf4ff" stroke="#d4e3fc"/>
+      <text x="460" y="140" text-anchor="middle" fill="#003cab" font-size="11">找到成功案例</text>
+      <text x="460" y="156" text-anchor="middle" fill="#4b4b4b" font-size="10">注入系统提示</text>
+      <line x1="540" y1="142" x2="570" y2="142" stroke="#0052d9" stroke-width="1.8" marker-end="url(#arrow4)"/>
+      <rect x="575" y="120" width="130" height="44" rx="8" fill="#059669" opacity="0.8"/>
+      <text x="640" y="140" text-anchor="middle" fill="#fff" font-size="11">基于经验</text>
+      <text x="640" y="156" text-anchor="middle" fill="#d1fae5" font-size="10">给出回答</text>
+      <!-- 底部注释 -->
+      <rect x="120" y="195" width="480" height="50" rx="10" fill="#edf4ff" stroke="#d4e3fc"/>
+      <text x="360" y="218" text-anchor="middle" font-size="12" fill="#003cab" font-weight="600">关键技术：动态少样本提示（Few-shot）</text>
+      <text x="360" y="236" text-anchor="middle" font-size="11" fill="#4b4b4b">把历史成功案例注入prompt → AI像经验丰富的老师</text>
+    </svg>
+  </div>
+
+  <blockquote>💡 <strong>关键认知</strong>：情景记忆不只存"发生了什么"，还存"怎么发生的"——它保留了时间线、因果链和试错过程。这使得AI不是死板地重复，而是能从成功和失败中分别学到东西。</blockquote>
+</div>
+
+<div class="card">
+  <h2>四、语义记忆：AI的百科全书</h2>
+
+  <p><strong>一句话</strong>：语义记忆存储事实和知识，是"不绑定任何特定对话的稳定知识库"。</p>
+
+  <p>就像你学到的概念和理论知识——"地球绕太阳转"、"水在100°C沸腾"——这些不绑定于任何特定经历，是独立的事实。语义记忆是从大量经历中<strong>蒸馏</strong>出来的稳定知识。</p>
+
+  <!-- SVG: RAG工作流程 -->
+  <div class="svg-container">
+    <p>📐 语义记忆核心技术：RAG工作流程</p>
+    <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="arrow5" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 Z" fill="#0052d9"/></marker></defs>
+      <!-- 离线阶段 -->
+      <rect x="15" y="10" width="230" height="140" rx="12" fill="#edf4ff" stroke="#d4e3fc" stroke-width="1.5"/>
+      <text x="130" y="35" text-anchor="middle" font-size="13" fill="#003cab" font-weight="700">离线阶段</text>
+      <rect x="30" y="48" width="200" height="36" rx="8" fill="#0052d9" opacity="0.2"/>
+      <text x="130" y="72" text-anchor="middle" font-size="11.5" fill="#003cab">📄 文档切分成小块</text>
+      <line x1="130" y1="84" x2="130" y2="100" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arrow5)"/>
+      <rect x="30" y="104" width="200" height="36" rx="8" fill="#0052d9" opacity="0.35"/>
+      <text x="130" y="128" text-anchor="middle" font-size="11.5" fill="#003cab">🏷️ 向量化+存入数据库</text>
+      <!-- 向量数据库 -->
+      <rect x="280" y="40" width="160" height="90" rx="12" fill="#003cab" opacity="0.9"/>
+      <text x="360" y="70" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">向量数据库</text>
+      <text x="360" y="90" text-anchor="middle" fill="#d4e3fc" font-size="10">Pinecone / Milvus</text>
+      <text x="360" y="108" text-anchor="middle" fill="#d4e3fc" font-size="10">FAISS / Qdrant</text>
+      <!-- 连线：离线→DB -->
+      <line x1="245" y1="90" x2="280" y2="85" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arrow5)"/>
+      <!-- 运行时 -->
+      <rect x="15" y="165" width="230" height="120" rx="12" fill="#fff8f0" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="130" y="190" text-anchor="middle" font-size="13" fill="#92400e" font-weight="700">运行时</text>
+      <rect x="30" y="200" width="200" height="36" rx="8" fill="#f59e0b" opacity="0.2"/>
+      <text x="130" y="224" text-anchor="middle" font-size="11.5" fill="#92400e">❓ 问题向量化+检索Top-K</text>
+      <line x1="130" y1="236" x2="130" y2="252" stroke="#f59e0b" stroke-width="1.5"/>
+      <rect x="30" y="252" width="200" height="28" rx="8" fill="#f59e0b" opacity="0.35"/>
+      <text x="130" y="272" text-anchor="middle" font-size="11.5" fill="#92400e">相关知识片段 → LLM生成</text>
+      <!-- 连线：运行时→DB -->
+      <line x1="245" y1="220" x2="280" y2="120" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow5)"/>
+      <!-- 右侧：生成 -->
+      <rect x="480" y="60" width="220" height="100" rx="12" fill="#059669" opacity="0.1" stroke="#059669" stroke-width="1.5"/>
+      <text x="590" y="85" text-anchor="middle" font-size="13" fill="#065f46" font-weight="700">生成答案</text>
+      <text x="590" y="108" text-anchor="middle" font-size="11" fill="#4b4b4b">相关知识 + 用户问题</text>
+      <text x="590" y="128" text-anchor="middle" font-size="11" fill="#4b4b4b">→ 一起输入LLM → 输出</text>
+      <text x="590" y="148" text-anchor="middle" font-size="11" fill="#059669" font-weight="600">✅ 准确、有据可查的答案</text>
+      <!-- 连线：DB→生成 -->
+      <line x1="440" y1="85" x2="480" y2="95" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arrow5)"/>
+      <!-- 底部类比 -->
+      <rect x="480" y="200" width="220" height="80" rx="10" fill="#edf4ff" stroke="#d4e3fc"/>
+      <text x="590" y="224" text-anchor="middle" font-size="12" fill="#003cab" font-weight="600">📚 类比：智能档案柜</text>
+      <text x="590" y="246" text-anchor="middle" font-size="11" fill="#4b4b4b">把书切成片段→贴标签→分类存</text>
+      <text x="590" y="264" text-anchor="middle" font-size="11" fill="#4b4b4b">提问时→快速找到相关片段</text>
+    </svg>
+  </div>
+
+  <h3>语义记忆 vs 情景记忆</h3>
+  <table>
+    <tr><th>对比项</th><th>情景记忆</th><th>语义记忆</th></tr>
+    <tr><td>存什么</td><td>具体经历（带时间线）</td><td>提炼后的事实和概念</td></tr>
+    <tr><td>粒度</td><td>细（一次对话、一次尝试）</td><td>粗（一条知识、一个偏好）</td></tr>
+    <tr><td>时间属性</td><td>强（"上周三发生了什么"）</td><td>弱（"地球绕太阳转"不绑定时间）</td></tr>
+    <tr><td>类比</td><td>日记本</td><td>百科全书</td></tr>
+    <tr><td>更新方式</td><td>追加新经历</td><td>蒸馏+合并+冲突解决</td></tr>
+  </table>
+
+  <blockquote>💡 <strong>关键认知</strong>：情景记忆是"原材料"（经历），语义记忆是"加工品"（知识）。好的记忆系统会自动把情景记忆蒸馏成语义记忆——就像你做了十次实验后总结出一条规律，不再需要每次都翻实验记录。</blockquote>
+</div>
+
+<div class="card">
+  <h2>五、程序记忆：AI的肌肉记忆</h2>
+
+  <p><strong>一句话</strong>：程序记忆决定AI"怎么做"，是最抽象但最容易被低估的一层。</p>
+
+  <p>就像你会骑车、会打字、会做菜——不是每次现想一遍规则，而是把规则<strong>内化</strong>为行动模式。你不思考"先左脚还是先右脚"，直接就骑了。这就是程序记忆。</p>
+
+  <h3>两个实现层面</h3>
+  <table>
+    <tr><th>层面</th><th>说明</th><th>复杂度</th></tr>
+    <tr><td>理想</td><td>直接改变模型权重，从根本学会新技能</td><td>高（需要微调）</td></tr>
+    <tr><td>实际</td><td>维护动态指令系统 + 可复用操作套路</td><td>中等（配置即可）</td></tr>
+  </table>
+
+  <p>程序记忆在Agent中的具体形态：Skills、SOP、可复用操作套路、工作流、决策规则、系统prompt、few-shot示例。</p>
+
+  <!-- SVG: 程序记忆机制 -->
+  <div class="svg-container">
+    <p>📐 程序记忆：从对话中学习行为模式</p>
+    <svg viewBox="0 0 720 180" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="arrow6" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 Z" fill="#0052d9"/></marker></defs>
+      <!-- Step 1 -->
+      <rect x="15" y="30" width="155" height="60" rx="10" fill="#0052d9" opacity="0.85"/>
+      <text x="92" y="55" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">① 发现偏好</text>
+      <text x="92" y="75" text-anchor="middle" fill="#d4e3fc" font-size="10">用户不喜欢XX表达</text>
+      <line x1="170" y1="60" x2="195" y2="60" stroke="#0052d9" stroke-width="2" marker-end="url(#arrow6)"/>
+      <!-- Step 2 -->
+      <rect x="200" y="30" width="155" height="60" rx="10" fill="#0052d9" opacity="0.65"/>
+      <text x="277" y="55" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">② 更新指令</text>
+      <text x="277" y="75" text-anchor="middle" fill="#d4e3fc" font-size="10">加入持续指令集</text>
+      <line x1="355" y1="60" x2="380" y2="60" stroke="#0052d9" stroke-width="2" marker-end="url(#arrow6)"/>
+      <!-- Step 3 -->
+      <rect x="385" y="30" width="155" height="60" rx="10" fill="#0052d9" opacity="0.45"/>
+      <text x="462" y="55" text-anchor="middle" fill="#003cab" font-size="12" font-weight="600">③ 分析效果</text>
+      <text x="462" y="75" text-anchor="middle" fill="#4b4b4b" font-size="10">提取成功规律</text>
+      <line x1="540" y1="60" x2="565" y2="60" stroke="#0052d9" stroke-width="2" marker-end="url(#arrow6)"/>
+      <!-- Step 4 -->
+      <rect x="570" y="30" width="135" height="60" rx="10" fill="#059669" opacity="0.8"/>
+      <text x="637" y="55" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">④ 持久化</text>
+      <text x="637" y="75" text-anchor="middle" fill="#d1fae5" font-size="10">下次自动应用</text>
+      <!-- 底部注释 -->
+      <rect x="100" y="120" width="520" height="40" rx="8" fill="#edf4ff" stroke="#d4e3fc"/>
+      <text x="360" y="146" text-anchor="middle" font-size="12" fill="#003cab">⚡ 模型权重本身也可视为程序记忆的终极形态——把所有行为模式内化进参数</text>
+    </svg>
+  </div>
+
+  <blockquote>💡 <strong>关键认知</strong>：程序记忆改变的是AI的"行为模式"，而不是"知识内容"。它决定的是"我应该怎么完成这类任务"，而不是"这个任务的事实是什么"。</blockquote>
+</div>
+
+<div class="card">
+  <h2>六、四种记忆如何协同工作？</h2>
+
+  <p>单个记忆类型各有分工，但真正让AI变聪明的是<strong>四者协同</strong>。</p>
+
+  <!-- SVG: 四记忆协同 -->
+  <div class="svg-container">
+    <p>📐 四种记忆协同工作案例：用户问"我最爱的食物是什么？"</p>
+    <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="arrow7" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 Z" fill="#0052d9"/></marker></defs>
+      <!-- 用户 -->
+      <rect x="270" y="10" width="180" height="44" rx="10" fill="#001a45"/>
+      <text x="360" y="38" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">👤 用户提问</text>
+      <!-- 四个记忆模块 -->
+      <rect x="20" y="85" width="155" height="80" rx="10" fill="#0052d9" opacity="0.85"/>
+      <text x="97" y="110" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">🧠 工作记忆</text>
+      <text x="97" y="130" text-anchor="middle" fill="#d4e3fc" font-size="10">追踪当前对话</text>
+      <text x="97" y="148" text-anchor="middle" fill="#d4e3fc" font-size="10">维护问题上下文</text>
+
+      <rect x="195" y="85" width="155" height="80" rx="10" fill="#3b82f6" opacity="0.8"/>
+      <text x="272" y="110" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">📖 情景记忆</text>
+      <text x="272" y="130" text-anchor="middle" fill="#dbeafe" font-size="10">搜索历史经验</text>
+      <text x="272" y="148" text-anchor="middle" fill="#dbeafe" font-size="10">"最爱巧克力熔岩蛋糕"</text>
+
+      <rect x="370" y="85" width="155" height="80" rx="10" fill="#059669" opacity="0.75"/>
+      <text x="447" y="110" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">📚 语义记忆</text>
+      <text x="447" y="130" text-anchor="middle" fill="#d1fae5" font-size="10">食物偏好知识</text>
+      <text x="447" y="148" text-anchor="middle" fill="#d1fae5" font-size="10">背景知识支撑</text>
+
+      <rect x="545" y="85" width="155" height="80" rx="10" fill="#f59e0b" opacity="0.85"/>
+      <text x="622" y="110" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">⚡ 程序记忆</text>
+      <text x="622" y="130" text-anchor="middle" fill="#fef3c7" font-size="10">回答风格指令</text>
+      <text x="622" y="148" text-anchor="middle" fill="#fef3c7" font-size="10">温馨、个性化</text>
+
+      <!-- 连线：用户→各记忆 -->
+      <line x1="310" y1="54" x2="97" y2="85" stroke="#0052d9" stroke-width="1.2" stroke-dasharray="4,3"/>
+      <line x1="340" y1="54" x2="272" y2="85" stroke="#3b82f6" stroke-width="1.2" stroke-dasharray="4,3"/>
+      <line x1="380" y1="54" x2="447" y2="85" stroke="#059669" stroke-width="1.2" stroke-dasharray="4,3"/>
+      <line x1="410" y1="54" x2="622" y2="85" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="4,3"/>
+
+      <!-- 融合 -->
+      <rect x="180" y="195" width="360" height="44" rx="10" fill="#003cab"/>
+      <text x="360" y="222" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">🔄 四记忆融合 → 完整上下文构建</text>
+
+      <!-- 连线：各记忆→融合 -->
+      <line x1="97" y1="165" x2="270" y2="195" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arrow7)"/>
+      <line x1="272" y1="165" x2="320" y2="195" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow7)"/>
+      <line x1="447" y1="165" x2="400" y2="195" stroke="#059669" stroke-width="1.5" marker-end="url(#arrow7)"/>
+      <line x1="622" y1="165" x2="450" y2="195" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrow7)"/>
+
+      <!-- 输出 -->
+      <rect x="220" y="262" width="280" height="44" rx="10" fill="#059669"/>
+      <text x="360" y="289" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">✅ "你最爱巧克力熔岩蛋糕！🍰"</text>
+      <line x1="360" y1="239" x2="360" y2="262" stroke="#059669" stroke-width="2" marker-end="url(#arrow7)"/>
+    </svg>
+  </div>
+
+  <h3>记忆的层级递进</h3>
+
+  <!-- SVG: 层级递进 -->
+  <div class="svg-container">
+    <p>📐 四类记忆的递进关系</p>
+    <svg viewBox="0 0 720 160" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="arrow8" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 Z" fill="#0052d9"/></marker></defs>
+      <rect x="10" y="30" width="155" height="90" rx="10" fill="#0052d9" opacity="0.85"/>
+      <text x="87" y="60" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">工作记忆</text>
+      <text x="87" y="82" text-anchor="middle" fill="#d4e3fc" font-size="10">当下能想什么</text>
+      <text x="87" y="100" text-anchor="middle" fill="#d4e3fc" font-size="10">（上下文窗口）</text>
+      <line x1="165" y1="75" x2="195" y2="75" stroke="#0052d9" stroke-width="2" marker-end="url(#arrow8)"/>
+      <rect x="200" y="30" width="155" height="90" rx="10" fill="#3b82f6" opacity="0.75"/>
+      <text x="277" y="60" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">情景记忆</text>
+      <text x="277" y="82" text-anchor="middle" fill="#dbeafe" font-size="10">过去能否被回溯</text>
+      <text x="277" y="100" text-anchor="middle" fill="#dbeafe" font-size="10">（历史经验）</text>
+      <line x1="355" y1="75" x2="385" y2="75" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow8)"/>
+      <rect x="390" y="30" width="155" height="90" rx="10" fill="#059669" opacity="0.7"/>
+      <text x="467" y="60" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">语义记忆</text>
+      <text x="467" y="82" text-anchor="middle" fill="#d1fae5" font-size="10">经验能否压缩成知识</text>
+      <text x="467" y="100" text-anchor="middle" fill="#d1fae5" font-size="10">（事实库）</text>
+      <line x1="545" y1="75" x2="575" y2="75" stroke="#059669" stroke-width="2" marker-end="url(#arrow8)"/>
+      <rect x="580" y="30" width="130" height="90" rx="10" fill="#f59e0b" opacity="0.85"/>
+      <text x="645" y="60" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">程序记忆</text>
+      <text x="645" y="82" text-anchor="middle" fill="#fef3c7" font-size="10">知识能否变成能力</text>
+      <text x="645" y="100" text-anchor="middle" fill="#fef3c7" font-size="10">（行为模式）</text>
+    </svg>
+  </div>
+
+  <p>这四层是递进的：没有工作记忆，其他记忆无法被AI"看到"；没有情景记忆，AI无法从过往中学习；没有语义记忆，每次都要翻遍原始经历效率太低；没有程序记忆，有知识也不会用。</p>
+</div>
+
+<!-- 第三部分 -->
+<div class="part-title">第三部分：全局记忆的争夺战</div>
+
+<div class="card">
+  <h2>一、什么是"全局记忆"？</h2>
+
+  <p><strong>一句话</strong>：全局记忆 = 跨所有会话、所有场景的持久化记忆能力，是AI从"工具"到"数字分身"的关键。</p>
+
+  <p>前面讲的四类记忆模型是"微观"设计，而"全局记忆"是"宏观"概念——它要求AI具备：</p>
+  <table>
+    <tr><th>能力</th><th>含义</th></tr>
+    <tr><td>跨会话持久化</td><td>不是"这次记住"，而是"永远记住"</td></tr>
+    <tr><td>跨场景一致性</td><td>在不同应用中保持对同一个用户的认知</td></tr>
+    <tr><td>持续学习成长</td><td>相处越久越懂你</td></tr>
+  </table>
+
+  <blockquote>💡 <strong>关键认知</strong>：全局记忆解决的不仅是"记住"的问题，更是"成为谁"的问题——有了全局记忆，AI才可能从通用工具变成你的专属数字分身。</blockquote>
+</div>
+
+<div class="card">
+  <h2>二、"数字海马体"比喻</h2>
+
+  <p>人类大脑中，<strong>海马体</strong>负责信息的编码、索引和内化——从感官输入到短期加工再到长期存储的完整过程。</p>
+
+  <!-- SVG: 数字海马体 -->
+  <div class="svg-container">
+    <p>📐 AI的"数字海马体"仿生架构</p>
+    <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="arrow9" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 Z" fill="#0052d9"/></marker></defs>
+      <!-- 输入 -->
+      <rect x="10" y="65" width="110" height="60" rx="10" fill="#001a45"/>
+      <text x="65" y="92" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">感官输入</text>
+      <text x="65" y="112" text-anchor="middle" fill="#a8cfff" font-size="10">对话/文档/事件</text>
+      <line x1="120" y1="95" x2="155" y2="95" stroke="#0052d9" stroke-width="2" marker-end="url(#arrow9)"/>
+      <!-- 数字海马体 -->
+      <rect x="160" y="45" width="160" height="100" rx="14" fill="#0052d9"/>
+      <text x="240" y="72" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">🧠 数字海马体</text>
+      <text x="240" y="95" text-anchor="middle" fill="#d4e3fc" font-size="11">信息感知</text>
+      <text x="240" y="113" text-anchor="middle" fill="#d4e3fc" font-size="11">提炼·加工·编码</text>
+      <text x="240" y="131" text-anchor="middle" fill="#d4e3fc" font-size="11">记忆索引</text>
+      <line x1="320" y1="75" x2="365" y2="55" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arrow9)"/>
+      <line x1="320" y1="95" x2="365" y2="95" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arrow9)"/>
+      <line x1="320" y1="115" x2="365" y2="145" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arrow9)"/>
+      <!-- 数字皮层 -->
+      <rect x="370" y="25" width="160" height="55" rx="10" fill="#003cab" opacity="0.85"/>
+      <text x="450" y="48" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">💾 数字皮层</text>
+      <text x="450" y="68" text-anchor="middle" fill="#d4e3fc" font-size="10">长期存储（向量DB/图谱）</text>
+      <!-- 数字杏仁核 -->
+      <rect x="370" y="90" width="160" height="55" rx="10" fill="#f59e0b" opacity="0.85"/>
+      <text x="450" y="113" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">❤️ 数字杏仁核</text>
+      <text x="450" y="133" text-anchor="middle" fill="#fef3c7" font-size="10">情感标记+优先级</text>
+      <!-- 记忆巩固 -->
+      <rect x="370" y="155" width="160" height="35" rx="8" fill="#edf4ff" stroke="#d4e3fc"/>
+      <text x="450" y="178" text-anchor="middle" font-size="11" fill="#003cab">记忆巩固·智能遗忘</text>
+      <line x1="320" y1="130" x2="365" y2="168" stroke="#0052d9" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow9)"/>
+      <!-- 输出 -->
+      <line x1="530" y1="55" x2="570" y2="75" stroke="#059669" stroke-width="1.5" marker-end="url(#arrow9)"/>
+      <line x1="530" y1="115" x2="570" y2="95" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrow9)"/>
+      <rect x="575" y="55" width="130" height="60" rx="10" fill="#059669" opacity="0.85"/>
+      <text x="640" y="80" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">✅ 持续认知</text>
+      <text x="640" y="100" text-anchor="middle" fill="#d1fae5" font-size="10">从即时响应→持续学习</text>
+    </svg>
+  </div>
+</div>
+
+<div class="card">
+  <h2>三、硅谷的争夺战：谁在做全局记忆？</h2>
+
+  <h3>大厂布局</h3>
+  <table>
+    <tr><th>公司</th><th>产品/方案</th><th>核心特点</th></tr>
+    <tr><td>Anthropic</td><td>Claude记忆功能</td><td>搜索过去对话，在新聊天中引用</td></tr>
+    <tr><td>Google</td><td>Gemini记忆</td><td>跨越多次对话，提炼偏好</td></tr>
+    <tr><td>OpenAI</td><td>ChatGPT Memory</td><td>用户偏好自动记忆，跨会话保持</td></tr>
+  </table>
+
+  <h3>创业公司突围</h3>
+  <table>
+    <tr><th>公司</th><th>方案</th><th>核心创新</th></tr>
+    <tr><td>Mem0</td><td>独立记忆层</td><td>GitHub 41000星；AWS选定为其Agent SDK的记忆提供商</td></tr>
+    <tr><td>Engramme</td><td>大记忆模型(LMM)</td><td>哈佛团队，脱离Transformer范式，PB级终身存储</td></tr>
+    <tr><td>MemVerse</td><td>通用多模态记忆</td><td>上海AILab，双通路+蒸馏，Token消耗减90%</td></tr>
+    <tr><td>红熊AI</td><td>"记忆熊"</td><td>复刻海马体-皮层协作，五大记忆模块</td></tr>
+    <tr><td>Pika</td><td>AI Selves</td><td>数字分身，记忆+个性+成长</td></tr>
+  </table>
+
+  <!-- SVG: 三条技术路线 -->
+  <div class="svg-container">
+    <p>📐 三条技术路线对比</p>
+    <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg">
+      <!-- 路线一 -->
+      <rect x="10" y="15" width="220" height="170" rx="12" fill="#edf4ff" stroke="#d4e3fc" stroke-width="1.5"/>
+      <text x="120" y="40" text-anchor="middle" font-size="13" fill="#003cab" font-weight="700">路线一：外挂记忆层</text>
+      <text x="120" y="60" text-anchor="middle" font-size="11" fill="#4b4b4b">Mem0 / Letta 等</text>
+      <rect x="30" y="72" width="180" height="40" rx="8" fill="#0052d9" opacity="0.8"/>
+      <text x="120" y="98" text-anchor="middle" fill="#fff" font-size="12">LLM（不变）</text>
+      <rect x="30" y="120" width="180" height="40" rx="8" fill="#059669" opacity="0.6"/>
+      <text x="120" y="146" text-anchor="middle" fill="#fff" font-size="12">记忆层（独立外挂）</text>
+      <text x="120" y="180" text-anchor="middle" font-size="11" fill="#059669" font-weight="600">✅ 简单集成</text>
+
+      <!-- 路线二 -->
+      <rect x="250" y="15" width="220" height="170" rx="12" fill="#fff8f0" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="360" y="40" text-anchor="middle" font-size="13" fill="#92400e" font-weight="700">路线二：架构级革新</text>
+      <text x="360" y="60" text-anchor="middle" font-size="11" fill="#4b4b4b">DeepSeek Engram 等</text>
+      <rect x="270" y="72" width="180" height="88" rx="8" fill="#f59e0b" opacity="0.8"/>
+      <text x="360" y="100" text-anchor="middle" fill="#fff" font-size="12">LLM + Engram模块</text>
+      <text x="360" y="120" text-anchor="middle" fill="#fef3c7" font-size="11">查-算分离</text>
+      <text x="360" y="140" text-anchor="middle" fill="#fef3c7" font-size="11">常数时间查找</text>
+      <text x="360" y="180" text-anchor="middle" font-size="11" fill="#f59e0b" font-weight="600">⚡ 架构重构</text>
+
+      <!-- 路线三 -->
+      <rect x="490" y="15" width="220" height="170" rx="12" fill="#f0fdf4" stroke="#059669" stroke-width="1.5"/>
+      <text x="600" y="40" text-anchor="middle" font-size="13" fill="#065f46" font-weight="700">路线三：参数化内化</text>
+      <text x="600" y="60" text-anchor="middle" font-size="11" fill="#4b4b4b">模型微调</text>
+      <rect x="510" y="72" width="180" height="88" rx="8" fill="#059669" opacity="0.8"/>
+      <text x="600" y="100" text-anchor="middle" fill="#fff" font-size="12">LLM（微调后）</text>
+      <text x="600" y="120" text-anchor="middle" fill="#d1fae5" font-size="11">知识内化到权重</text>
+      <text x="600" y="140" text-anchor="middle" fill="#d1fae5" font-size="11">终极"肌肉记忆"</text>
+      <text x="600" y="180" text-anchor="middle" font-size="11" fill="#dc2626" font-weight="600">🔥 最彻底但最难</text>
+    </svg>
+  </div>
+
+  <blockquote>💡 <strong>关键认知</strong>：记忆正在从"各团队定制的工程问题"演变为"AI技术栈的标准基础设施"。就像数据库之于Web开发，记忆层将成为AI Agent开发的标准组件。</blockquote>
+</div>
+
+<div class="card">
+  <h2>四、记忆系统也会失效</h2>
+
+  <table>
+    <tr><th>记忆类型</th><th>典型失效</th><th>解决方案</th></tr>
+    <tr><td>工作记忆</td><td>上下文窗口填满，跟丢早期指令</td><td>智能上下文修剪、摘要压缩</td></tr>
+    <tr><td>情景记忆</td><td>检索到不相关的旧情景、时间混淆</td><td>时间戳标记、向量检索优化</td></tr>
+    <tr><td>语义记忆</td><td>事实过时、条目相互矛盾</td><td>版本控制、冲突解决机制</td></tr>
+    <tr><td>程序记忆</td><td>行为规则变化但指令没更新</td><td>定期更新、自适应调整</td></tr>
+  </table>
+
+  <p>还有三个根本性挑战：</p>
+  <p><strong>1. 覆盖率 vs 准确率</strong>：全量上下文准确率72.9%但延迟17秒；需要找到信息选择的最优策略。</p>
+  <p><strong>2. 记忆治理</strong>：未经验证的知识会导致"自信的错误答案"。</p>
+  <p><strong>3. 时间衰减</strong>：旧记忆应逐渐淡出，矛盾记忆需要清理——就像人脑的"遗忘"机制。</p>
+
+  <blockquote>💡 <strong>关键认知</strong>：智能遗忘和智能记忆同样重要。什么都记住 = 什么都记不住。好的记忆系统必须有衰减机制和冲突解决机制。</blockquote>
+</div>
+
+<div class="card">
+  <h2>五、前沿方向：让记忆"内化"</h2>
+
+  <p>目前大多数方案是"外挂记忆层"——LLM本身不变，外部挂一个数据库。但更远大的目标是让记忆<strong>内化到模型权重</strong>中，就像人类的肌肉记忆。</p>
+
+  <h3>Retro-Former：反思式学习</h3>
+  <p>不直接微调大模型，而是训练一个较小的"反思模型"。反思模型分析过去的成功和失败，生成语言反馈，把反馈注入大模型的prompt，指导后续行为——相当于给大模型配了一个"学习教练"。</p>
+
+  <h3>Voyager：终身学习智能体</h3>
+  <p>第一个具备终身学习能力的LLM驱动智能体（在Minecraft中验证）。三大模块：<strong>自动课程</strong>（按难度递进生成任务）、<strong>技能库</strong>（可复用的程序记忆）、<strong>迭代提示</strong>（根据反馈优化）。结果：获取3.3倍更多物品、行进2.3倍更远、解锁技能树速度提升15.3倍。</p>
+
+  <p>这些方向的共同目标：<strong>从"每次从零开始"走向"越用越聪明"</strong>。</p>
+</div>
+
+<!-- 名词速查 -->
+<div class="card glossary">
+  <h2>附录：专有名词速查（22个）</h2>
+  <table>
+    <tr><th>名词</th><th>全称</th><th>一句话白话</th></tr>
+    <tr><td>LLM</td><td>Large Language Model</td><td>大语言模型，就是ChatGPT/Claude这类AI</td></tr>
+    <tr><td>Agent</td><td>AI Agent</td><td>能自主感知、决策、执行的AI智能体</td></tr>
+    <tr><td>Context Window</td><td>—</td><td>上下文窗口，模型一次能"看到"的文字量</td></tr>
+    <tr><td>Working Memory</td><td>—</td><td>工作记忆，AI当前对话中能记住的内容</td></tr>
+    <tr><td>Episodic Memory</td><td>—</td><td>情景记忆，AI的历史经历和经验</td></tr>
+    <tr><td>Semantic Memory</td><td>—</td><td>语义记忆，AI的事实知识库</td></tr>
+    <tr><td>Procedural Memory</td><td>—</td><td>程序记忆，AI的行为模式和技能</td></tr>
+    <tr><td>RAG</td><td>Retrieval-Augmented Generation</td><td>检索增强生成，先搜再答</td></tr>
+    <tr><td>Few-shot</td><td>Few-shot Prompting</td><td>给AI几个例子让它照着做</td></tr>
+    <tr><td>Vector DB</td><td>Vector Database</td><td>向量数据库，按语义相似度存取数据</td></tr>
+    <tr><td>Embedding</td><td>—</td><td>把文字变成数字向量，方便计算相似度</td></tr>
+    <tr><td>Global Memory</td><td>—</td><td>全局记忆，跨所有会话的持久化记忆能力</td></tr>
+    <tr><td>Digital Hippocampus</td><td>—</td><td>数字海马体，AI记忆系统的编码中枢</td></tr>
+    <tr><td>Mem0</td><td>—</td><td>最流行的AI外挂记忆层方案</td></tr>
+    <tr><td>Letta/MemGPT</td><td>—</td><td>让Agent自己管理记忆的方案</td></tr>
+    <tr><td>Engramme</td><td>—</td><td>哈佛团队的"大记忆模型"，脱离Transformer范式</td></tr>
+    <tr><td>MemVerse</td><td>—</td><td>上海AILab的通用多模态记忆框架</td></tr>
+    <tr><td>Retro-Former</td><td>Retrospective Transformer</td><td>反思式学习：用小模型指导大模型改进</td></tr>
+    <tr><td>Voyager</td><td>—</td><td>第一个终身学习LLM智能体（Minecraft中验证）</td></tr>
+    <tr><td>CoALA</td><td>Cognitive Architectures for Language Agents</td><td>语言Agent的认知架构理论框架</td></tr>
+    <tr><td>SFT</td><td>Supervised Fine-Tuning</td><td>监督微调，用标注数据训练模型</td></tr>
+    <tr><td>Token</td><td>—</td><td>文本的最小单位，约等于0.75个汉字</td></tr>
+  </table>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  生成日期：2026-05-21 | Agent记忆机制学习笔记
+</div>
+
+</div>
+</body>
+</html>
