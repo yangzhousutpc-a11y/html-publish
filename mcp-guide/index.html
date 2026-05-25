@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MCP 终极指南（基础篇+进阶篇+番外篇）</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;background:#f3f4f6;color:#242424;line-height:1.8}
+a{color:#0052d9;text-decoration:none}a:hover{text-decoration:underline;color:#003cab}
+.header{background:linear-gradient(135deg,#001a45 0%,#0052d9 60%,#0077ff 100%);color:white;padding:52px 32px;text-align:center}
+.header h1{font-size:22px;font-weight:700;max-width:800px;margin:0 auto;letter-spacing:0.5px}
+.header .sub{font-size:13px;opacity:.85;margin-top:12px;max-width:700px;margin-left:auto;margin-right:auto}
+.stats{display:flex;justify-content:center;gap:28px;margin-top:18px;flex-wrap:wrap}
+.stats .s{font-size:12px;opacity:.8}.stats .s strong{font-size:18px;color:#66b1ff;display:block}
+.container{max-width:1000px;margin:0 auto;padding:24px}
+.content{background:white;border-radius:10px;padding:32px 36px;margin-top:20px;border:1px solid #e5e6eb;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
+.content h1{font-size:22px;color:#0052d9;margin:36px 0 16px;padding-bottom:10px;border-bottom:2px solid #0052d9;font-weight:700}
+.content h1:first-child{margin-top:0}
+.content h2{font-size:18px;color:#242424;margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid #e5e6eb;font-weight:600}
+.content h3{font-size:15px;color:#0052d9;margin:20px 0 8px;font-weight:600}
+.content p{font-size:14px;color:#4b4b4b;margin:8px 0}
+.content ul,.content ol{padding-left:22px;margin:8px 0}
+.content li{font-size:14px;color:#4b4b4b;margin:4px 0}
+.content strong{color:#242424}
+.content em{color:#0052d9;font-style:normal}
+.content blockquote{background:#edf4ff;border-left:4px solid #0052d9;padding:12px 18px;margin:12px 0;border-radius:0 8px 8px 0;font-size:14px;color:#003cab}
+.content blockquote p{color:#003cab;margin:4px 0}
+.content hr{border:none;border-top:1px solid #e5e6eb;margin:28px 0}
+.content table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+.content th{background:#edf4ff;text-align:left;padding:10px 14px;font-weight:600;color:#0052d9;border-bottom:1px solid #d4e3fc}
+.content td{padding:10px 14px;border-bottom:1px solid #f0f1f2;color:#4b4b4b}
+.content tr:hover td{background:#f5f9ff}
+.content pre{background:#0d1b2a;border-radius:8px;padding:14px 18px;margin:10px 0;font-family:"SF Mono",Consolas,monospace;font-size:12.5px;line-height:1.6;overflow-x:auto;color:#c9d1d9}
+.content code{font-family:"SF Mono",Consolas,monospace;font-size:12.5px;background:#edf4ff;padding:2px 6px;border-radius:4px;color:#0052d9}
+.content pre code{background:none;padding:0;color:#c9d1d9}
+.footer{text-align:center;padding:30px 0;color:#8f959e;font-size:12px}</style>
+</head>
+<body>
+<div class="header">
+<h1>MCP 终极指南（基础篇+进阶篇+番外篇）</h1>
+<div class="sub">UP主: 马克的技术工作坊 | 3集约98分钟 | <a href="https://www.bilibili.com/video/BV1uronYREWR/" target="_blank" style="color:#66b1ff">基础篇</a> · <a href="https://www.bilibili.com/video/BV1Y854zmEg9/" target="_blank" style="color:#66b1ff">进阶篇</a> · <a href="https://www.bilibili.com/video/BV1v9V5zSEHA/" target="_blank" style="color:#66b1ff">番外篇</a></div>
+<div class="stats">
+<div class="s"><strong>98</strong>分钟</div>
+<div class="s"><strong>3</strong>集视频</div>
+<div class="s"><strong>15</strong>专有名词</div>
+<div class="s"><strong>3</strong>部分递进</div>
+</div>
+</div>
+<div class="container">
+<div class="content">
+<div style="margin:0 0 24px;padding:20px 24px;background:linear-gradient(135deg,#edf4ff 0%,#f0f7ff 50%,#f5f9ff 100%);border-radius:10px;border:1px solid #d4e3fc">
+<h2 id="_1">📖 内容综述</h2>
+<p>MCP（Model Context Protocol）被称为"AI世界的USB-C接口"——它解决了一个实际痛点：每个AI平台调用工具的方式都不一样，开发者要为每个平台重复造轮子。MCP用一套标准协议统一了工具的注册和调用，<strong>写一次Server，到处可用</strong>。</p>
+<p>这份笔记整合了三部曲的全部内容：<strong>基础篇</strong>教你"MCP是什么、怎么用"——从安装Cline到配置Server到使用第三方工具；<strong>进阶篇</strong>教你"MCP怎么建、底层怎么通信"——用FastMCP写自己的Server、用JSON-RPC 2.0理解底层协议；<strong>番外篇</strong>揭秘"大模型和Host到底怎么交互"——通过抓包发现Cline的4.8万字System Prompt、XML格式工具调用、以及MCP和Function Calling的真正关系。</p>
+<p>三部曲的递进逻辑：<strong>会用 → 会建 → 理解本质</strong>。</p>
+
+</div>
+
+<hr />
+<h1 id="mcp_1">第一部分：基础篇——MCP是什么、怎么用</h1>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 MCP的USB-C比喻: 从碎片化到统一标准</p>
+<svg viewBox="0 0 700 90" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <rect x="20" y="8" width="280" height="50" rx="8" fill="#dc2626"/><text x="160" y="26" text-anchor="middle" font-size="9" fill="white" font-weight="700">MCP之前: 充电器碎片化</text><text x="160" y="42" text-anchor="middle" font-size="7" fill="#fca5a5">ChatGPT一套 · Claude一套 · Gemini一套</text><text x="160" y="52" text-anchor="middle" font-size="6" fill="#fca5a5">每换一个平台就重写工具代码</text>
+  <text x="340" y="35" font-size="16" fill="#059669" font-weight="900">→</text>
+  <rect x="380" y="8" width="300" height="50" rx="8" fill="#059669"/><text x="530" y="26" text-anchor="middle" font-size="9" fill="white" font-weight="700">MCP之后: USB-C统一</text><text x="530" y="42" text-anchor="middle" font-size="7" fill="#a7f3d0">写一次MCP Server → 所有平台都能用</text><text x="530" y="52" text-anchor="middle" font-size="6" fill="#a7f3d0">"一次开发，到处可用"</text>
+  <text x="350" y="78" text-anchor="middle" font-size="7" fill="#0052d9" font-weight="600">MCP的价值不在于Tool本身，而在于统一标准 · 降低整个生态的接入成本</text>
+</svg></div>
+<h2 id="mcp_2">一、MCP简要介绍</h2>
+<p><strong>一句话</strong>：MCP是Anthropic推出的标准化协议，让大模型能通过统一接口使用各种外部工具。</p>
+<h3 id="usb-c">USB-C比喻</h3>
+<pre class="codehilite"><code>MCP之前 = 充电器碎片化时代
+├─ ChatGPT用一套工具格式
+├─ Claude用另一套
+└─ Gemini又不一样
+→ 开发者为每个平台写不同的集成代码
+
+MCP之后 = USB-C统一时代
+└─ 所有平台用同一个MCP协议
+→ 写一次Server，到处可用
+</code></pre>
+
+<h3 id="_2">三个核心角色</h3>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>是什么</th>
+<th>类比</th>
+<th>例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MCP Host</strong></td>
+<td>支持MCP的AI应用</td>
+<td>手机</td>
+<td>Claude Desktop、Cursor、Cline</td>
+</tr>
+<tr>
+<td><strong>MCP Server</strong></td>
+<td>提供工具的程序（通常本地运行）</td>
+<td>充电器</td>
+<td>天气服务、数据库服务</td>
+</tr>
+<tr>
+<td><strong>Tool</strong></td>
+<td>Server内部的具体功能</td>
+<td>充电线</td>
+<td>get_forecast、get_alerts</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：MCP Server不是"远程服务器"——它通常就是一个本地运行的Python/Node脚本。叫"Server"只是因为它在MCP协议中扮演"提供服务"的角色。</p>
+</blockquote>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 MCP三层架构: Host→Server→Tool</p>
+<svg viewBox="0 0 680 90" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:680px;font-family:-apple-system,sans-serif">
+  <defs><marker id="mc1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="15" width="160" height="50" rx="10" fill="#0052d9"/><text x="90" y="36" text-anchor="middle" font-size="12" fill="white" font-weight="700">MCP Host</text><text x="90" y="52" text-anchor="middle" font-size="8" fill="#66b1ff">Claude/Cursor/Cline</text>
+  <line x1="170" y1="40" x2="200" y2="40" stroke="#0052d9" stroke-width="2" marker-end="url(#mc1)"/><text x="185" y="34" text-anchor="middle" font-size="7" fill="#0052d9">MCP协议</text>
+  <rect x="205" y="15" width="170" height="50" rx="10" fill="#1a6fe8"/><text x="290" y="36" text-anchor="middle" font-size="12" fill="white" font-weight="700">MCP Server</text><text x="290" y="52" text-anchor="middle" font-size="8" fill="#a3d0ff">天气/数据库/GitHub</text>
+  <line x1="375" y1="40" x2="405" y2="40" stroke="#0052d9" stroke-width="2" marker-end="url(#mc1)"/><text x="390" y="34" text-anchor="middle" font-size="7" fill="#0052d9">包含</text>
+  <rect x="410" y="8" width="120" height="28" rx="5" fill="#4d94ff"/><text x="470" y="26" text-anchor="middle" font-size="9" fill="white" font-weight="600">Tool: get_weather</text>
+  <rect x="410" y="40" width="120" height="28" rx="5" fill="#4d94ff"/><text x="470" y="58" text-anchor="middle" font-size="9" fill="white" font-weight="600">Tool: get_alerts</text>
+  <rect x="545" y="15" width="125" height="50" rx="8" fill="#f0f7ff" stroke="#d4e3fc"/><text x="608" y="36" text-anchor="middle" font-size="8" fill="#0052d9" font-weight="600">USB-C比喻</text><text x="608" y="52" text-anchor="middle" font-size="7" fill="#4b4b4b">一条线到处用</text>
+</svg></div>
+<h2 id="mcp-server">二、配置MCP Server</h2>
+<h3 id="json">JSON配置文件格式</h3>
+<pre class="codehilite"><code class="language-json">{
+  &quot;mcpServers&quot;: {
+    &quot;weather&quot;: {
+      &quot;disabled&quot;: false,
+      &quot;timeout&quot;: 60,
+      &quot;command&quot;: &quot;python&quot;,
+      &quot;args&quot;: [&quot;weather.py&quot;],
+      &quot;transportType&quot;: &quot;stdio&quot;
+    }
+  }
+}
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>command</code></td>
+<td>启动程序（python/uvx/node/cmd）</td>
+</tr>
+<tr>
+<td><code>args</code></td>
+<td>启动参数（脚本路径）</td>
+</tr>
+<tr>
+<td><code>transportType</code></td>
+<td>传输方式，通常为stdio</td>
+</tr>
+<tr>
+<td><code>timeout</code></td>
+<td>超时时间（秒）</td>
+</tr>
+</tbody>
+</table>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 MCP完整交互时序</p>
+<svg viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <defs><marker id="mc2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="20" width="90" height="35" rx="6" fill="#edf4ff" stroke="#0052d9"/><text x="55" y="42" text-anchor="middle" font-size="9" fill="#003cab" font-weight="600">用户提问</text>
+  <line x1="100" y1="37" x2="120" y2="37" stroke="#0052d9" stroke-width="1.5" marker-end="url(#mc2)"/>
+  <rect x="125" y="15" width="110" height="45" rx="8" fill="#0052d9"/><text x="180" y="34" text-anchor="middle" font-size="10" fill="white" font-weight="700">Host</text><text x="180" y="50" text-anchor="middle" font-size="7" fill="#66b1ff">注入工具描述</text>
+  <line x1="235" y1="37" x2="255" y2="37" stroke="#0052d9" stroke-width="1.5" marker-end="url(#mc2)"/>
+  <rect x="260" y="15" width="100" height="45" rx="8" fill="#1a6fe8"/><text x="310" y="34" text-anchor="middle" font-size="10" fill="white" font-weight="700">LLM</text><text x="310" y="50" text-anchor="middle" font-size="7" fill="#a3d0ff">决策选工具</text>
+  <line x1="360" y1="37" x2="380" y2="37" stroke="#0052d9" stroke-width="1.5" marker-end="url(#mc2)"/>
+  <rect x="385" y="15" width="110" height="45" rx="8" fill="#3380e6"/><text x="440" y="34" text-anchor="middle" font-size="10" fill="white" font-weight="700">Server</text><text x="440" y="50" text-anchor="middle" font-size="7" fill="#a3d0ff">执行Tool</text>
+  <line x1="495" y1="37" x2="515" y2="37" stroke="#0052d9" stroke-width="1.5" marker-end="url(#mc2)"/>
+  <rect x="520" y="15" width="95" height="45" rx="8" fill="#059669"/><text x="568" y="34" text-anchor="middle" font-size="10" fill="white" font-weight="700">结果</text><text x="568" y="50" text-anchor="middle" font-size="7" fill="#a7f3d0">→返回用户</text>
+  <text x="350" y="82" text-anchor="middle" font-size="8" fill="#4b4b4b">工具描述以文本形式注入System Prompt · 不是Function Calling · 是纯文本匹配</text>
+</svg></div>
+<h2 id="mcp_3">三、MCP交互流程</h2>
+<p><strong>阶段一：初始化握手</strong></p>
+<pre class="codehilite"><code>① Cline读取JSON配置，启动MCP Server进程
+② 握手：Cline说&quot;你好&quot;，Server回&quot;我是weather&quot;
+③ 工具发现：Cline问&quot;你有什么工具？&quot;
+④ Server返回工具列表（名称+描述+参数格式）
+</code></pre>
+
+<p><strong>阶段二：工具调用</strong></p>
+<pre class="codehilite"><code>① 用户：&quot;明天纽约天气怎样？&quot;
+② Cline把问题+可用工具列表发给大模型
+③ 大模型判断需要调用get_forecast
+④ Cline向MCP Server发调用请求
+⑤ Server执行函数，调用真实天气API
+⑥ 结果返回给Cline → 转发给大模型
+⑦ 大模型总结数据，生成自然语言回答
+</code></pre>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 两种安装MCP Server的方式</p>
+<svg viewBox="0 0 650 68" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;font-family:-apple-system,sans-serif">
+  <rect x="20" y="8" width="280" height="38" rx="8" fill="#0052d9"/><text x="160" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">uvx (Python生态)</text><text x="160" y="38" text-anchor="middle" font-size="7" fill="#66b1ff">"command":"uvx","args":["mcp-server-xxx"]</text>
+  <rect x="320" y="8" width="310" height="38" rx="8" fill="#1a6fe8"/><text x="475" y="24" text-anchor="middle" font-size="9" fill="white" font-weight="700">npx (Node.js生态)</text><text x="475" y="38" text-anchor="middle" font-size="7" fill="#a3d0ff">"command":"npx","args":["@xxx/mcp-server"]</text>
+  <text x="325" y="62" text-anchor="middle" font-size="7" fill="#4b4b4b">配置写在JSON文件中(claude_desktop_config.json) · 两种方式配置格式相同，只是command不同</text>
+</svg></div>
+<h2 id="server">四、使用第三方Server</h2>
+<h3 id="uvxpython">uvx方式（Python生态）</h3>
+<pre class="codehilite"><code class="language-json">&quot;fetch&quot;: {
+  &quot;command&quot;: &quot;uvx&quot;,
+  &quot;args&quot;: [&quot;mcp-server-fetch&quot;]
+}
+</code></pre>
+
+<p>UV自动处理依赖安装，一行配置就能用。</p>
+<h3 id="npxnode">npx方式（Node生态）</h3>
+<pre class="codehilite"><code class="language-json">&quot;hotnews&quot;: {
+  &quot;command&quot;: &quot;cmd&quot;,
+  &quot;args&quot;: [&quot;/c&quot;, &quot;npx&quot;, &quot;-y&quot;, &quot;@wopal/mcp-server-hotnews&quot;]
+}
+</code></pre>
+
+<p>NPX下载并直接运行Node程序。</p>
+<hr />
+<h1 id="server_1">第二部分：进阶篇——自己写Server、理解协议</h1>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 用FastMCP写Server: 只需3步</p>
+<svg viewBox="0 0 650 70" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;font-family:-apple-system,sans-serif">
+  <defs><marker id="mc3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="10" width="180" height="38" rx="8" fill="#0052d9"/><text x="100" y="26" text-anchor="middle" font-size="9" fill="white" font-weight="700">Step1: pip install fastmcp</text><text x="100" y="40" text-anchor="middle" font-size="7" fill="#66b1ff">安装框架</text>
+  <line x1="190" y1="29" x2="210" y2="29" stroke="#0052d9" stroke-width="2" marker-end="url(#mc3)"/>
+  <rect x="215" y="10" width="200" height="38" rx="8" fill="#1a6fe8"/><text x="315" y="26" text-anchor="middle" font-size="9" fill="white" font-weight="700">Step2: @mcp.tool()装饰器</text><text x="315" y="40" text-anchor="middle" font-size="7" fill="#a3d0ff">写函数+加装饰器=工具</text>
+  <line x1="415" y1="29" x2="435" y2="29" stroke="#0052d9" stroke-width="2" marker-end="url(#mc3)"/>
+  <rect x="440" y="10" width="195" height="38" rx="8" fill="#059669"/><text x="538" y="26" text-anchor="middle" font-size="9" fill="white" font-weight="700">Step3: mcp.run(stdio)</text><text x="538" y="40" text-anchor="middle" font-size="7" fill="#a7f3d0">通过stdio与Host通信</text>
+  <text x="325" y="65" text-anchor="middle" font-size="7" fill="#4b4b4b">写一个MCP Server只需20行Python · 核心是@mcp.tool()装饰器自动生成工具描述</text>
+</svg></div>
+<h2 id="fastmcpmcp-server">五、用FastMCP写MCP Server</h2>
+<h3 id="_3">最小示例</h3>
+<pre class="codehilite"><code class="language-python">from mcp.server.fastmcp import FastMCP
+import httpx
+
+mcp = FastMCP(&quot;weather&quot;, log_level=&quot;ERROR&quot;)
+
+@mcp.tool()
+async def get_forecast(latitude: float, longitude: float) -&gt; str:
+    &quot;&quot;&quot;根据经纬度获取天气预报&quot;&quot;&quot;
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(f&quot;https://api.weather.gov/points/{latitude},{longitude}&quot;)
+        return resp.text
+
+if __name__ == &quot;__main__&quot;:
+    mcp.run(transport='stdio')
+</code></pre>
+
+<h3 id="fastmcp">FastMCP三大装饰器</h3>
+<table>
+<thead>
+<tr>
+<th>装饰器</th>
+<th>用途</th>
+<th>例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@mcp.tool()</code></td>
+<td>注册可调用工具</td>
+<td>天气查询、文件操作</td>
+</tr>
+<tr>
+<td><code>@mcp.resource()</code></td>
+<td>定义数据资源</td>
+<td>配置文件、用户档案</td>
+</tr>
+<tr>
+<td><code>@mcp.prompt()</code></td>
+<td>构建提示模板</td>
+<td>多轮对话模板</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：<code>@mcp.tool()</code>的三个魔法——自动从函数签名提取参数类型、从docstring提取工具描述、自动注册到Server。<strong>docstring的质量直接决定模型调用的准确率</strong>。</p>
+</blockquote>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 MCP底层: JSON-RPC 2.0 三步握手</p>
+<svg viewBox="0 0 650 70" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:650px;font-family:-apple-system,sans-serif">
+  <defs><marker id="mc4" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#0052d9"/></marker></defs>
+  <rect x="10" y="10" width="180" height="38" rx="8" fill="#0052d9"/><text x="100" y="26" text-anchor="middle" font-size="9" fill="white" font-weight="700">1. initialize</text><text x="100" y="40" text-anchor="middle" font-size="7" fill="#66b1ff">Host→Server 协议版本握手</text>
+  <line x1="190" y1="29" x2="210" y2="29" stroke="#0052d9" stroke-width="2" marker-end="url(#mc4)"/>
+  <rect x="215" y="10" width="180" height="38" rx="8" fill="#1a6fe8"/><text x="305" y="26" text-anchor="middle" font-size="9" fill="white" font-weight="700">2. tools/list</text><text x="305" y="40" text-anchor="middle" font-size="7" fill="#a3d0ff">Host获取可用工具列表</text>
+  <line x1="395" y1="29" x2="415" y2="29" stroke="#0052d9" stroke-width="2" marker-end="url(#mc4)"/>
+  <rect x="420" y="10" width="210" height="38" rx="8" fill="#3380e6"/><text x="525" y="26" text-anchor="middle" font-size="9" fill="white" font-weight="700">3. tools/call</text><text x="525" y="40" text-anchor="middle" font-size="7" fill="#a3d0ff">Host调用具体工具 → 返回结果</text>
+  <text x="325" y="65" text-anchor="middle" font-size="7" fill="#4b4b4b">通信方式: stdio(标准输入输出) 用NDJSON格式 · 每行一个JSON对象</text>
+</svg></div>
+<h2 id="json-rpc-20">六、底层协议：JSON-RPC 2.0</h2>
+<p>MCP底层通信用的是JSON-RPC 2.0标准，通过stdio（标准输入输出）传输。</p>
+<h3 id="_4">三步通信流程</h3>
+<p><strong>Step 1：initialize（握手）</strong></p>
+<pre class="codehilite"><code class="language-json">→ {&quot;method&quot;:&quot;initialize&quot;,&quot;params&quot;:{&quot;clientInfo&quot;:{&quot;name&quot;:&quot;Cline&quot;}},&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;id&quot;:0}
+← {&quot;result&quot;:{&quot;serverInfo&quot;:{&quot;name&quot;:&quot;weather&quot;}},&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;id&quot;:0}
+</code></pre>
+
+<p><strong>Step 2：tools/list（工具发现）</strong></p>
+<pre class="codehilite"><code class="language-json">→ {&quot;method&quot;:&quot;tools/list&quot;,&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;id&quot;:1}
+← {&quot;result&quot;:{&quot;tools&quot;:[{&quot;name&quot;:&quot;get_forecast&quot;,&quot;description&quot;:&quot;获取天气预报&quot;,
+    &quot;inputSchema&quot;:{&quot;properties&quot;:{&quot;latitude&quot;:{&quot;type&quot;:&quot;number&quot;}}}}]},&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;id&quot;:1}
+</code></pre>
+
+<p><strong>Step 3：tools/call（工具调用）</strong></p>
+<pre class="codehilite"><code class="language-json">→ {&quot;method&quot;:&quot;tools/call&quot;,&quot;params&quot;:{&quot;name&quot;:&quot;get_forecast&quot;,
+    &quot;arguments&quot;:{&quot;latitude&quot;:40.71,&quot;longitude&quot;:-74.0}},&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;id&quot;:4}
+← {&quot;result&quot;:{&quot;content&quot;:[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;纽约天气：晴...&quot;}]},&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;id&quot;:4}
+</code></pre>
+
+<blockquote>
+<p>💡 <strong>关键认知</strong>：掌握JSON-RPC协议后，你可以绕过任何Host，直接在终端输入JSON指令与MCP Server通信。这证明了MCP协议的独立性和标准化。</p>
+</blockquote>
+<hr />
+<h1 id="_5">第三部分：番外篇——抓包揭秘</h1>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 抓包揭秘: 4万字System Prompt的真相</p>
+<svg viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <rect x="10" y="10" width="160" height="55" rx="8" fill="#0052d9"/><text x="90" y="32" text-anchor="middle" font-size="10" fill="white" font-weight="700">Cline Host</text><text x="90" y="50" text-anchor="middle" font-size="8" fill="#66b1ff">4万字System Prompt!</text>
+  <rect x="185" y="10" width="165" height="55" rx="8" fill="#1a6fe8"/><text x="268" y="32" text-anchor="middle" font-size="9" fill="white" font-weight="700">工具描述注入</text><text x="268" y="50" text-anchor="middle" font-size="7" fill="#a3d0ff">以纯文本塞入Prompt</text>
+  <rect x="365" y="10" width="155" height="55" rx="8" fill="#3380e6"/><text x="443" y="32" text-anchor="middle" font-size="9" fill="white" font-weight="700">模型返回XML</text><text x="443" y="50" text-anchor="middle" font-size="7" fill="#a3d0ff">不是Function Calling!</text>
+  <rect x="535" y="10" width="155" height="55" rx="8" fill="#dc2626"/><text x="613" y="32" text-anchor="middle" font-size="9" fill="white" font-weight="700">ReAct循环</text><text x="613" y="50" text-anchor="middle" font-size="7" fill="#fca5a5">HTTP层=多次请求</text>
+  <rect x="10" y="75" width="680" height="20" rx="4" fill="#f0f7ff" stroke="#d4e3fc"/><text x="350" y="89" text-anchor="middle" font-size="8" fill="#0052d9">MCP的本质: 工具描述以文本注入Prompt · 模型通过文本匹配选择工具 · 和Function Calling互补</text>
+</svg></div>
+<h2 id="cline">七、抓包分析Cline与大模型的交互</h2>
+<h3 id="_6">抓包方法</h3>
+<p>在Cline和模型API之间搭一个代理服务器（FastAPI），记录所有请求和响应到日志文件。</p>
+<h3 id="_7">三大发现</h3>
+<p><strong>发现一：4.8万字的System Prompt</strong></p>
+<p>Cline发给模型的系统提示词约4.8万字符，包含：
+- 所有内置工具的XML格式调用规范
+- 所有已加载MCP工具的描述和参数
+- 执行规则、错误处理、安全约束
+- 要求使用<code>&lt;thinking&gt;</code>标签思考、<code>&lt;attempt_completion&gt;</code>结束任务</p>
+<p><strong>发现二：XML格式工具调用（不是Function Calling！）</strong></p>
+<pre class="codehilite"><code class="language-xml">&lt;use_mcp_tool&gt;
+&lt;server_name&gt;weather&lt;/server_name&gt;
+&lt;tool_name&gt;get_forecast&lt;/tool_name&gt;
+&lt;arguments&gt;{&quot;latitude&quot;: 40.7, &quot;longitude&quot;: -74.0}&lt;/arguments&gt;
+&lt;/use_mcp_tool&gt;
+</code></pre>
+
+<p>Cline用Prompt Engineering（提示工程）而非原生Function Calling来实现工具调用。</p>
+<p><strong>发现三：Agent的ReAct循环在HTTP层面的体现</strong></p>
+<pre class="codehilite"><code>第1次POST请求：System Prompt + 用户问题
+  → 模型返回：&lt;thinking&gt;+&lt;use_mcp_tool&gt;
+第2次POST请求：完整历史 + Observation
+  → 模型返回：&lt;write_to_file&gt;
+第3次POST请求：更新的历史 + 新Observation
+  → 模型返回：&lt;attempt_completion&gt;（任务完成）
+</code></pre>
+
+<p>每一轮都是完整的新HTTP请求（包含完整历史），Token消耗随对话轮数线性增长。</p>
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 MCP vs Function Calling 对比</p>
+<svg viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;font-family:-apple-system,sans-serif">
+  <rect x="20" y="8" width="290" height="60" rx="8" fill="#0052d9"/><text x="165" y="28" text-anchor="middle" font-size="12" fill="white" font-weight="700">MCP</text><text x="165" y="44" text-anchor="middle" font-size="8" fill="#66b1ff">工具描述注入System Prompt</text><text x="165" y="58" text-anchor="middle" font-size="8" fill="#a3d0ff">通用标准 · 写一次到处用</text>
+  <text x="350" y="42" text-anchor="middle" font-size="16" fill="#f59e0b" font-weight="900">+</text>
+  <rect x="390" y="8" width="290" height="60" rx="8" fill="#1a6fe8"/><text x="535" y="28" text-anchor="middle" font-size="12" fill="white" font-weight="700">Function Calling</text><text x="535" y="44" text-anchor="middle" font-size="8" fill="#a3d0ff">模型原生API支持</text><text x="535" y="58" text-anchor="middle" font-size="8" fill="#a3d0ff">结构化输出 · 更精确</text>
+  <rect x="20" y="76" width="660" height="20" rx="4" fill="#f0f7ff" stroke="#d4e3fc"/><text x="350" y="90" text-anchor="middle" font-size="8" fill="#059669" font-weight="600">互补非替代: MCP负责"连接"(通用标准) · FC负责"调用"(结构化精确)</text>
+</svg></div>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：番外篇抓包揭示了一个重要发现——<strong>Cline的System Prompt有4万多字</strong>！其中大部分是MCP工具的描述文本。这意味着每一次LLM调用都要把所有工具描述发一遍，Token消耗巨大。这就是为什么工具描述要写得简洁——因为它会被反复注入到每次请求中。</p>
+</blockquote>
+<h2 id="mcp-vs-function-calling">八、MCP vs Function Calling：互补非替代</h2>
+<pre class="codehilite"><code>┌──────────────────────────────┐
+│  大模型 (Claude/GPT/DeepSeek)  │
+└──────────────┬───────────────┘
+               ↓ Host自己决定格式（XML/FC/其他）
+┌──────────────────────────────┐
+│  MCP Host (Cline/Cursor)      │
+└──────────────┬───────────────┘
+               ↓ MCP协议（JSON-RPC 2.0）← 这里才是MCP
+┌──────────────────────────────┐
+│  MCP Server (Weather/DB/...)  │
+└──────────────────────────────┘
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>MCP</th>
+<th>Function Calling</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>作用域</strong></td>
+<td>Host ↔ Server</td>
+<td>Host ↔ Model</td>
+</tr>
+<tr>
+<td><strong>标准化</strong></td>
+<td>✅ 统一标准</td>
+<td>❌ 各家不同</td>
+</tr>
+<tr>
+<td><strong>解决问题</strong></td>
+<td>工具集成碎片化</td>
+<td>模型对工具的理解</td>
+</tr>
+<tr>
+<td><strong>比喻</strong></td>
+<td>手脚（执行能力）</td>
+<td>大脑（决策能力）</td>
+</tr>
+<tr>
+<td><strong>关系</strong></td>
+<td><strong>互补，不是替代</strong></td>
+<td><strong>互补，不是替代</strong></td>
+</tr>
+</tbody>
+</table>
+
+<div style="margin:16px 0;padding:16px;background:#edf4ff;border-radius:10px;border:1px solid #d4e3fc">
+<p style="font-size:13px;color:#0052d9;font-weight:600;margin-bottom:8px">📐 MCP vs Function Calling 层级关系</p>
+
+<svg viewBox="0 0 600 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px">
+  <rect x="180" y="10" width="240" height="35" rx="8" fill="#0052d9" stroke="#003cab" stroke-width="1.5"/>
+  <text x="300" y="33" text-anchor="middle" font-size="12" fill="white" font-weight="700">大模型 (Claude/GPT)</text>
+  <text x="300" y="55" text-anchor="middle" font-size="9" fill="#0052d9">↕ Host自己决定格式（XML/FC）</text>
+  <rect x="180" y="60" width="240" height="35" rx="8" fill="#1a6fe8" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="300" y="83" text-anchor="middle" font-size="12" fill="white" font-weight="700">MCP Host (Cline/Cursor)</text>
+  <text x="300" y="105" text-anchor="middle" font-size="9" fill="#0052d9">↕ MCP协议（JSON-RPC） ← 标准化</text>
+  <rect x="180" y="110" width="240" height="35" rx="8" fill="#3380e6" stroke="#0052d9" stroke-width="1.5"/>
+  <text x="300" y="133" text-anchor="middle" font-size="12" fill="white" font-weight="700">MCP Server (Weather/DB)</text>
+  <text x="40" y="32" text-anchor="middle" font-size="9" fill="#dc2626" font-weight="600">FC作用域</text>
+  <line x1="60" y1="15" x2="60" y2="90" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="540" y="82" text-anchor="middle" font-size="9" fill="#059669" font-weight="600">MCP作用域</text>
+  <line x1="520" y1="65" x2="520" y2="140" stroke="#059669" stroke-width="1.5" stroke-dasharray="4,3"/>
+</svg>
+</div>
+<blockquote>
+<p>💡 <strong>关键认知</strong>：MCP不规定模型怎么调用工具——Cline用XML、Cherry Studio用Function Calling、其他Host可以用任何格式。MCP只管"Host和Server之间怎么通信"这一段。理解这一点，你就理解了MCP的真正定位。</p>
+</blockquote>
+<hr />
+<h2 id="15">附录：专有名词速查（15个）</h2>
+<table>
+<thead>
+<tr>
+<th>名词</th>
+<th>全称</th>
+<th>一句话白话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP</td>
+<td>Model Context Protocol</td>
+<td>AI工具的USB-C统一接口协议</td>
+</tr>
+<tr>
+<td>MCP Host</td>
+<td>-</td>
+<td>支持MCP协议的AI应用（如Cline）</td>
+</tr>
+<tr>
+<td>MCP Server</td>
+<td>-</td>
+<td>提供工具的程序（通常本地运行）</td>
+</tr>
+<tr>
+<td>Tool</td>
+<td>-</td>
+<td>Server内部的具体功能函数</td>
+</tr>
+<tr>
+<td>FastMCP</td>
+<td>-</td>
+<td>用Python快速构建MCP Server的框架</td>
+</tr>
+<tr>
+<td>JSON-RPC 2.0</td>
+<td>-</td>
+<td>MCP底层使用的通信协议标准</td>
+</tr>
+<tr>
+<td>stdio</td>
+<td>Standard Input/Output</td>
+<td>标准输入输出，MCP最常用的传输方式</td>
+</tr>
+<tr>
+<td>NDJSON</td>
+<td>Newline Delimited JSON</td>
+<td>每行一个JSON对象的格式</td>
+</tr>
+<tr>
+<td>uvx</td>
+<td>-</td>
+<td>Python包管理器UV的工具运行器</td>
+</tr>
+<tr>
+<td>npx</td>
+<td>Node Package Execute</td>
+<td>Node.js的包直接执行器</td>
+</tr>
+<tr>
+<td>Function Calling</td>
+<td>函数调用</td>
+<td>模型原生的工具调用机制</td>
+</tr>
+<tr>
+<td>System Prompt</td>
+<td>系统提示词</td>
+<td>定义AI行为的隐藏指令</td>
+</tr>
+<tr>
+<td>ReAct</td>
+<td>Reasoning + Acting</td>
+<td>思考→行动→观察的Agent循环</td>
+</tr>
+<tr>
+<td>SSE</td>
+<td>Server-Sent Events</td>
+<td>服务器推送事件（流式响应）</td>
+</tr>
+<tr>
+<td>inputSchema</td>
+<td>输入模式</td>
+<td>用JSON Schema定义工具参数格式</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="footer">学习笔记由 WorkBuddy AI 助手整理 · 2026-04-11 · 通俗叙事风格 · 腾讯云商务蓝配色</div>
+</div>
+</body>
+</html>
