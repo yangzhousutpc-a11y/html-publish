@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>腾讯会议 × WorkBuddy 高频协同场景</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:"PingFang SC","Microsoft YaHei","Helvetica Neue",Helvetica,Arial,sans-serif;
+  background:#F0F4FA;
+  color:#1A2B45;
+  -webkit-font-smoothing:antialiased;
+}
+.poster {
+  width:1080px;
+  margin:0 auto;
+  background:#FFFFFF;
+  box-shadow:0 8px 40px rgba(0,82,217,0.06);
+}
+
+/* ===== HERO (compact) ===== */
+.hero{
+  position:relative;
+  padding:28px 44px 30px 44px;
+  background:linear-gradient(135deg,#0052D9 0%,#1E7CE8 55%,#3DA8E4 100%);
+  color:#FFF;
+  overflow:hidden;
+}
+.hero::before{
+  content:"";
+  position:absolute; right:-90px; top:-90px;
+  width:240px; height:240px;
+  background:radial-gradient(circle,rgba(255,255,255,0.16) 0%,transparent 70%);
+  border-radius:50%;
+}
+.hero::after{
+  content:"";
+  position:absolute; left:-60px; bottom:-80px;
+  width:200px; height:200px;
+  background:radial-gradient(circle,rgba(255,255,255,0.08) 0%,transparent 70%);
+  border-radius:50%;
+}
+.hero-inner{
+  position:relative;
+  display:flex; align-items:center; gap:24px;
+}
+.hero-left{ flex:1; min-width:0;}
+.hero-logos{
+  display:flex; align-items:center; gap:14px;
+  margin-bottom:14px;
+}
+.logo-chip{
+  display:inline-flex; align-items:center; gap:8px;
+  background:rgba(255,255,255,0.16);
+  border:1px solid rgba(255,255,255,0.28);
+  padding:6px 14px;
+  border-radius:10px;
+  font-size:13px; font-weight:700; color:#FFF;
+  letter-spacing:0.3px;
+}
+.logo-chip .lico{
+  width:22px; height:22px;
+  background:rgba(255,255,255,0.95);
+  border-radius:6px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px;
+}
+.logo-x{
+  font-size:18px; color:#FFE082; font-weight:300;
+}
+.hero-tagline{
+  font-size:12px; color:#FFE082; letter-spacing:2px;
+  font-weight:600; margin-bottom:6px;
+}
+.hero-sub{
+  font-size:13px; line-height:1.7;
+  color:rgba(255,255,255,0.94);
+  max-width:680px;
+}
+.hero-right{
+  display:flex; flex-direction:column; gap:8px;
+  flex-shrink:0;
+}
+.hero-stat{
+  background:rgba(255,255,255,0.16);
+  border:1px solid rgba(255,255,255,0.28);
+  padding:9px 16px;
+  border-radius:10px;
+  display:flex; align-items:baseline; gap:8px;
+  min-width:165px;
+  backdrop-filter:blur(6px);
+}
+.hero-stat .n{
+  font-size:22px; font-weight:800; color:#FFE082;
+  line-height:1; letter-spacing:-0.5px;
+}
+.hero-stat .l{
+  font-size:11.5px; color:rgba(255,255,255,0.92);
+  font-weight:500;
+}
+
+/* ===== SUMMARY (3 reasons) ===== */
+.why{
+  padding:30px 44px 14px 44px;
+  background:#FFF;
+}
+.section-h{
+  display:flex; align-items:center; gap:10px;
+  margin-bottom:4px;
+}
+.section-h .badge{
+  display:inline-block;
+  background:linear-gradient(135deg,#0052D9,#3DA8E4);
+  color:#FFF; font-size:11px; font-weight:600;
+  padding:3px 11px; border-radius:100px; letter-spacing:1px;
+}
+.section-h h2{
+  font-size:22px; font-weight:800; color:#0E2A5A;
+  letter-spacing:-0.5px;
+}
+.section-desc{
+  font-size:12.5px; color:#5A6B82; line-height:1.6;
+  margin-bottom:16px;
+}
+.why-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+.why-card{
+  background:linear-gradient(180deg,#F5F9FF 0%,#FFF 100%);
+  border:1px solid #E1ECFF;
+  border-radius:14px;
+  padding:16px 16px;
+  position:relative;
+}
+.why-card .emoji{
+  font-size:24px; margin-bottom:8px; line-height:1;
+}
+.why-card h3{
+  font-size:14.5px; font-weight:700; color:#0052D9;
+  margin-bottom:5px;
+}
+.why-card p{
+  font-size:12px; color:#445069; line-height:1.6;
+}
+
+/* ===== SCENARIOS ===== */
+.scenes{
+  padding:24px 44px 30px 44px;
+  background:#FFF;
+}
+.scn-grid{
+  display:grid; grid-template-columns:1fr 1fr; gap:12px;
+  margin-top:14px;
+}
+.scn-card{
+  background:#FFF;
+  border:1px solid #E1ECFF;
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 2px 10px rgba(0,82,217,0.04);
+  display:flex; flex-direction:column;
+}
+.scn-head{
+  padding:12px 14px 10px 14px;
+  background:linear-gradient(135deg,#F5F9FF 0%,#EDF4FF 100%);
+  border-bottom:1px solid #E1ECFF;
+  display:flex; align-items:center; gap:10px;
+  position:relative;
+}
+.scn-icon{
+  flex-shrink:0;
+  width:34px; height:34px;
+  background:linear-gradient(135deg,#0052D9,#3DA8E4);
+  border-radius:9px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:17px;
+  box-shadow:0 3px 8px rgba(0,82,217,0.22);
+}
+.scn-num{
+  position:absolute;
+  font-size:10px; color:#0052D9; font-weight:700;
+  letter-spacing:1px;
+  background:#FFF;
+  padding:2px 8px; border-radius:100px;
+  border:1px solid #C6DCFF;
+  right:12px; top:12px;
+}
+.scn-title{
+  flex:1;
+  font-size:14.5px; font-weight:700; color:#0E2A5A;
+  line-height:1.35;
+  padding-right:54px;
+}
+.scn-body{
+  padding:11px 14px 14px 14px;
+  flex:1; display:flex; flex-direction:column;
+}
+.scn-desc{
+  font-size:11.8px; color:#3F506C; line-height:1.65;
+  margin-bottom:9px;
+}
+.scn-tags{
+  display:flex; flex-direction:column; gap:5px;
+  margin-bottom:9px;
+}
+.scn-tag{
+  display:flex; align-items:flex-start; gap:6px;
+  font-size:11.5px; color:#445069; line-height:1.45;
+}
+.scn-tag .k{
+  flex-shrink:0;
+  display:inline-flex; align-items:center; gap:4px;
+  background:#EDF4FF; color:#0052D9;
+  padding:2px 8px; border-radius:5px;
+  font-size:10.5px; font-weight:600;
+}
+.scn-tag .v{ color:#3F506C;}
+.scn-prompt{
+  margin-top:auto;
+  background:#F5F9FF;
+  border:1px dashed #BFD5FF;
+  border-radius:9px;
+  padding:9px 11px;
+}
+.scn-prompt-label{
+  display:inline-flex; align-items:center; gap:3px;
+  font-size:10.5px; color:#0052D9; font-weight:700;
+  letter-spacing:1px;
+  margin-bottom:4px;
+}
+.scn-prompt-text{
+  font-size:11px; color:#2C3E5C; line-height:1.65;
+  white-space:pre-wrap;
+  word-break:break-word;
+  font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+}
+
+/* ===== ARCHITECTURE ===== */
+.arch{
+  padding:28px 44px 34px 44px;
+  background:linear-gradient(180deg,#F0F6FF 0%,#E8F1FF 100%);
+}
+.arch-flow{
+  display:grid; grid-template-columns:repeat(5,1fr); gap:6px;
+  margin-top:14px;
+}
+.arch-step{
+  background:#FFF;
+  border:1px solid #E1ECFF;
+  border-radius:10px;
+  padding:11px 8px;
+  text-align:center;
+}
+.arch-step .step-emoji{ font-size:20px; margin-bottom:3px;}
+.arch-step .step-title{ font-size:12.5px; font-weight:700; color:#0E2A5A; margin-bottom:2px;}
+.arch-step .step-desc{ font-size:10.5px; color:#5A6B82; line-height:1.4;}
+.arch-conn{
+  display:flex; flex-wrap:wrap; gap:7px;
+  margin-top:12px; justify-content:center;
+}
+.connector-pill{
+  display:inline-flex; align-items:center; gap:5px;
+  background:#FFF; border:1px solid #C6DCFF;
+  padding:5px 11px; border-radius:100px;
+  font-size:11px; color:#0052D9; font-weight:600;
+}
+.connector-pill .dot{
+  width:6px; height:6px; border-radius:50%;
+  background:#22C55E; box-shadow:0 0 0 3px rgba(34,197,94,0.18);
+}
+
+/* ===== VALUE TABLE ===== */
+.value{
+  padding:60px 60px;
+  background:#FFF;
+}
+.v-table{
+  width:100%; border-collapse:separate; border-spacing:0;
+  margin-top:24px; font-size:13px;
+  border-radius:14px; overflow:hidden;
+  box-shadow:0 2px 12px rgba(0,82,217,0.05);
+}
+.v-table thead th{
+  background:linear-gradient(135deg,#0052D9,#1E7CE8);
+  color:#FFF;
+  text-align:left; padding:14px 16px;
+  font-size:12px; letter-spacing:1px; font-weight:600;
+}
+.v-table tbody td{
+  padding:14px 16px;
+  border-bottom:1px solid #F0F4FA;
+  vertical-align:top;
+}
+.v-table tbody tr:last-child td{ border-bottom:none;}
+.v-table tbody tr:nth-child(even) td{ background:#F8FBFF;}
+.v-table .col-no{
+  color:#0052D9; font-weight:700; width:48px;
+}
+.v-table .col-name{ font-weight:700; color:#0E2A5A; width:200px;}
+.v-table .col-val{ color:#2C3E5C;}
+.v-table .col-conn{ color:#5A6B82; font-size:12px;}
+
+/* ===== CTA FOOTER ===== */
+.cta{
+  background:linear-gradient(135deg,#0E2A5A 0%,#0052D9 100%);
+  color:#FFF;
+  padding:50px 60px 40px 60px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.cta::before{
+  content:"";
+  position:absolute; top:-100px; left:50%;
+  transform:translateX(-50%);
+  width:500px; height:300px;
+  background:radial-gradient(ellipse,rgba(255,255,255,0.1) 0%,transparent 70%);
+}
+.cta-title{
+  font-size:30px; font-weight:800; line-height:1.4;
+  margin-bottom:12px; position:relative;
+  letter-spacing:-0.5px;
+}
+.cta-title em{ font-style:normal; color:#FFE082;}
+.cta-sub{
+  font-size:15px; color:rgba(255,255,255,0.85); line-height:1.7;
+  margin-bottom:26px; position:relative;
+}
+.cta-buttons{
+  display:flex; gap:12px; justify-content:center;
+  position:relative;
+}
+.cta-btn{
+  display:inline-flex; align-items:center; gap:8px;
+  background:#FFF; color:#0052D9;
+  padding:12px 26px; border-radius:100px;
+  font-size:14px; font-weight:700;
+  box-shadow:0 6px 20px rgba(0,0,0,0.15);
+}
+.cta-btn.outline{
+  background:transparent; color:#FFF;
+  border:1.5px solid rgba(255,255,255,0.5);
+}
+.cta-foot{
+  margin-top:30px;
+  padding-top:20px;
+  border-top:1px solid rgba(255,255,255,0.15);
+  display:flex; justify-content:space-between;
+  font-size:11.5px; color:rgba(255,255,255,0.6);
+  position:relative;
+  letter-spacing:1px;
+}
+</style>
+</head>
+<body>
+<div class="poster">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <div class="hero-logos">
+          <span class="logo-chip">
+            <span class="lico">🎬</span>
+            腾讯会议
+          </span>
+          <span class="logo-x">✕</span>
+          <span class="logo-chip">
+            <span class="lico">🧠</span>
+            WorkBuddy
+          </span>
+        </div>
+        <div class="hero-tagline">JOINT SOLUTION · 联合方案</div>
+        <p class="hero-sub">
+          将每一场会议的录制、转写与智能纪要，自动转化为销售评分、客户画像、合规审计、教学评估等可执行业务资产，端到端打通"开会 → 决策 → 执行 → 沉淀"全链路。
+        </p>
+      </div>
+      <div class="hero-right">
+        <div class="hero-stat"><span class="n">8</span><span class="l">高频协同场景</span></div>
+        <div class="hero-stat"><span class="n">5+</span><span class="l">原生连接器打通</span></div>
+        <div class="hero-stat"><span class="n">0</span><span class="l">人工干预闭环</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHY -->
+  <div class="why">
+    <div class="section-h">
+      <span class="badge">WHY</span>
+      <h2>为什么是腾讯会议 × WorkBuddy</h2>
+    </div>
+    <div class="section-desc">两大产品的能力互补，让"会议"从成本中心变成价值中心。</div>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="emoji">📊</div>
+        <h3>数据源唯一</h3>
+        <p>腾讯会议是企业最完整、最结构化的"对话型数据"入口，覆盖销售、研发、培训、教学等全岗位场景。</p>
+      </div>
+      <div class="why-card">
+        <div class="emoji">🧠</div>
+        <h3>智能体落地</h3>
+        <p>WorkBuddy 提供企业级 Agent 能力，可调用乐享、企微、腾讯文档、企查查等连接器闭环执行。</p>
+      </div>
+      <div class="why-card">
+        <div class="emoji">🔁</div>
+        <h3>业务闭环</h3>
+        <p>从"开完会就忘"到"开完会即行动"，每一场会议的产出可量化、可追踪、可复用。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENARIOS -->
+  <div class="scenes">
+    <div class="section-h">
+      <span class="badge">SCENARIOS</span>
+      <h2>八大高频协同场景</h2>
+    </div>
+    <div class="section-desc">面向销售、客户成功、HR、法务、教研、培训等核心岗位，每个场景含场景描述、适用对象、连接器与可直接复用的 Prompt 示例。</div>
+
+    <div class="scn-grid">
+
+      <!-- 01 -->
+      <div class="scn-card">
+        <div class="scn-head">
+          <div class="scn-icon">🎯</div>
+          <div class="scn-title">销售单场会议内容质检</div>
+          <div class="scn-num">01 / 08</div>
+        </div>
+        <div class="scn-body">
+          <div class="scn-desc">销售拜访/电销场景下，通过腾讯会议录制谈话内容，会议结束后由 WorkBuddy 自动拉取智能纪要与转写文本，按企业自定义评分卡（开场/需求挖掘/方案讲解/异议处理/Close 五维）打分，输出可下载的销售行为评分报告与改进建议。</div>
+          <div class="scn-tags">
+            <div class="scn-tag"><span class="k">👥 适用对象</span><span class="v">销售、销售管理者、客户成功</span></div>
+            <div class="scn-tag"><span class="k">🔌 连接器</span><span class="v">腾讯会议 + 乐享 + 企业微信</span></div>
+          </div>
+          <div class="scn-prompt">
+            <div class="scn-prompt-label">⚡ PROMPT 示例</div>
+            <div class="scn-prompt-text">帮我分析腾讯会议[会议号 123-456-789]的录制内容，按"开场破冰/需求挖掘/方案讲解/异议处理/Close 推进"五维评分（满分 100），结合转写原文给出每一维的扣分点和原话引用，最后输出评分报告，保存到乐享知识库"销售话术评分"文件夹，文件按"时间+录制文件名"命名，并把链接发给我。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 02 -->
+      <div class="scn-card">
+        <div class="scn-head">
+          <div class="scn-icon">📚</div>
+          <div class="scn-title">会议纪要自动归档到知识库</div>
+          <div class="scn-num">02 / 08</div>
+        </div>
+        <div class="scn-body">
+          <div class="scn-desc">会议结束后，WorkBuddy 自动获取腾讯会议智能纪要 + 关键决议 + 待办，按业务类型（客户拜访/伙伴交流/内部评审）选择对应模板，写入乐享知识库对应空间，附上录制回放链接，并 @ 相关人员。</div>
+          <div class="scn-tags">
+            <div class="scn-tag"><span class="k">👥 适用对象</span><span class="v">销售、项目经理、各业务线员工</span></div>
+            <div class="scn-tag"><span class="k">🔌 连接器</span><span class="v">腾讯会议 + 乐享 + 企业微信</span></div>
+          </div>
+          <div class="scn-prompt">
+            <div class="scn-prompt-label">⚡ PROMPT 示例</div>
+            <div class="scn-prompt-text">把今天上午 10 点的腾讯会议按"客户拜访 7 字段"模板整理会议纪要，写入乐享知识库"客户拜访会议纪要"文件夹下，标题用"客户名_日期"，正文末尾附录制回放链接，写完后把页面链接通过企微发给我和销售总监张三。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 03 -->
+      <div class="scn-card">
+        <div class="scn-head">
+          <div class="scn-icon">📈</div>
+          <div class="scn-title">跨多场会议的内容总结</div>
+          <div class="scn-num">03 / 08</div>
+        </div>
+        <div class="scn-body">
+          <div class="scn-desc">日常工作中，周报/月报是高频需求，需汇总多场会议内容；针对同一议题组织的多次讨论会，也常需要做整体性的内容总结与回顾。</div>
+          <div class="scn-tags">
+            <div class="scn-tag"><span class="k">👥 适用对象</span><span class="v">全员（销售、研发、运营、管理者）</span></div>
+            <div class="scn-tag"><span class="k">🔌 连接器</span><span class="v">腾讯会议 + 乐享知识库</span></div>
+          </div>
+          <div class="scn-prompt">
+            <div class="scn-prompt-label">⚡ PROMPT 示例</div>
+            <div class="scn-prompt-text">读取 5 月 25 日至 5 月 29 日的所有客户拜访相关的腾讯会议录制文件，生成工作周报，最终输出 HTML 单页报告，并在乐享知识库"工作周报存档"位置存档，文件名按"时间+周报总结"命名，完成后把链接发给我。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 04 -->
+      <div class="scn-card">
+        <div class="scn-head">
+          <div class="scn-icon">🚀</div>
+          <div class="scn-title">销售拜访前准备 + 全流程闭环</div>
+          <div class="scn-num">04 / 08</div>
+        </div>
+        <div class="scn-body">
+          <div class="scn-desc">拜访前自动调用企查查拉取目标企业基本信息，结合知识库产品资料生成客户谈参；拜访中通过腾讯会议录制；拜访后自动生成纪要、更新 CRM 商机、提取客户提问形成待办派发，并在每周五自动汇总成周报。</div>
+          <div class="scn-tags">
+            <div class="scn-tag"><span class="k">👥 适用对象</span><span class="v">销售、客户经理、渠道运营</span></div>
+            <div class="scn-tag"><span class="k">🔌 连接器</span><span class="v">企查查 + 乐享 + 腾讯会议 + 文档 + 企微</span></div>
+          </div>
+          <div class="scn-prompt">
+            <div class="scn-prompt-label">⚡ PROMPT 示例</div>
+            <div class="scn-prompt-text">我本周周五下午 5 点要拜访 XXX 集团 CIO，目标推销 XXX 产品：① 用企查查查公司信息、股权、风险；② 从乐享知识库挑制造业大客户产品方案；③ 输出一页纸客户谈参。拜访结束后我会发会议号给你，请按拜访 7 字段模板生成纪要 → 写入腾讯文档商机表 → 客户问题转待办，通过企业微信下发给相关人员。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 05 -->
+      <div class="scn-card">
+        <div class="scn-head">
+          <div class="scn-icon">🛡️</div>
+          <div class="scn-title">会议合规 / 风险审计</div>
+          <div class="scn-num">05 / 08</div>
+        </div>
+        <div class="scn-body">
+          <div class="scn-desc">合同评审、商务谈判、对外承诺类会议结束后，WorkBuddy 扫描转写文本，识别"承诺类语句""价格类承诺""合规风险词"，输出风险点清单与原文锚点，自动归档到法务/审计专员邮箱。</div>
+          <div class="scn-tags">
+            <div class="scn-tag"><span class="k">👥 适用对象</span><span class="v">法务、采购、销售运营、风控</span></div>
+            <div class="scn-tag"><span class="k">🔌 连接器</span><span class="v">腾讯会议 + QQ 邮箱 + 乐享</span></div>
+          </div>
+          <div class="scn-prompt">
+            <div class="scn-prompt-label">⚡ PROMPT 示例</div>
+            <div class="scn-prompt-text">扫描本周所有标注"商务谈判"的腾讯会议录制，识别 ① 口头价格承诺 ② 交付时间承诺 ③ 兜底/保证类话术 ④ 数据/隐私合规风险词，输出风险清单（含原话+时间戳+录制链接），存入乐享"项目合规风险"文件夹，并以 PDF 形式发邮件给法务总监并抄送我。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 06 -->
+      <div class="scn-card">
+        <div class="scn-head">
+          <div class="scn-icon">💼</div>
+          <div class="scn-title">面试 / 招聘智能评估</div>
+          <div class="scn-num">06 / 08</div>
+        </div>
+        <div class="scn-body">
+          <div class="scn-desc">HR 通过腾讯会议进行候选人面试，WorkBuddy 基于岗位需求与面试过程，从专业、沟通、匹配度、文化等多维度对候选人进行评分，生成结构化候选人画像，写入招聘系统或腾讯文档候选人表。</div>
+          <div class="scn-tags">
+            <div class="scn-tag"><span class="k">👥 适用对象</span><span class="v">HR、招聘经理、用人部门负责人</span></div>
+            <div class="scn-tag"><span class="k">🔌 连接器</span><span class="v">腾讯会议 + 腾讯文档 + 企业微信</span></div>
+          </div>
+          <div class="scn-prompt">
+            <div class="scn-prompt-label">⚡ PROMPT 示例</div>
+            <div class="scn-prompt-text">读取今天 14:00 与候选人"王某某-资深架构师岗"的腾讯会议录制，按"分布式系统/团队管理/业务理解/沟通表达"四维评估，每维 1-5 分并附原话证据，生成候选人画像页写入腾讯文档"候选人评估表"，结果通过企业微信同步给招聘负责人 XXX。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 07 -->
+      <div class="scn-card">
+        <div class="scn-head">
+          <div class="scn-icon">🎓</div>
+          <div class="scn-title">培训 / 内训知识沉淀</div>
+          <div class="scn-num">07 / 08</div>
+        </div>
+        <div class="scn-body">
+          <div class="scn-desc">内部培训、技术分享、产品宣讲等录制后，自动生成"金句卡片+章节笔记+测验题"三件套，沉淀进乐享知识库形成可复用培训素材包。</div>
+          <div class="scn-tags">
+            <div class="scn-tag"><span class="k">👥 适用对象</span><span class="v">培训发展、培训讲师、企业大学</span></div>
+            <div class="scn-tag"><span class="k">🔌 连接器</span><span class="v">腾讯会议 + 乐享知识库</span></div>
+          </div>
+          <div class="scn-prompt">
+            <div class="scn-prompt-label">⚡ PROMPT 示例</div>
+            <div class="scn-prompt-text">把昨天 19:00 的"AI Agent 工程化分享"腾讯会议录制处理成培训素材包：① 每 5 分钟一段章节笔记；② 抽 10 句金句做卡片；③ 围绕核心知识点出 8 道测验题（4 单选+4 简答）；全部写入乐享知识库"内训培训会"文件夹下，文件名为"AI Agent 工程化分享"，并在末尾附录制视频。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 08 -->
+      <div class="scn-card">
+        <div class="scn-head">
+          <div class="scn-icon">📖</div>
+          <div class="scn-title">在线教学课程质量评估</div>
+          <div class="scn-num">08 / 08</div>
+        </div>
+        <div class="scn-body">
+          <div class="scn-desc">学校/培训机构/企业大学通过腾讯会议开展在线课程，课后自动按"教学内容/讲授清晰度/互动参与/节奏控制/课堂氛围"五维评估课程质量，结合学生发言时长、提问次数、答疑响应时延等客观指标，输出课程质量报告。</div>
+          <div class="scn-tags">
+            <div class="scn-tag"><span class="k">👥 适用对象</span><span class="v">教研负责人、培训主管、授课教师、教务管理</span></div>
+            <div class="scn-tag"><span class="k">🔌 连接器</span><span class="v">腾讯会议 + 乐享 + 企业微信</span></div>
+          </div>
+          <div class="scn-prompt">
+            <div class="scn-prompt-label">⚡ PROMPT 示例</div>
+            <div class="scn-prompt-text">帮我分析腾讯会议[会议号 xxx]的课程录制，按"教学内容/讲授清晰度/互动参与/节奏控制/课堂氛围"五维评估（满分 100），并附学生发言时长占比、提问次数、答疑平均响应时延等客观数据，最终输出 HTML 课程质量评估报告，保存到乐享"课程质量评估"文件夹下，文件名按"课程名+授课老师+日期"命名，链接通过企业微信发给教研组长和授课老师。</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ARCHITECTURE -->
+  <div class="arch">
+    <div class="section-h">
+      <span class="badge">ARCHITECTURE</span>
+      <h2>联合方案技术链路</h2>
+    </div>
+    <div class="section-desc">从会议召开到组织资产沉淀，五步闭环全流程自动化。</div>
+
+    <div class="arch-flow">
+      <div class="arch-step">
+        <div class="step-emoji">🎬</div>
+        <div class="step-title">会议召开</div>
+        <div class="step-desc">腾讯会议<br>录制+转写+纪要</div>
+      </div>
+      <div class="arch-step">
+        <div class="step-emoji">🔌</div>
+        <div class="step-title">数据接入</div>
+        <div class="step-desc">WorkBuddy 拉取<br>录制/纪要/待办</div>
+      </div>
+      <div class="arch-step">
+        <div class="step-emoji">🧠</div>
+        <div class="step-title">智能加工</div>
+        <div class="step-desc">Agent 调大模型<br>评分/抽取/聚合</div>
+      </div>
+      <div class="arch-step">
+        <div class="step-emoji">⚡</div>
+        <div class="step-title">业务闭环</div>
+        <div class="step-desc">写 CRM/知识库<br>派发待办/邮件</div>
+      </div>
+      <div class="arch-step">
+        <div class="step-emoji">💎</div>
+        <div class="step-title">沉淀复用</div>
+        <div class="step-desc">长期检索/对比<br>形成组织资产</div>
+      </div>
+    </div>
+
+    <div class="arch-conn">
+      <div class="connector-pill"><span class="dot"></span>腾讯会议</div>
+      <div class="connector-pill"><span class="dot"></span>乐享知识库</div>
+      <div class="connector-pill"><span class="dot"></span>企业微信</div>
+      <div class="connector-pill"><span class="dot"></span>腾讯文档</div>
+      <div class="connector-pill"><span class="dot"></span>企查查</div>
+      <div class="connector-pill"><span class="dot"></span>QQ 邮箱</div>
+    </div>
+  </div>
+
+
+</div>
+</body>
+</html>
