@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>LLM 大语言模型 · 一图看懂</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0A0820;
+  --text:#E8E5FF;
+  --muted:rgba(232,229,255,.7);
+  --hint:rgba(232,229,255,.5);
+  --grad:linear-gradient(135deg,#7878FF,#FF78D4);
+}
+html,body{overflow-x:hidden}
+body{
+  font-family:"PingFang SC","SF Pro Display","Helvetica Neue","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--text);min-height:100vh;
+  position:relative;padding:30px 0 60px;
+}
+body::before{
+  content:"";position:fixed;inset:-20%;z-index:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 30%, rgba(120,80,255,.4), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 20%, rgba(255,80,180,.35), transparent 60%),
+    radial-gradient(ellipse 70% 60% at 60% 80%, rgba(80,180,255,.4), transparent 60%),
+    radial-gradient(ellipse 40% 30% at 30% 90%, rgba(120,255,200,.25), transparent 60%);
+  filter:blur(60px);
+  animation:flow 14s ease-in-out infinite alternate;
+}
+@keyframes flow{
+  0%{transform:translate(-3%,-2%) scale(1)}
+  100%{transform:translate(4%,3%) scale(1.08)}
+}
+.page{max-width:1080px;margin:0 auto;padding:0 28px;position:relative;z-index:1}
+
+/* nav */
+.nav{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 24px;
+  background:rgba(255,255,255,.05);backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.1);border-radius:20px;
+  margin-bottom:50px;
+}
+.nav .brand{font-weight:600;font-size:15px;letter-spacing:1px;display:flex;align-items:center;gap:10px}
+.nav .dot{
+  display:inline-block;width:10px;height:10px;border-radius:50%;
+  background:var(--grad);
+  box-shadow:0 0 12px rgba(120,120,255,.8);
+}
+.nav .links{display:flex;gap:24px;font-size:13px;color:var(--muted)}
+
+/* hero */
+.hero{text-align:center;padding:30px 0 50px}
+.hero .badge{
+  display:inline-block;padding:6px 16px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
+  border-radius:30px;font-size:12px;letter-spacing:2px;
+  color:var(--muted);margin-bottom:24px;
+  backdrop-filter:blur(10px);
+}
+h1{
+  font-size:64px;font-weight:700;letter-spacing:-2px;line-height:1.05;
+  background:linear-gradient(135deg,#FFF 20%,#A8B5FF 50%,#FF95E0 80%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  margin-bottom:20px;
+}
+.hero .lead{
+  font-size:17px;color:var(--muted);max-width:620px;margin:0 auto;line-height:1.7;
+}
+.cta{margin-top:30px;display:inline-flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.btn{padding:12px 26px;border-radius:14px;font-size:14px;font-weight:500;text-decoration:none;display:inline-block}
+.btn.primary{background:var(--grad);color:#fff;box-shadow:0 8px 30px rgba(120,120,255,.4)}
+.btn.ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:var(--text);backdrop-filter:blur(10px)}
+
+/* stats */
+.stats{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:0 0 36px;
+  padding:28px;background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1);border-radius:24px;
+  backdrop-filter:blur(20px);
+}
+.stat{text-align:center}
+.stat .num{
+  font-size:38px;font-weight:700;letter-spacing:-1.5px;line-height:1;
+  background:linear-gradient(135deg,#A8B5FF,#FF95E0);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.stat .lbl{font-size:11px;letter-spacing:2px;color:var(--hint);margin-top:6px;text-transform:uppercase}
+
+/* sections */
+.section{margin-top:54px}
+.section .eyebrow{
+  font-size:11px;letter-spacing:3px;color:var(--hint);text-transform:uppercase;margin-bottom:8px;
+}
+.section h2{font-size:30px;font-weight:600;letter-spacing:-.5px;margin-bottom:24px}
+.section h2 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* concept – what is llm */
+.what{
+  display:grid;grid-template-columns:1.2fr 1fr;gap:20px;margin-bottom:18px;
+}
+.glass{
+  background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.03));
+  backdrop-filter:blur(24px);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:24px;padding:26px;position:relative;overflow:hidden;
+}
+.glass::before{
+  content:"";position:absolute;top:-1px;left:-1px;right:-1px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);
+}
+.glass h3{font-size:18px;font-weight:600;color:#fff;margin-bottom:10px}
+.glass p{font-size:14px;line-height:1.85;color:var(--muted)}
+.glass p .key{color:#fff;font-weight:600;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:6px}
+
+/* timeline */
+.timeline{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:8px;
+}
+.tl{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;padding:18px 14px;backdrop-filter:blur(10px);
+}
+.tl .yr{font-size:24px;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tl .ev{font-size:13px;color:#fff;margin-top:6px;font-weight:500}
+.tl .desc{font-size:11px;color:var(--hint);margin-top:4px;line-height:1.5}
+
+/* abilities grid */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:8px}
+.glass.cap{padding:22px}
+.icon-orb{
+  width:46px;height:46px;border-radius:13px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:14px;border:1px solid rgba(255,255,255,.2);
+}
+.orb1{background:linear-gradient(135deg,rgba(120,120,255,.4),rgba(120,120,255,.1))}
+.orb2{background:linear-gradient(135deg,rgba(255,120,212,.4),rgba(255,120,212,.1))}
+.orb3{background:linear-gradient(135deg,rgba(80,200,255,.4),rgba(80,200,255,.1))}
+.orb4{background:linear-gradient(135deg,rgba(180,120,255,.4),rgba(180,120,255,.1))}
+.orb5{background:linear-gradient(135deg,rgba(120,255,200,.4),rgba(120,255,200,.1))}
+.orb6{background:linear-gradient(135deg,rgba(255,180,80,.4),rgba(255,180,80,.1))}
+.icon-orb svg{width:22px;height:22px;color:#fff}
+.cap h3{font-size:16px;margin-bottom:6px}
+.cap .tag{display:inline-block;font-size:10px;letter-spacing:2px;color:var(--hint);text-transform:uppercase;margin-bottom:8px}
+.cap p{font-size:13px;line-height:1.7;color:var(--muted)}
+
+/* how it works – pipeline */
+.pipe{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px;position:relative;
+}
+.pipe-step{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;padding:18px;text-align:center;backdrop-filter:blur(10px);
+  position:relative;
+}
+.pipe-step .n{font-size:11px;letter-spacing:2px;color:var(--hint);margin-bottom:6px}
+.pipe-step .t{font-size:15px;font-weight:600;color:#fff;margin-bottom:4px}
+.pipe-step .d{font-size:12px;color:var(--muted);line-height:1.6}
+.pipe-step::after{
+  content:"→";position:absolute;right:-12px;top:50%;transform:translateY(-50%);
+  color:rgba(255,255,255,.4);font-size:18px;
+}
+.pipe-step:last-child::after{display:none}
+
+/* family */
+.family{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:8px}
+.fm{
+  background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:20px;padding:22px;
+}
+.fm .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.fm .name{font-size:18px;font-weight:600;color:#fff}
+.fm .org{font-size:11px;color:var(--hint);letter-spacing:1.5px;text-transform:uppercase}
+.fm p{font-size:13px;color:var(--muted);line-height:1.7}
+.fm .models{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
+.fm .pill{font-size:11px;padding:3px 10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:10px;color:var(--text)}
+
+/* cta-block */
+.outro{
+  margin-top:54px;padding:36px 30px;text-align:center;
+  background:linear-gradient(135deg,rgba(120,120,255,.15),rgba(255,120,212,.12));
+  border:1px solid rgba(255,255,255,.15);border-radius:24px;backdrop-filter:blur(20px);
+}
+.outro h3{font-size:24px;font-weight:600;color:#fff;margin-bottom:8px;letter-spacing:-.5px}
+.outro p{font-size:14px;color:var(--muted);max-width:520px;margin:0 auto 18px;line-height:1.7}
+
+.footer{
+  margin-top:30px;padding-top:18px;border-top:1px solid rgba(255,255,255,.1);
+  display:flex;justify-content:space-between;font-size:11px;letter-spacing:2px;
+  color:var(--hint);text-transform:uppercase;
+}
+
+@media(max-width:780px){
+  h1{font-size:42px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .what,.timeline,.grid,.pipe,.family{grid-template-columns:1fr}
+  .pipe-step::after{display:none}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="nav">
+    <div class="brand"><span class="dot"></span>LLM · A Field Guide</div>
+    <div class="links"><span>原理</span><span>能力</span><span>生态</span></div>
+  </div>
+
+  <div class="hero">
+    <div class="badge">✦ AI 入门 · 2026</div>
+    <h1>大语言模型<br>是怎么"懂"你的？</h1>
+    <p class="lead">LLM（Large Language Model）是吃下整个互联网文本、学会预测下一个词的神经网络。它没有数据库，也不"理解"世界 —— 它只是把语言压缩成了概率。</p>
+    <div class="cta">
+      <a class="btn primary" href="#">了解原理</a>
+      <a class="btn ghost" href="#">查看模型家族 →</a>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="num">175B</div><div class="lbl">GPT-3 参数量</div></div>
+    <div class="stat"><div class="num">15T</div><div class="lbl">训练 token 量</div></div>
+    <div class="stat"><div class="num">128K</div><div class="lbl">上下文窗口</div></div>
+    <div class="stat"><div class="num">2017</div><div class="lbl">Transformer 诞生</div></div>
+  </div>
+
+  <div class="section">
+    <div class="eyebrow">CHAPTER 01 · 是什么</div>
+    <h2>一句话讲清 <em>LLM 到底是什么</em></h2>
+    <div class="what">
+      <div class="glass">
+        <h3>它是一台"超大号下一个词预测机"</h3>
+        <p>给一段文本，LLM 输出每个可能的下一个词的<span class="key">概率分布</span>。把它接起来连续预测，就成了对话、写作、翻译、写代码。</p>
+        <p style="margin-top:10px">它的"知识"不是储存在某个表里，而是被压进了<span class="key">几千亿个权重参数</span>里 —— 像把一座图书馆压扁成一张高维曲面。</p>
+      </div>
+      <div class="glass">
+        <h3>三个常见误解</h3>
+        <p>❶ 它<span class="key">不是搜索引擎</span>，无法实时联网（除非接外部工具）。<br>
+           ❷ 它<span class="key">不是数据库</span>，记忆是模糊的、可能编造（hallucination）。<br>
+           ❸ 它<span class="key">不"理解"语义</span>，但能在统计意义上做得非常像理解。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="eyebrow">CHAPTER 02 · 怎么炼成</div>
+    <h2>从 <em>原始文本</em> 到 <em>能聊天的助手</em>，4 步</h2>
+    <div class="pipe">
+      <div class="pipe-step">
+        <div class="n">STEP 01</div>
+        <div class="t">收集语料</div>
+        <div class="d">网页 / 书 / 代码 / 论文，TB 级别清洗</div>
+      </div>
+      <div class="pipe-step">
+        <div class="n">STEP 02</div>
+        <div class="t">预训练</div>
+        <div class="d">在 GPU 集群上学"猜下一个 token"，几个月烧几千万美元</div>
+      </div>
+      <div class="pipe-step">
+        <div class="n">STEP 03</div>
+        <div class="t">指令微调 SFT</div>
+        <div class="d">用人工写的"问答对"教它听话</div>
+      </div>
+      <div class="pipe-step">
+        <div class="n">STEP 04</div>
+        <div class="t">RLHF / DPO</div>
+        <div class="d">用人类偏好数据校准答案，让它更有用更安全</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="eyebrow">CHAPTER 03 · 关键里程碑</div>
+    <h2>八年改变世界的 <em>5 个时刻</em></h2>
+    <div class="timeline">
+      <div class="tl"><div class="yr">2017</div><div class="ev">Transformer</div><div class="desc">"Attention Is All You Need" 奠基</div></div>
+      <div class="tl"><div class="yr">2020</div><div class="ev">GPT-3</div><div class="desc">175B 参数，涌现 few-shot 能力</div></div>
+      <div class="tl"><div class="yr">2022</div><div class="ev">ChatGPT</div><div class="desc">2 个月破亿用户，AI 进入大众视野</div></div>
+      <div class="tl"><div class="yr">2024</div><div class="ev">多模态推理</div><div class="desc">GPT-4o / Claude 3.5 / Gemini 全面接管</div></div>
+      <div class="tl"><div class="yr">2026</div><div class="ev">Agent 元年</div><div class="desc">从聊天到执行任务，长上下文 + 工具调用</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="eyebrow">CHAPTER 04 · 能干什么</div>
+    <h2>六大核心能力，<em>覆盖 80% 应用场景</em></h2>
+    <div class="grid">
+      <div class="glass cap">
+        <div class="icon-orb orb1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h16"/></svg></div>
+        <div class="tag">GENERATION</div>
+        <h3>文本生成</h3>
+        <p>写文案、写报告、写邮件、写小说，从一句 prompt 到一万字长文。</p>
+      </div>
+      <div class="glass cap">
+        <div class="icon-orb orb2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg></div>
+        <div class="tag">CODING</div>
+        <h3>代码助手</h3>
+        <p>补全、调试、重构、生成单元测试。Cursor、Copilot 都靠它。</p>
+      </div>
+      <div class="glass cap">
+        <div class="icon-orb orb3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div>
+        <div class="tag">TRANSLATE</div>
+        <h3>翻译 & 改写</h3>
+        <p>跨 100+ 语种，保留语气与领域术语，远超传统机翻。</p>
+      </div>
+      <div class="glass cap">
+        <div class="icon-orb orb4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 4v16"/></svg></div>
+        <div class="tag">SUMMARIZE</div>
+        <h3>总结 & 抽取</h3>
+        <p>会议纪要、PDF 摘要、表格提取，10 分钟干完之前 1 小时的活。</p>
+      </div>
+      <div class="glass cap">
+        <div class="icon-orb orb5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6M12 16v6M5 5l4 4M15 15l4 4M2 12h6M16 12h6M5 19l4-4M15 9l4-4"/></svg></div>
+        <div class="tag">REASONING</div>
+        <h3>逻辑推理</h3>
+        <p>数学题、SQL 编写、多步规划。o1 / DeepSeek-R1 把推理推向新高度。</p>
+      </div>
+      <div class="glass cap">
+        <div class="icon-orb orb6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 18 0 9 9 0 1 0-18 0M9 12l2 2 4-4"/></svg></div>
+        <div class="tag">AGENT</div>
+        <h3>调用工具</h3>
+        <p>读邮件、查日历、写文档、调 API。LLM 不再只是聊天，而是干活。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="eyebrow">CHAPTER 05 · 模型家族</div>
+    <h2>2026 年的 <em>主流玩家</em></h2>
+    <div class="family">
+      <div class="fm">
+        <div class="row"><span class="name">GPT 系列</span><span class="org">OpenAI · USA</span></div>
+        <p>消费端最知名品牌，多模态、Agent、Sora 视频集成最快，闭源。</p>
+        <div class="models"><span class="pill">GPT-5</span><span class="pill">GPT-4o</span><span class="pill">o1 / o3</span></div>
+      </div>
+      <div class="fm">
+        <div class="row"><span class="name">Claude</span><span class="org">Anthropic · USA</span></div>
+        <p>长上下文（200K)、写作和代码口碑最佳，Sonnet 4 / Opus 4 是开发者心头好。</p>
+        <div class="models"><span class="pill">Opus 4</span><span class="pill">Sonnet 4</span><span class="pill">Haiku</span></div>
+      </div>
+      <div class="fm">
+        <div class="row"><span class="name">Gemini</span><span class="org">Google · USA</span></div>
+        <p>原生多模态 + 1M 超长上下文，深度集成 Workspace 与 Android。</p>
+        <div class="models"><span class="pill">Gemini 2.5 Pro</span><span class="pill">Flash</span></div>
+      </div>
+      <div class="fm">
+        <div class="row"><span class="name">国产开源派</span><span class="org">CHINA · OPEN</span></div>
+        <p>DeepSeek R1 / Qwen 3 / GLM-4 / Hunyuan，性价比和私有化部署王者。</p>
+        <div class="models"><span class="pill">DeepSeek</span><span class="pill">Qwen</span><span class="pill">GLM</span><span class="pill">Hunyuan</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="outro">
+    <h3>所以，LLM 不是魔法。</h3>
+    <p>它是一种新的"基础设施"—— 像电和云。理解它的边界（会编造、有截止日期、要喂上下文），就能把它用得又稳又狠。</p>
+    <a class="btn primary" href="#">看看怎么落地到你的工作流 →</a>
+  </div>
+
+  <div class="footer">
+    <span>© 2026 · LLM Field Guide</span>
+    <span>WORKBUDDY · Mr. Zhou</span>
+    <span>Style · Aurora</span>
+  </div>
+</div>
+</body>
+</html>

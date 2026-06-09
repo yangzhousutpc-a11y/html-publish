@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>大语言模型 · 一张牛皮纸看懂</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#F0E4CC;
+  --paper-2:#E8D8B8;
+  --paper-3:#DCC89A;
+  --ink:#3E2C1C;
+  --ink-2:#5C422A;
+  --accent:#9C2A1A;
+  --green:#5C8A3A;
+  --border:#8B6B3D;
+}
+html,body{overflow-x:hidden}
+body{
+  font-family:"Noto Serif SC","Source Han Serif SC","Songti SC",Georgia,"Times New Roman",serif;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255,255,255,.4), transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(0,0,0,.06), transparent 40%),
+    repeating-linear-gradient(45deg, transparent 0 2px, rgba(120,80,40,.04) 2px 4px),
+    var(--paper);
+  padding:36px 0 60px;
+  min-height:100vh;
+}
+.page{max-width:840px;margin:0 auto;padding:0 22px}
+.poster{
+  background:
+    radial-gradient(ellipse at top left, rgba(255,255,255,.5), transparent 50%),
+    radial-gradient(ellipse at 70% 30%, rgba(160,100,50,.08), transparent 60%),
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(120,80,40,.03) 3px 4px),
+    var(--paper-2);
+  border:2px solid var(--border);
+  outline:1px solid var(--border);
+  outline-offset:6px;
+  padding:36px 30px;
+  position:relative;
+  box-shadow:inset 0 0 60px rgba(120,80,40,.18);
+}
+.corner{position:absolute;width:34px;height:34px;border:1.5px solid var(--border)}
+.corner.tl{top:10px;left:10px;border-right:none;border-bottom:none}
+.corner.tr{top:10px;right:10px;border-left:none;border-bottom:none}
+.corner.bl{bottom:10px;left:10px;border-right:none;border-top:none}
+.corner.br{bottom:10px;right:10px;border-left:none;border-top:none}
+
+.head{text-align:center;padding:8px 0 22px;position:relative}
+.head .topline{
+  font-size:11px;letter-spacing:5px;color:var(--ink-2);
+  border-top:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);
+  padding:6px 0;margin-bottom:22px;text-transform:uppercase;
+}
+h1{
+  font-size:54px;font-weight:800;letter-spacing:3px;line-height:1.1;
+  text-shadow:1px 1px 0 rgba(0,0,0,.1);
+}
+h1 .red{color:var(--accent)}
+h1 .green{color:var(--green)}
+.subtitle{
+  margin-top:8px;font-size:18px;color:var(--ink-2);font-style:italic;
+}
+.subtitle::before,.subtitle::after{content:"❦";margin:0 12px;color:var(--border)}
+
+/* Hero illustration */
+.hero{margin:18px auto 28px;text-align:center}
+.hero svg{width:100%;max-width:600px;height:auto}
+
+/* generic h2 */
+.section{margin-top:32px}
+.section .h2-row{
+  display:flex;align-items:baseline;gap:14px;
+  border-bottom:1.5px dashed var(--ink-2);padding-bottom:8px;margin-bottom:18px;
+}
+.section h2{font-size:22px;font-weight:800;letter-spacing:1px}
+.section .ch{
+  font-size:11px;letter-spacing:3px;color:var(--accent);
+  border:1px solid var(--accent);padding:2px 8px;
+}
+.section .lead{
+  font-size:14px;color:var(--ink-2);font-style:italic;margin-left:auto;
+}
+
+/* what */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.card{
+  background:var(--paper);border:1.5px solid var(--border);
+  padding:18px 18px 16px;position:relative;
+  box-shadow:3px 3px 0 var(--ink);
+}
+.card::before{
+  content:"";position:absolute;top:6px;left:6px;right:6px;bottom:6px;
+  border:0.5px dashed var(--border);pointer-events:none;
+}
+.card h3{font-size:17px;font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.card h3 .num{
+  width:26px;height:26px;border:1.5px solid var(--accent);border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:13px;color:var(--accent);background:var(--paper);font-weight:800;
+}
+.card p{font-size:14px;line-height:1.85;color:var(--ink)}
+.accent{color:var(--accent);font-weight:800;border-bottom:1.5px solid var(--accent)}
+.accent-g{color:var(--green);font-weight:800}
+
+/* stats row */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:6px}
+.stat{
+  background:var(--paper);border:1.5px solid var(--ink);padding:14px 10px;
+  text-align:center;box-shadow:2px 2px 0 var(--accent);
+}
+.stat .n{font-size:26px;font-weight:800;color:var(--accent);letter-spacing:-1px}
+.stat .l{font-size:11px;color:var(--ink-2);margin-top:4px;letter-spacing:1px}
+
+/* pipeline */
+.pipe{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-items:start}
+.pipe-step{
+  background:var(--paper);border:1.5px solid var(--border);
+  padding:16px 12px;text-align:center;position:relative;
+  box-shadow:3px 3px 0 var(--ink-2);
+}
+.pipe-step .n{
+  font-size:11px;letter-spacing:2px;color:var(--accent);font-weight:700;margin-bottom:4px;
+}
+.pipe-step .t{font-size:15px;font-weight:800;margin-bottom:4px}
+.pipe-step .d{font-size:12px;color:var(--ink-2);line-height:1.6}
+.pipe-step::after{
+  content:"➜";position:absolute;right:-14px;top:50%;transform:translateY(-50%);
+  color:var(--accent);font-size:20px;font-weight:700;z-index:2;
+}
+.pipe-step:last-child::after{display:none}
+
+/* timeline */
+.timeline{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.tl{
+  background:var(--paper-2);border:1.5px solid var(--border);
+  padding:12px 8px;text-align:center;position:relative;
+  box-shadow:2px 2px 0 var(--ink);
+}
+.tl .yr{font-size:22px;font-weight:800;color:var(--accent)}
+.tl .ev{font-size:13px;font-weight:800;margin-top:4px}
+.tl .desc{font-size:11px;color:var(--ink-2);margin-top:4px;line-height:1.5}
+
+/* abilities */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.cap{
+  background:var(--paper);border:1.5px solid var(--border);padding:16px;
+  box-shadow:3px 3px 0 var(--ink);
+}
+.cap .icon{
+  width:40px;height:40px;display:flex;align-items:center;justify-content:center;
+  border:1.5px solid var(--ink);background:var(--paper-2);
+  margin-bottom:10px;font-size:22px;
+}
+.cap h3{font-size:15px;font-weight:800;margin-bottom:4px}
+.cap .tag{font-size:10px;color:var(--accent);letter-spacing:2px;margin-bottom:6px}
+.cap p{font-size:13px;line-height:1.7;color:var(--ink-2)}
+
+/* family */
+.fam{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fm{
+  background:var(--paper);border:1.5px solid var(--border);padding:16px;
+  box-shadow:3px 3px 0 var(--ink-2);
+}
+.fm .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.fm .name{font-size:18px;font-weight:800}
+.fm .org{font-size:10px;letter-spacing:2px;color:var(--accent);text-transform:uppercase}
+.fm p{font-size:13px;line-height:1.7;color:var(--ink-2)}
+.fm .pills{margin-top:8px;display:flex;gap:5px;flex-wrap:wrap}
+.fm .pill{
+  font-size:11px;border:1px solid var(--ink);padding:2px 7px;background:var(--paper-2);
+}
+
+/* myth list */
+.myth{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.myth .m{
+  background:var(--paper);border:1.5px dashed var(--accent);padding:14px;
+  position:relative;
+}
+.myth .m .x{
+  position:absolute;top:-12px;left:14px;background:var(--paper-2);
+  color:var(--accent);font-size:11px;letter-spacing:2px;font-weight:800;
+  padding:2px 8px;border:1.5px solid var(--accent);
+}
+.myth .m h4{font-size:14px;font-weight:800;margin:6px 0 4px}
+.myth .m p{font-size:13px;line-height:1.7;color:var(--ink-2)}
+
+/* outro */
+.outro{
+  margin-top:30px;text-align:center;
+  background:var(--paper-3);border:2px solid var(--ink);
+  padding:24px 20px;position:relative;
+  box-shadow:4px 4px 0 var(--accent);
+}
+.outro h3{font-size:22px;font-weight:800;letter-spacing:1px;margin-bottom:8px}
+.outro p{font-size:14px;color:var(--ink-2);max-width:520px;margin:0 auto;line-height:1.85;font-style:italic}
+.outro .quote-mark{font-size:36px;color:var(--accent);line-height:1}
+
+/* stamp + watermark */
+.stamp{
+  position:absolute;bottom:24px;right:30px;
+  width:84px;height:84px;border:2px solid var(--accent);border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:var(--accent);font-size:11px;line-height:1.3;text-align:center;
+  transform:rotate(-12deg);opacity:.78;font-weight:800;letter-spacing:1px;
+}
+.stamp::before{content:"";position:absolute;inset:6px;border:1px solid var(--accent);border-radius:50%}
+.watermark{position:absolute;bottom:14px;left:24px;font-size:11px;color:var(--border);font-style:italic}
+
+@media(max-width:780px){
+  h1{font-size:38px}
+  .two-col,.stats,.timeline,.grid3,.fam,.myth,.pipe{grid-template-columns:1fr 1fr}
+  .pipe-step::after{display:none}
+  h1 br{display:none}
+}
+</style>
+</head>
+<body>
+<div class="page">
+<div class="poster">
+  <div class="corner tl"></div><div class="corner tr"></div>
+  <div class="corner bl"></div><div class="corner br"></div>
+
+  <div class="head">
+    <div class="topline">A I &nbsp;·&nbsp; Vol. 026 &nbsp;·&nbsp; Field Notebook on Large Language Models &nbsp;·&nbsp; June 2026</div>
+    <h1>大 <span class="red">·</span> 语 <span class="green">·</span> 言 <span class="red">·</span> 模 <span class="green">·</span> 型<br>
+        <span style="font-size:22px;letter-spacing:6px;font-weight:700">— 一张牛皮纸看懂 LLM —</span></h1>
+    <div class="subtitle">它不是魔法，是一台<span class="accent">超大号下一个词预测机</span></div>
+  </div>
+
+  <!-- Hero illustration -->
+  <div class="hero">
+    <svg viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg">
+      <g fill="none" stroke="#3E2C1C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <!-- 中央：装着大脑的玻璃罐 -->
+        <rect x="240" y="40" width="120" height="130" rx="6"/>
+        <ellipse cx="300" cy="40" rx="60" ry="10"/>
+        <ellipse cx="300" cy="40" rx="60" ry="10" stroke-dasharray="2 3"/>
+        <!-- brain -->
+        <path d="M260 90 Q252 72 270 68 Q282 58 296 70 Q310 64 318 80 Q330 88 322 102 Q330 116 314 122 Q300 134 286 120 Q268 124 262 106 Q252 96 260 90 Z"/>
+        <path d="M276 86 Q286 90 282 102 M298 86 Q294 100 304 106 M286 110 Q296 114 308 110"/>
+        <text x="300" y="160" text-anchor="middle" font-size="11" fill="#9C2A1A" stroke="none" font-weight="800" font-family="Noto Serif SC, Songti SC">L L M</text>
+        <!-- 罐子标签 -->
+        <rect x="252" y="135" width="96" height="22" fill="#F0E4CC"/>
+        <text x="300" y="151" text-anchor="middle" font-size="10" fill="#3E2C1C" stroke="none" font-family="Songti SC">几千亿参数 · 一张概率曲面</text>
+
+        <!-- 左：书本 + tokens -->
+        <g transform="translate(80,70)">
+          <path d="M0 0 L60 0 L60 70 L0 70 Z"/>
+          <path d="M0 0 L60 0 M0 12 L60 12 M0 70 L60 70"/>
+          <path d="M8 24 H52 M8 32 H46 M8 40 H50 M8 48 H40 M8 56 H52"/>
+          <text x="30" y="92" text-anchor="middle" font-size="11" fill="#3E2C1C" stroke="none" font-family="Songti SC">语料 · 文本</text>
+        </g>
+        <!-- 数据流箭头 -->
+        <path d="M150 105 Q200 95 235 100" stroke-dasharray="3 4"/>
+        <path d="M225 95 L235 100 L225 105"/>
+
+        <!-- 右：齿轮 + 输出 -->
+        <g transform="translate(400,70)">
+          <circle cx="40" cy="35" r="26"/>
+          <circle cx="40" cy="35" r="14" stroke-dasharray="2 3"/>
+          <path d="M40 5 L40 -5 M40 65 L40 75 M10 35 L0 35 M70 35 L80 35 M18 13 L11 6 M62 57 L69 64 M18 57 L11 64 M62 13 L69 6"/>
+          <text x="40" y="92" text-anchor="middle" font-size="11" fill="#5C8A3A" stroke="none" font-family="Songti SC" font-weight="800">下一个词</text>
+        </g>
+        <path d="M362 105 Q392 100 410 100" stroke-dasharray="3 4"/>
+        <path d="M404 95 L414 100 L404 105"/>
+
+        <!-- 底部羽毛笔 + 怀表 -->
+        <g transform="translate(120,180)">
+          <path d="M0 0 L40 -28 L52 -22 L14 6 Z"/>
+          <path d="M14 6 L8 14"/>
+        </g>
+        <g transform="translate(450,180)">
+          <circle cx="14" cy="0" r="14"/>
+          <path d="M14 -8 L14 0 L20 4"/>
+          <path d="M14 -16 L14 -20 M14 16 L14 20 M-2 0 L-6 0 M30 0 L34 0"/>
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Section 01: Stats -->
+  <div class="section">
+    <div class="h2-row">
+      <span class="ch">CH 01</span>
+      <h2>大数字一览</h2>
+      <span class="lead">这台机器有多"大"</span>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="n">175B</div><div class="l">GPT-3 参数量</div></div>
+      <div class="stat"><div class="n">15T</div><div class="l">训练 token 量</div></div>
+      <div class="stat"><div class="n">128K</div><div class="l">上下文窗口</div></div>
+      <div class="stat"><div class="n">2017</div><div class="l">Transformer 诞生</div></div>
+    </div>
+  </div>
+
+  <!-- Section 02: 是什么 -->
+  <div class="section">
+    <div class="h2-row">
+      <span class="ch">CH 02</span>
+      <h2>它到底是什么</h2>
+      <span class="lead">一句话就能讲清楚</span>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <h3><span class="num">1</span>本质：下一个词预测器</h3>
+        <p>给一段话，LLM 输出每个可能下一个词的<span class="accent">概率分布</span>；连续预测就成了对话、写作、翻译。</p>
+        <p style="margin-top:8px">它的"知识"被压缩进<span class="accent-g">几千亿权重参数</span>里 —— 像把一座图书馆压扁成一张高维曲面。</p>
+      </div>
+      <div class="card">
+        <h3><span class="num">2</span>能力来源：海量+涌现</h3>
+        <p>当模型规模与数据量跨过某个临界点，<span class="accent">few-shot 学习</span>、<span class="accent">逻辑推理</span>、<span class="accent">代码生成</span> 这些能力会突然冒出来 —— 这就是著名的"涌现现象"。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 03: 三个误解 -->
+  <div class="section">
+    <div class="h2-row">
+      <span class="ch">CH 03</span>
+      <h2>三个常见误解</h2>
+      <span class="lead">劝退一下</span>
+    </div>
+    <div class="myth">
+      <div class="m"><div class="x">✗ MYTH 1</div><h4>它不是搜索引擎</h4><p>无法实时联网，除非接外部工具（联网/检索/MCP）。</p></div>
+      <div class="m"><div class="x">✗ MYTH 2</div><h4>它不是数据库</h4><p>记忆是模糊的、可能编造（hallucination）。</p></div>
+      <div class="m"><div class="x">✗ MYTH 3</div><h4>它不"理解"</h4><p>只是统计意义上做得很像理解，不是真懂。</p></div>
+    </div>
+  </div>
+
+  <!-- Section 04: pipeline -->
+  <div class="section">
+    <div class="h2-row">
+      <span class="ch">CH 04</span>
+      <h2>它是怎么炼成的</h2>
+      <span class="lead">从原始文本到能聊天，4 步</span>
+    </div>
+    <div class="pipe">
+      <div class="pipe-step"><div class="n">STEP 01</div><div class="t">收集语料</div><div class="d">网页 / 书 / 代码 / 论文，TB 级清洗</div></div>
+      <div class="pipe-step"><div class="n">STEP 02</div><div class="t">预训练</div><div class="d">GPU 集群猜下一个 token，烧几月几千万美元</div></div>
+      <div class="pipe-step"><div class="n">STEP 03</div><div class="t">指令微调 SFT</div><div class="d">用人工写的"问答对"教它听话</div></div>
+      <div class="pipe-step"><div class="n">STEP 04</div><div class="t">RLHF / DPO</div><div class="d">用人类偏好数据校准答案，更安全更有用</div></div>
+    </div>
+  </div>
+
+  <!-- Section 05: timeline -->
+  <div class="section">
+    <div class="h2-row">
+      <span class="ch">CH 05</span>
+      <h2>八年改变世界</h2>
+      <span class="lead">5 个里程碑时刻</span>
+    </div>
+    <div class="timeline">
+      <div class="tl"><div class="yr">2017</div><div class="ev">Transformer</div><div class="desc">"Attention Is All You Need"</div></div>
+      <div class="tl"><div class="yr">2020</div><div class="ev">GPT-3</div><div class="desc">175B，涌现 few-shot</div></div>
+      <div class="tl"><div class="yr">2022</div><div class="ev">ChatGPT</div><div class="desc">2 月破亿，AI 进大众视野</div></div>
+      <div class="tl"><div class="yr">2024</div><div class="ev">多模态推理</div><div class="desc">GPT-4o / Claude 3.5 / Gemini</div></div>
+      <div class="tl"><div class="yr">2026</div><div class="ev">Agent 元年</div><div class="desc">从聊天到执行任务</div></div>
+    </div>
+  </div>
+
+  <!-- Section 06: abilities -->
+  <div class="section">
+    <div class="h2-row">
+      <span class="ch">CH 06</span>
+      <h2>六大核心能力</h2>
+      <span class="lead">覆盖 80% 应用场景</span>
+    </div>
+    <div class="grid3">
+      <div class="cap"><div class="icon">📝</div><div class="tag">GENERATION</div><h3>文本生成</h3><p>写文案、报告、邮件、小说，从一句 prompt 到一万字。</p></div>
+      <div class="cap"><div class="icon">⚙️</div><div class="tag">CODING</div><h3>代码助手</h3><p>补全 / 调试 / 重构 / 测试。Cursor、Copilot 都靠它。</p></div>
+      <div class="cap"><div class="icon">🌐</div><div class="tag">TRANSLATE</div><h3>翻译改写</h3><p>跨 100+ 语种，保留语气与术语，远超传统机翻。</p></div>
+      <div class="cap"><div class="icon">📑</div><div class="tag">SUMMARIZE</div><h3>总结抽取</h3><p>会议纪要、PDF 摘要、表格提取，10 分钟干 1 小时活。</p></div>
+      <div class="cap"><div class="icon">🧠</div><div class="tag">REASONING</div><h3>逻辑推理</h3><p>数学题、SQL 编写、多步规划。o1 / DeepSeek-R1 把推理推向新高度。</p></div>
+      <div class="cap"><div class="icon">🤖</div><div class="tag">AGENT</div><h3>调用工具</h3><p>读邮件、查日历、写文档、调 API。LLM 不再只是聊天。</p></div>
+    </div>
+  </div>
+
+  <!-- Section 07: family -->
+  <div class="section">
+    <div class="h2-row">
+      <span class="ch">CH 07</span>
+      <h2>2026 主流玩家</h2>
+      <span class="lead">四方对垒</span>
+    </div>
+    <div class="fam">
+      <div class="fm">
+        <div class="row"><span class="name">GPT 系列</span><span class="org">OpenAI · USA</span></div>
+        <p>消费端最知名品牌，多模态 / Agent / Sora 集成最快，闭源。</p>
+        <div class="pills"><span class="pill">GPT-5</span><span class="pill">GPT-4o</span><span class="pill">o3</span></div>
+      </div>
+      <div class="fm">
+        <div class="row"><span class="name">Claude</span><span class="org">Anthropic · USA</span></div>
+        <p>长上下文（200K），写作和代码口碑最佳，开发者最爱。</p>
+        <div class="pills"><span class="pill">Opus 4</span><span class="pill">Sonnet 4</span><span class="pill">Haiku</span></div>
+      </div>
+      <div class="fm">
+        <div class="row"><span class="name">Gemini</span><span class="org">Google · USA</span></div>
+        <p>原生多模态 + 1M 超长上下文，深度集成 Workspace 与 Android。</p>
+        <div class="pills"><span class="pill">Gemini 2.5 Pro</span><span class="pill">Flash</span></div>
+      </div>
+      <div class="fm">
+        <div class="row"><span class="name">国产开源派</span><span class="org">CHINA · OPEN</span></div>
+        <p>性价比与私有化部署王者，DeepSeek R1 / Qwen 3 / GLM-4 / Hunyuan。</p>
+        <div class="pills"><span class="pill">DeepSeek</span><span class="pill">Qwen</span><span class="pill">GLM</span><span class="pill">Hunyuan</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Outro -->
+  <div class="outro">
+    <div class="quote-mark">❝</div>
+    <h3>所以，LLM 不是魔法。</h3>
+    <p>它是一种新的"基础设施" —— 像电和云。<br>
+       理解它的边界（会编造、有截止日期、要喂上下文），<br>
+       就能把它用得 <span class="accent">又稳又狠</span>。</p>
+  </div>
+
+  <div class="stamp">LLM<br>FIELD<br>2026</div>
+  <div class="watermark">@WorkBuddy · Mr. Zhou</div>
+</div>
+</div>
+</body>
+</html>
