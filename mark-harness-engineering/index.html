@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>马克 · Harness Engineering 学习笔记</title>
+<style>
+:root{
+  --brand:#0052d9;
+  --brand-deep:#003cab;
+  --brand-light:#edf4ff;
+  --ink:#242424;
+  --ink-2:#4b4b4b;
+  --ink-3:#7a7a7a;
+  --line:#e5e6eb;
+  --line-blue:#d4e3fc;
+  --bg:#f3f4f6;
+  --card:#ffffff;
+  --code-bg:#0d1b2a;
+  --hl:#66b1ff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;line-height:1.8;font-size:15px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px 80px}
+header.hero{background:linear-gradient(135deg,#001a45 0%,#0052d9 55%,#0077ff 100%);color:#fff;padding:56px 44px 44px;border-radius:0 0 18px 18px;margin-bottom:24px;position:relative;overflow:hidden}
+header.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(255,255,255,.12),transparent 60%);pointer-events:none}
+header.hero .platform{display:inline-block;font-size:12px;letter-spacing:.12em;background:rgba(255,255,255,.15);padding:5px 12px;border-radius:999px;margin-bottom:16px;backdrop-filter:blur(4px)}
+header.hero h1{font-size:30px;margin:0 0 12px;font-weight:700;line-height:1.3}
+header.hero .meta{margin:8px 0;font-size:14px;color:rgba(255,255,255,.85)}
+header.hero .meta a{color:#a5d3ff;text-decoration:none}
+header.hero .meta a:hover{text-decoration:underline}
+header.hero .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-top:24px}
+header.hero .stat{background:rgba(255,255,255,.08);border-radius:10px;padding:14px 16px;backdrop-filter:blur(4px)}
+header.hero .stat .num{font-size:22px;font-weight:700;color:var(--hl)}
+header.hero .stat .lbl{font-size:12px;color:rgba(255,255,255,.75);margin-top:2px}
+.summary{background:linear-gradient(135deg,#edf4ff 0%,#f0f7ff 60%,#f5f9ff 100%);border:1px solid var(--line-blue);border-radius:14px;padding:28px 32px;margin-bottom:28px}
+.summary h2{font-size:18px;color:var(--brand-deep);margin:0 0 14px;font-weight:600;padding-left:12px;border-left:4px solid var(--brand)}
+.summary p{margin:8px 0 12px;color:var(--ink-2)}
+.summary p:last-child{margin-bottom:0}
+.summary strong{color:var(--brand-deep);font-weight:600}
+section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:32px 36px;margin-bottom:22px;box-shadow:0 1px 2px rgba(16,38,76,.04)}
+section h2{font-size:22px;font-weight:700;margin:0 0 18px;color:var(--brand-deep);padding-left:14px;border-left:4px solid var(--brand)}
+section h3{font-size:18px;font-weight:600;margin:24px 0 12px;color:var(--ink)}
+section h4{font-size:15px;font-weight:600;margin:18px 0 8px;color:var(--ink-2)}
+p{margin:8px 0 12px;color:var(--ink-2)}
+strong{color:var(--brand-deep);font-weight:600}
+ul,ol{padding-left:24px;margin:8px 0 14px;color:var(--ink-2)}
+li{margin:4px 0}
+code{background:#f1f4fa;color:var(--brand-deep);padding:2px 6px;border-radius:4px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13px}
+pre{background:var(--code-bg);color:#e5edff;padding:16px 18px;border-radius:8px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13px;line-height:1.6}
+blockquote{background:var(--brand-light);border-left:3px solid var(--brand);padding:12px 18px;margin:14px 0;border-radius:6px;color:var(--brand-deep);font-size:14px}
+blockquote p{margin:4px 0;color:var(--brand-deep)}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+thead th{background:var(--brand-light);color:var(--brand-deep);padding:11px 13px;text-align:left;font-weight:600;font-size:13px;border-bottom:1px solid var(--line-blue)}
+tbody td{padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-2)}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#fafbfd}
+.svg-card{margin:18px 0;padding:18px;background:var(--brand-light);border:1px solid var(--line-blue);border-radius:10px}
+.svg-card .svg-title{font-size:13px;color:var(--brand-deep);font-weight:600;margin-bottom:10px}
+.svg-card svg{width:100%;height:auto;display:block}
+footer{margin-top:24px;padding:20px;text-align:center;color:var(--ink-3);font-size:12px;border-top:1px dashed var(--line)}
+@media (max-width:720px){
+  header.hero{padding:36px 22px 28px}
+  header.hero h1{font-size:22px}
+  section{padding:22px 18px}
+  .summary{padding:20px 18px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="platform">📺 B站 · 马克的技术工作坊</span>
+  <h1>Harness Engineering 到底是什么？<br/>概念、实战与争议，一次全部讲清楚</h1>
+  <div class="meta">🎬 视频时长：37 分 24 秒 · 单 P</div>
+  <div class="meta">🔗 视频链接：<a href="https://www.bilibili.com/video/BV12LR1B3EUt/" target="_blank">https://www.bilibili.com/video/BV12LR1B3EUt/</a></div>
+  <div class="stats">
+    <div class="stat"><div class="num">5</div><div class="lbl">核心模块</div></div>
+    <div class="stat"><div class="num">12</div><div class="lbl">专有名词</div></div>
+    <div class="stat"><div class="num">8</div><div class="lbl">SVG 图</div></div>
+    <div class="stat"><div class="num">2026</div><div class="lbl">命名年份</div></div>
+  </div>
+</header>
+
+<div class="summary">
+  <h2>📋 内容综述</h2>
+  <p>这一期视频回答的是 2026 年 AI 圈<strong>最热的新名词</strong>——<strong>Harness Engineering</strong>——到底是什么。马克用"<strong>Agent = Model + Harness</strong>"这一行简洁公式开场，把 Harness 解释成"套在 LLM 这匹烈马身上的马具"：模型决定"想做什么"，<strong>Harness 决定模型能看到什么、能用什么工具、失败后怎么办</strong>。它不是一项新技术，而是把过去两年零散的 agent 工程实践第一次<strong>系统命名</strong>。</p>
+  <p>视频按"<strong>是什么 → 与谁有关 → 谁在干 → 从哪来 → 是不是炒作</strong>"五段式展开：先用层次图把 <strong>Prompt Engineering（2022-2023）→ Context Engineering（2024-2025）→ Harness Engineering（2026）</strong> 串成一条递进的研究范围扩展史；再分别拆解 <strong>Anthropic（Claude Code 的 nO 循环、Ralph Wiggum 双 Agent 架构、Managed Agents 三件解耦）</strong> 与 <strong>OpenAI（Codex 三层架构、AGENTS.md 极简化、subagent 工作流、百万行实验）</strong> 的实战路线，让读者直观感受到"同一个目标、两条工程路径"。</p>
+  <p>后半段，马克把镜头拉回<strong>起源争议</strong>：词是 2026 年 2 月被 <strong>Mitchell Hashimoto</strong> 命名的，但概念早在 2024 年 11 月就被 Anthropic 用过；OpenAI 在 2026-02-11 跟进发文一举引爆词条。最后回到价值判断：<strong>它是不是噱头？</strong> 马克的结论与 Anthropic 一致——<strong>"不是噱头，但也不是终局"</strong>：随着模型变强，部分 harness 会被吞回模型权重；但 harness 也会<strong>变形以解锁更复杂任务</strong>，是 AI 工程过渡期的必修课。</p>
+</div>
+
+<section>
+  <h2>一、Harness Engineering 是什么</h2>
+  <h3>1.1 一句话定义</h3>
+  <p>把 LLM 比作一匹会推理的烈马，<strong>Harness 就是套在它身上的马具</strong>——工具、上下文管理、权限、验证、记忆、回滚机制。<strong>Harness Engineering 就是设计这套马具的工程实践</strong>。</p>
+
+  <h3>1.2 核心公式（LangChain Harrison Chase 提出）</h3>
+  <blockquote><p><strong>Agent = Model + Harness</strong></p></blockquote>
+  <p>它的含义是：<strong>Model</strong> 决定"会推理多深"；<strong>Harness</strong> 决定"推理能落地多远"——两者乘积才是 Agent 的真实能力。</p>
+
+  <div class="svg-card">
+    <div class="svg-title">📐 图 1：Agent = Model + Harness 的乘积关系</div>
+    <svg viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="gradModel" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#0077ff"/><stop offset="1" stop-color="#0052d9"/>
+        </linearGradient>
+        <linearGradient id="gradHarness" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#5b8def"/><stop offset="1" stop-color="#003cab"/>
+        </linearGradient>
+      </defs>
+      <rect x="40" y="60" width="200" height="120" rx="14" fill="url(#gradModel)"/>
+      <text x="140" y="115" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">Model</text>
+      <text x="140" y="140" text-anchor="middle" font-size="12" fill="#cfe1ff">推理深度</text>
+      <text x="140" y="158" text-anchor="middle" font-size="11" fill="#cfe1ff">"想做什么"</text>
+
+      <text x="280" y="128" text-anchor="middle" font-size="34" font-weight="700" fill="#0052d9">+</text>
+
+      <rect x="320" y="60" width="200" height="120" rx="14" fill="url(#gradHarness)"/>
+      <text x="420" y="115" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">Harness</text>
+      <text x="420" y="140" text-anchor="middle" font-size="12" fill="#cfe1ff">落地能力</text>
+      <text x="420" y="158" text-anchor="middle" font-size="11" fill="#cfe1ff">"能干什么"</text>
+
+      <text x="560" y="128" text-anchor="middle" font-size="34" font-weight="700" fill="#0052d9">=</text>
+
+      <rect x="600" y="60" width="120" height="120" rx="14" fill="#fff" stroke="#0052d9" stroke-width="2"/>
+      <text x="660" y="115" text-anchor="middle" font-size="20" font-weight="700" fill="#003cab">Agent</text>
+      <text x="660" y="140" text-anchor="middle" font-size="12" fill="#4b4b4b">真实能力</text>
+      <text x="660" y="158" text-anchor="middle" font-size="11" fill="#4b4b4b">= 推理 × 落地</text>
+
+      <text x="380" y="220" text-anchor="middle" font-size="13" fill="#7a7a7a">前沿模型差距越来越小，胜负在 Harness 设计</text>
+    </svg>
+  </div>
+
+  <h3>1.3 更精确的工程定义（Mitchell Hashimoto）</h3>
+  <blockquote><p>"<strong>每当 Agent 犯一次错，就花时间做工程改造，让它再也不犯同样的错。</strong>"</p></blockquote>
+  <p>这把 Harness Engineering 从"形容词"变成了"动作"——它是一种<strong>反思 → 工程化 → 沉淀</strong>的迭代循环。</p>
+
+  <h3>1.4 八大核心组件</h3>
+  <table>
+    <thead><tr><th>#</th><th>组件</th><th>作用</th><th>典型实现</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><strong>Prompt / 上下文组装</strong></td><td>把用户意图 + 系统指令 + 历史拼成一次推理输入</td><td>XML 标签、模板引擎</td></tr>
+      <tr><td>2</td><td><strong>工具系统</strong></td><td>提供 read / write / bash / grep 等原语</td><td>Anthropic 18 个原子工具</td></tr>
+      <tr><td>3</td><td><strong>执行循环</strong></td><td><code>while tool_call: 执行 → 观察 → 再调模型</code></td><td>nO Loop、Ralph Loop</td></tr>
+      <tr><td>4</td><td><strong>Sandbox / 权限</strong></td><td>限定模型能动什么文件、能跑什么命令</td><td>seatbelt、Landlock、容器</td></tr>
+      <tr><td>5</td><td><strong>Checkpoint & Session</strong></td><td>append-only 事件日志，可恢复</td><td>session.log、git commit</td></tr>
+      <tr><td>6</td><td><strong>Verification（验证回路）</strong></td><td>测试、Linter、视觉、LLM-as-judge</td><td>tsc、eslint、screenshot diff</td></tr>
+      <tr><td>7</td><td><strong>Subagent 编排</strong></td><td>子代理 fork / 并行 / worktree</td><td>Codex 三类 subagent</td></tr>
+      <tr><td>8</td><td><strong>Observability</strong></td><td>跟踪、评测、回放</td><td>LangSmith、Trace</td></tr>
+    </tbody>
+  </table>
+
+  <div class="svg-card">
+    <div class="svg-title">📐 图 2：Harness 的 8 大核心组件</div>
+    <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg">
+      <rect x="20" y="20" width="720" height="320" rx="16" fill="#fff" stroke="#d4e3fc" stroke-width="1"/>
+      <text x="380" y="50" text-anchor="middle" font-size="14" font-weight="600" fill="#003cab">Agent Harness 八件套</text>
+
+      <g>
+        <rect x="50" y="80" width="160" height="60" rx="8" fill="#edf4ff" stroke="#0052d9" stroke-width="1.2"/>
+        <text x="130" y="106" text-anchor="middle" font-size="13" font-weight="600" fill="#003cab">① Prompt 组装</text>
+        <text x="130" y="124" text-anchor="middle" font-size="11" fill="#4b4b4b">XML / 模板引擎</text>
+      </g>
+      <g>
+        <rect x="230" y="80" width="160" height="60" rx="8" fill="#edf4ff" stroke="#0052d9" stroke-width="1.2"/>
+        <text x="310" y="106" text-anchor="middle" font-size="13" font-weight="600" fill="#003cab">② 工具系统</text>
+        <text x="310" y="124" text-anchor="middle" font-size="11" fill="#4b4b4b">原子工具 18 个</text>
+      </g>
+      <g>
+        <rect x="410" y="80" width="160" height="60" rx="8" fill="#edf4ff" stroke="#0052d9" stroke-width="1.2"/>
+        <text x="490" y="106" text-anchor="middle" font-size="13" font-weight="600" fill="#003cab">③ 执行循环</text>
+        <text x="490" y="124" text-anchor="middle" font-size="11" fill="#4b4b4b">nO / Ralph Loop</text>
+      </g>
+      <g>
+        <rect x="590" y="80" width="160" height="60" rx="8" fill="#edf4ff" stroke="#0052d9" stroke-width="1.2"/>
+        <text x="670" y="106" text-anchor="middle" font-size="13" font-weight="600" fill="#003cab">④ Sandbox 权限</text>
+        <text x="670" y="124" text-anchor="middle" font-size="11" fill="#4b4b4b">seatbelt / 容器</text>
+      </g>
+
+      <g>
+        <rect x="50" y="170" width="160" height="60" rx="8" fill="#dde9ff" stroke="#003cab" stroke-width="1.2"/>
+        <text x="130" y="196" text-anchor="middle" font-size="13" font-weight="600" fill="#003cab">⑤ Checkpoint</text>
+        <text x="130" y="214" text-anchor="middle" font-size="11" fill="#4b4b4b">session.log / git</text>
+      </g>
+      <g>
+        <rect x="230" y="170" width="160" height="60" rx="8" fill="#dde9ff" stroke="#003cab" stroke-width="1.2"/>
+        <text x="310" y="196" text-anchor="middle" font-size="13" font-weight="600" fill="#003cab">⑥ 验证回路</text>
+        <text x="310" y="214" text-anchor="middle" font-size="11" fill="#4b4b4b">test / lint / judge</text>
+      </g>
+      <g>
+        <rect x="410" y="170" width="160" height="60" rx="8" fill="#dde9ff" stroke="#003cab" stroke-width="1.2"/>
+        <text x="490" y="196" text-anchor="middle" font-size="13" font-weight="600" fill="#003cab">⑦ Subagent 编排</text>
+        <text x="490" y="214" text-anchor="middle" font-size="11" fill="#4b4b4b">fork / worktree</text>
+      </g>
+      <g>
+        <rect x="590" y="170" width="160" height="60" rx="8" fill="#dde9ff" stroke="#003cab" stroke-width="1.2"/>
+        <text x="670" y="196" text-anchor="middle" font-size="13" font-weight="600" fill="#003cab">⑧ Observability</text>
+        <text x="670" y="214" text-anchor="middle" font-size="11" fill="#4b4b4b">trace / 评测</text>
+      </g>
+
+      <rect x="180" y="265" width="400" height="60" rx="10" fill="#0052d9"/>
+      <text x="380" y="290" text-anchor="middle" font-size="14" font-weight="600" fill="#fff">8 个组件作为有机系统协作</text>
+      <text x="380" y="310" text-anchor="middle" font-size="12" fill="#cfe1ff">才算真正的 Harness Engineering</text>
+    </svg>
+  </div>
+
+  <blockquote><p>💡 <strong>关键认知</strong>：harness 不是某一项工具，而是<strong>整套外壳</strong>。把 8 个组件单独做都不算 harness engineering，只有当它们<strong>作为一个有机系统协作</strong>时才算。</p></blockquote>
+</section>
+
+<section>
+  <h2>二、与 Prompt / Context Engineering 的关系</h2>
+  <h3>2.1 一句话</h3>
+  <p>三者是研究范围<strong>层层向外扩展</strong>的递进关系，<strong>不是互斥而是包含</strong>。</p>
+
+  <h3>2.2 三层递进对比</h3>
+  <table>
+    <thead><tr><th>层</th><th>关注点</th><th>代表性问题</th><th>时代</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Prompt Engineering</strong></td><td>一句话怎么问</td><td>"如何让模型 zero-shot 也答对？"</td><td>2022-2023</td></tr>
+      <tr><td><strong>Context Engineering</strong></td><td>整个上下文窗里塞什么、怎么压</td><td>"RAG 后召回哪些片段？多轮如何压缩？"</td><td>2024-2025</td></tr>
+      <tr><td><strong>Harness Engineering</strong></td><td>模型之外的整套执行系统</td><td>"Agent 失败后怎么自动恢复？"</td><td>2026</td></tr>
+    </tbody>
+  </table>
+
+  <div class="svg-card">
+    <div class="svg-title">📐 图 3：从 Prompt 到 Harness 的研究范围扩展</div>
+    <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="380" cy="170" rx="340" ry="120" fill="#edf4ff" stroke="#0052d9" stroke-width="1.2"/>
+      <text x="380" y="74" text-anchor="middle" font-size="14" font-weight="600" fill="#003cab">Harness Engineering · 2026</text>
+      <text x="380" y="92" text-anchor="middle" font-size="11" fill="#4b4b4b">模型之外的整套执行系统</text>
+
+      <ellipse cx="380" cy="180" rx="240" ry="90" fill="#dde9ff" stroke="#003cab" stroke-width="1.2"/>
+      <text x="380" y="116" text-anchor="middle" font-size="13" font-weight="600" fill="#003cab">Context Engineering · 2024–2025</text>
+      <text x="380" y="134" text-anchor="middle" font-size="11" fill="#4b4b4b">上下文窗里塞什么</text>
+
+      <ellipse cx="380" cy="200" rx="140" ry="60" fill="#0052d9"/>
+      <text x="380" y="190" text-anchor="middle" font-size="13" font-weight="600" fill="#fff">Prompt Engineering · 2022–2023</text>
+      <text x="380" y="208" text-anchor="middle" font-size="11" fill="#cfe1ff">一句话怎么问</text>
+
+      <text x="380" y="300" text-anchor="middle" font-size="12" fill="#7a7a7a">外层包含内层 · 关注边界不断外移</text>
+    </svg>
+  </div>
+
+  <h3>2.3 Harness Engineering 的关键洞察</h3>
+  <blockquote><p>"Harness engineering 是 context engineering 的<strong>延伸</strong>，趋势是<strong>把更多上下文控制权交给模型自己</strong>。" —— LangChain Harrison Chase</p></blockquote>
+  <p>这背后是一个<strong>经济学逻辑</strong>：</p>
+  <ul>
+    <li>前沿模型差距越来越小（GPT / Claude / Gemini 顶尖模型只差几个百分点）；</li>
+    <li>用得好不好不再取决于"换更强的模型"，而是<strong>取决于 harness 设计</strong>；</li>
+    <li>因此 Harness Engineering 是<strong>工程红利时代</strong>的产物。</li>
+  </ul>
+
+  <blockquote><p>💡 <strong>关键认知</strong>：当所有人都在用同一档模型时，<strong>护城河就在 harness 里</strong>。这也是 Cursor、Devin、Codex 这些"看起来都用 GPT 系"的产品最终拉开差距的根因。</p></blockquote>
+</section>
+
+<section>
+  <h2>三、Anthropic 实战（Claude Code & Managed Agents）</h2>
+  <h3>3.1 一句话</h3>
+  <p>Anthropic 的 harness 哲学是"<strong>简单循环 + 原子工具 + 严格验证</strong>"，相信"<strong>原语优于集成</strong>"。</p>
+
+  <h3>3.2 Claude Code 的 nO 循环</h3>
+  <ul>
+    <li>内部代号 <strong>nO</strong>，单一扁平消息列表，不做花哨编排；</li>
+    <li>工具集只有约 <strong>18 个原子工具</strong>（Bash / Glob / Grep / LS / Read / Write / Edit / MultiEdit / WebSearch / WebFetch / TodoWrite / Task / ExitPlanMode 等）；</li>
+    <li>哲学："<strong>原语优于集成</strong>"——选 ripgrep 正则而非向量数据库，让模型自己学会组合原语。</li>
+  </ul>
+
+  <div class="svg-card">
+    <div class="svg-title">📐 图 4：Claude Code 的 nO 循环</div>
+    <svg viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg">
+      <rect x="40" y="60" width="160" height="60" rx="10" fill="#edf4ff" stroke="#0052d9" stroke-width="1.5"/>
+      <text x="120" y="86" text-anchor="middle" font-size="13" font-weight="600" fill="#003cab">用户消息</text>
+      <text x="120" y="104" text-anchor="middle" font-size="11" fill="#4b4b4b">user message</text>
+
+      <rect x="240" y="60" width="160" height="60" rx="10" fill="#0052d9"/>
+      <text x="320" y="86" text-anchor="middle" font-size="13" font-weight="600" fill="#fff">Claude 推理</text>
+      <text x="320" y="104" text-anchor="middle" font-size="11" fill="#cfe1ff">model.run()</text>
+
+      <rect x="440" y="60" width="160" height="60" rx="10" fill="#dde9ff" stroke="#003cab" stroke-width="1.5"/>
+      <text x="520" y="86" text-anchor="middle" font-size="13" font-weight="600" fill="#003cab">Tool Call</text>
+      <text x="520" y="104" text-anchor="middle" font-size="11" fill="#4b4b4b">Read / Bash / Edit</text>
+
+      <rect x="240" y="160" width="160" height="60" rx="10" fill="#fff" stroke="#0052d9" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <text x="320" y="186" text-anchor="middle" font-size="13" font-weight="600" fill="#003cab">tool result</text>
+      <text x="320" y="204" text-anchor="middle" font-size="11" fill="#4b4b4b">追加到消息列表</text>
+
+      <path d="M200 90 L240 90" fill="none" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arr)"/>
+      <path d="M400 90 L440 90" fill="none" stroke="#0052d9" stroke-width="1.5" marker-end="url(#arr)"/>
+      <path d="M520 120 Q520 160 400 190" fill="none" stroke="#003cab" stroke-width="1.5" marker-end="url(#arr)"/>
+      <path d="M240 190 Q120 190 120 120" fill="none" stroke="#003cab" stroke-width="1.5" marker-end="url(#arr)"/>
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#003cab"/>
+        </marker>
+      </defs>
+      <text x="120" y="155" font-size="11" fill="#7a7a7a">while tool_call: 循环执行</text>
+    </svg>
+  </div>
+
+  <h3>3.3 Ralph Wiggum Loop（双 Agent 接力）</h3>
+  <p>2024-11 Anthropic 首发，是"<strong>长链路 agent</strong>"的最早实践之一。</p>
+  <table>
+    <thead><tr><th>Agent</th><th>职责</th><th>持久化方式</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Initializer Agent</strong></td><td>建脚手架、写 init 脚本、初始化 <code>claude-progress.txt</code>、做第一个 git commit</td><td>把功能清单写进进度文件</td></tr>
+      <tr><td><strong>Coding Agent</strong></td><td>每个 session 读 git log + 进度文件，<strong>做一个</strong>功能就提交</td><td>用文件系统在 context window 之间传递记忆</td></tr>
+    </tbody>
+  </table>
+  <blockquote><p>💡 <strong>关键认知</strong>：context window 不能保存的东西，<strong>git 和文件系统能保存</strong>。Ralph Loop 用最朴素的 Unix 哲学解决了"agent 失忆"问题。</p></blockquote>
+
+  <h3>3.4 三 Agent GAN 架构（2026-03）</h3>
+  <table>
+    <thead><tr><th>Agent</th><th>职责</th><th>关键设计</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Planner</strong></td><td>拆需求成子任务清单</td><td>不写代码，只规划</td></tr>
+      <tr><td><strong>Generator</strong></td><td>根据计划写代码</td><td>拥有完整工具集</td></tr>
+      <tr><td><strong>Evaluator</strong></td><td>独立评估，避免"王婆卖瓜"</td><td><strong>完全隔离上下文</strong>，看不到 Generator 的"自圆其说"</td></tr>
+    </tbody>
+  </table>
+
+  <div class="svg-card">
+    <div class="svg-title">📐 图 5：三 Agent GAN 架构 vs Solo 方案的实证对比</div>
+    <svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg">
+      <rect x="40" y="40" width="320" height="200" rx="12" fill="#fef2f2" stroke="#dc2626" stroke-width="1"/>
+      <text x="200" y="70" text-anchor="middle" font-size="14" font-weight="600" fill="#dc2626">Solo（裸 Claude）</text>
+      <rect x="80" y="92" width="240" height="40" rx="8" fill="#fff" stroke="#fca5a5"/>
+      <text x="200" y="116" text-anchor="middle" font-size="13" fill="#7f1d1d">Claude · 单 Agent · 直接写</text>
+      <text x="80" y="160" font-size="12" fill="#4b4b4b">⏱ 时长：20 分钟</text>
+      <text x="80" y="182" font-size="12" fill="#4b4b4b">💰 成本：$9</text>
+      <text x="80" y="204" font-size="12" font-weight="600" fill="#dc2626">❌ 几乎不可用</text>
+
+      <rect x="400" y="40" width="320" height="200" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="1"/>
+      <text x="560" y="70" text-anchor="middle" font-size="14" font-weight="600" fill="#059669">Full Harness（三 Agent）</text>
+      <rect x="420" y="92" width="80" height="40" rx="8" fill="#fff" stroke="#6ee7b7"/>
+      <text x="460" y="116" text-anchor="middle" font-size="12" fill="#065f46">Planner</text>
+      <rect x="520" y="92" width="80" height="40" rx="8" fill="#fff" stroke="#6ee7b7"/>
+      <text x="560" y="116" text-anchor="middle" font-size="12" fill="#065f46">Generator</text>
+      <rect x="620" y="92" width="80" height="40" rx="8" fill="#fff" stroke="#6ee7b7"/>
+      <text x="660" y="116" text-anchor="middle" font-size="12" fill="#065f46">Evaluator</text>
+      <text x="420" y="160" font-size="12" fill="#4b4b4b">⏱ 时长：6 小时</text>
+      <text x="420" y="182" font-size="12" fill="#4b4b4b">💰 成本：$200</text>
+      <text x="420" y="204" font-size="12" font-weight="600" fill="#059669">✅ 产品级可用</text>
+    </svg>
+  </div>
+
+  <h3>3.5 Context Reset vs Compaction（解决 Context Anxiety）</h3>
+  <ul>
+    <li><strong>Context Anxiety</strong>（上下文焦虑）：Sonnet 4.5 出现的现象——模型感觉上下文快满就<strong>草草收尾</strong>；</li>
+    <li><strong>Compaction</strong>：摘要续写；</li>
+    <li><strong>Context Reset</strong>：清空重启，靠 session.log 与文件系统恢复状态。</li>
+  </ul>
+  <blockquote><p>💡 <strong>关键认知</strong>：Opus 4.5 之后这个问题<strong>消失了</strong>——也就是说 <strong>Context Reset 这个 harness 组件被模型升级"吃掉"了</strong>。这是 Harness Engineering 最魔幻也最焦虑的一面：<strong>你今天精心设计的脚手架，明天可能就被模型权重吸收</strong>。</p></blockquote>
+
+  <h3>3.6 Managed Agents（2026）三件解耦</h3>
+  <pre>[ Brain ]    = Claude + harness
+[ Hands ]    = sandbox / 容器 / 工具
+[ Session ]  = append-only 事件日志</pre>
+  <p>任何组件挂掉都能用 <code>wake(sessionId)</code> 重启——<strong>从"养宠物"变成"养牛"</strong>（pets vs cattle）。</p>
+</section>
+
+<section>
+  <h2>四、OpenAI 实战（Codex CLI / Cloud / Subagents）</h2>
+  <h3>4.1 一句话</h3>
+  <p>OpenAI 把 harness 做成"<strong>跨入口共用的统一中枢</strong>"——CLI、Web、IDE、App 共享同一个 Codex Core。</p>
+
+  <h3>4.2 Codex 三层架构</h3>
+
+  <div class="svg-card">
+    <div class="svg-title">📐 图 6：Codex 跨入口统一中枢架构</div>
+    <svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg">
+      <rect x="40" y="40" width="680" height="60" rx="10" fill="#edf4ff" stroke="#0052d9" stroke-width="1.2"/>
+      <text x="380" y="65" text-anchor="middle" font-size="14" font-weight="600" fill="#003cab">前端层 · Frontends</text>
+      <text x="100" y="90" text-anchor="middle" font-size="12" fill="#4b4b4b">CLI</text>
+      <text x="260" y="90" text-anchor="middle" font-size="12" fill="#4b4b4b">Web</text>
+      <text x="420" y="90" text-anchor="middle" font-size="12" fill="#4b4b4b">IDE 插件</text>
+      <text x="600" y="90" text-anchor="middle" font-size="12" fill="#4b4b4b">App / SDK</text>
+
+      <rect x="40" y="120" width="680" height="60" rx="10" fill="#dde9ff" stroke="#003cab" stroke-width="1.2"/>
+      <text x="380" y="145" text-anchor="middle" font-size="14" font-weight="600" fill="#003cab">App Server · 双向 JSON-RPC</text>
+      <text x="380" y="168" text-anchor="middle" font-size="11" fill="#4b4b4b">跨进程消息总线，所有前端共享同一个 Server</text>
+
+      <rect x="40" y="200" width="680" height="60" rx="10" fill="#0052d9"/>
+      <text x="380" y="225" text-anchor="middle" font-size="14" font-weight="600" fill="#fff">Codex Core · Agent 循环 + Subagent + Session</text>
+      <text x="380" y="248" text-anchor="middle" font-size="11" fill="#cfe1ff">所有入口共享同一个 harness 中枢</text>
+
+      <path d="M380 100 L380 120" stroke="#003cab" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <path d="M380 180 L380 200" stroke="#003cab" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <defs>
+        <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#003cab"/>
+        </marker>
+      </defs>
+    </svg>
+  </div>
+
+  <blockquote><p>💡 <strong>关键认知</strong>：为什么 "Codex 在自家 UI 比通用聊天框感觉更好"？因为所有入口共享<strong>同一 harness</strong>，而不是每家产品重新造一遍。</p></blockquote>
+
+  <h3>4.3 百万行实验（被业界反复引用的实证）</h3>
+  <table>
+    <thead><tr><th>维度</th><th>数据</th></tr></thead>
+    <tbody>
+      <tr><td>团队规模</td><td>3 → 7 人</td></tr>
+      <tr><td>时长</td><td>5 个月</td></tr>
+      <tr><td>代码量</td><td>~100 万行</td></tr>
+      <tr><td>PR 数量</td><td>1500 个</td></tr>
+      <tr><td><strong>限制</strong></td><td><strong>全程不准人工写一行代码</strong></td></tr>
+    </tbody>
+  </table>
+  <p>结果：生产线上跑、有真实用户。这次实验被认为是"<strong>harness engineering 工业化可行性</strong>"的最强证明。</p>
+
+  <h3>4.4 Harness 优化三件套</h3>
+  <table>
+    <thead><tr><th>招数</th><th>做法</th><th>收益</th></tr></thead>
+    <tbody>
+      <tr><td><strong>AGENTS.md 极简化</strong></td><td>从巨型文档压成 ~100 行索引</td><td>避免文档腐化，节省 context</td></tr>
+      <tr><td><strong>接 Chrome DevTools</strong></td><td>Codex 自己截屏验证 UI、要求服务启动 ≤800ms</td><td>UI 验证从"靠猜"变"靠看"</td></tr>
+      <tr><td><strong>后台任务清扫</strong></td><td>定期跑后台 Codex 任务清扫技术债与过时文档</td><td>harness 自我修复</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.5 Subagent 工作流</h3>
+  <table>
+    <thead><tr><th>类型</th><th>用途</th><th>上下文</th></tr></thead>
+    <tbody>
+      <tr><td><strong>default</strong></td><td>通用任务</td><td>共享父 sandbox</td></tr>
+      <tr><td><strong>worker</strong></td><td>重活、长任务</td><td>独立资源</td></tr>
+      <tr><td><strong>explorer</strong></td><td>探索性研究、读代码</td><td>独立但 read-only</td></tr>
+    </tbody>
+  </table>
+  <p>用户可以用自然语言显式触发：<strong>"派一个 agent 看 security，一个看 test gaps"</strong>。approval 跨线程冒泡，权限不丢失。</p>
+</section>
+
+<section>
+  <h2>五、Harness Engineering 的来源</h2>
+  <h3>5.1 一句话</h3>
+  <p>词是 2026 年 2 月被 <strong>Mitchell Hashimoto</strong>（HashiCorp 创始人）命名的，但概念早在 2024 年底就被 Anthropic 用过。</p>
+
+  <h3>5.2 关键时间线</h3>
+
+  <div class="svg-card">
+    <div class="svg-title">📐 图 7：Harness Engineering 词条爆发时间线（2024-11 → 2026-05）</div>
+    <svg viewBox="0 0 760 380" xmlns="http://www.w3.org/2000/svg">
+      <line x1="100" y1="40" x2="100" y2="360" stroke="#0052d9" stroke-width="2"/>
+
+      <circle cx="100" cy="60" r="6" fill="#0052d9"/>
+      <text x="120" y="56" font-size="13" font-weight="600" fill="#003cab">2024-11</text>
+      <text x="120" y="74" font-size="12" fill="#4b4b4b">Anthropic 首次用 "harness" 一词</text>
+      <text x="120" y="90" font-size="11" fill="#7a7a7a">《Effective harnesses for long-running agents》</text>
+
+      <circle cx="100" cy="115" r="8" fill="#dc2626"/>
+      <text x="120" y="111" font-size="13" font-weight="600" fill="#dc2626">2026-02-05 · 命名起点</text>
+      <text x="120" y="129" font-size="12" fill="#4b4b4b">Mitchell Hashimoto《My AI Adoption Journey》</text>
+      <text x="120" y="145" font-size="11" fill="#7a7a7a">第 5 节正式提出 "Harness Engineering"</text>
+
+      <circle cx="100" cy="170" r="6" fill="#0052d9"/>
+      <text x="120" y="166" font-size="13" font-weight="600" fill="#003cab">2026-02-11</text>
+      <text x="120" y="184" font-size="12" fill="#4b4b4b">OpenAI 跟进发文 · 词条引爆</text>
+
+      <circle cx="100" cy="210" r="6" fill="#0052d9"/>
+      <text x="120" y="206" font-size="13" font-weight="600" fill="#003cab">2026-02-17</text>
+      <text x="120" y="224" font-size="12" fill="#4b4b4b">Martin Fowler 站点跟进</text>
+
+      <circle cx="100" cy="250" r="6" fill="#0052d9"/>
+      <text x="120" y="246" font-size="13" font-weight="600" fill="#003cab">2026-03-10</text>
+      <text x="120" y="264" font-size="12" fill="#4b4b4b">LangChain：Agent = Model + Harness 公式</text>
+
+      <circle cx="100" cy="290" r="6" fill="#0052d9"/>
+      <text x="120" y="286" font-size="13" font-weight="600" fill="#003cab">2026-03-24</text>
+      <text x="120" y="304" font-size="12" fill="#4b4b4b">Anthropic 三 Agent GAN 架构发布</text>
+
+      <circle cx="100" cy="335" r="6" fill="#0052d9"/>
+      <text x="120" y="331" font-size="13" font-weight="600" fill="#003cab">2026-04-30 / 05-02</text>
+      <text x="120" y="349" font-size="12" fill="#4b4b4b">HN 讨论双双登顶 · 概念成熟期</text>
+    </svg>
+  </div>
+
+  <h3>5.3 词根来源</h3>
+  <ul>
+    <li><strong>Test Harness</strong>：传统软件工程的"测试外壳"；</li>
+    <li><strong>lm-evaluation-harness</strong>：开源 LLM 评测框架；</li>
+    <li>两者合流，借给了 agent 工程。</li>
+  </ul>
+  <blockquote><p>💡 <strong>关键认知</strong>：Harness Engineering 不是凭空发明的新词——它是<strong>老术语在新语境下的复用</strong>。这恰恰说明 agent 工程在向<strong>传统软件工程</strong>靠拢，而不是离开。</p></blockquote>
+</section>
+
+<section>
+  <h2>六、是噱头还是技术突破</h2>
+  <h3>6.1 一句话</h3>
+  <p><strong>不是噱头，但也不是终局</strong>——它是 AI 工程过渡期的必修课。</p>
+
+  <h3>6.2 质疑方观点</h3>
+  <table>
+    <thead><tr><th>论点</th><th>出处</th></tr></thead>
+    <tbody>
+      <tr><td>没有新技术——linter、任务拆解、评估全是旧工具旧瓶装新酒</td><td>HN 顶贴</td></tr>
+      <tr><td>模型变强会自动吸收 harness（Sonnet 4.5 → Opus 4.6 减少了 harness 复杂度）</td><td>Anthropic 自己承认</td></tr>
+      <tr><td>"是不是只是 retry logic 换个名字？"</td><td>HN 评论</td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.3 支持方观点</h3>
+  <table>
+    <thead><tr><th>论点</th><th>数据 / 出处</th></tr></thead>
+    <tbody>
+      <tr><td><strong>实证有效</strong>：同模型仅换 harness，效果显著提升</td><td>Archon PR 接受率 <strong>6.7% → 70%</strong>；LangChain Deep Agents 在 Terminal-Bench 2.0 把 <strong>52.8% → 66.5%</strong></td></tr>
+      <tr><td>第一次系统化命名了零散实践，让经验<strong>可传承</strong></td><td>LangChain、Anthropic 多篇 blog</td></tr>
+      <tr><td>Cursor 训练 Composer 时把 harness <strong>编进模型权重</strong>——证明它是真实抽象层</td><td>Cursor 工程博客</td></tr>
+    </tbody>
+  </table>
+
+  <div class="svg-card">
+    <div class="svg-title">📐 图 8：Harness Engineering 价值判断的两面</div>
+    <svg viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg">
+      <rect x="40" y="30" width="320" height="180" rx="12" fill="#fef2f2" stroke="#dc2626" stroke-width="1"/>
+      <text x="200" y="60" text-anchor="middle" font-size="14" font-weight="600" fill="#dc2626">质疑：是炒作？</text>
+      <text x="60" y="92" font-size="12" fill="#4b4b4b">• 没有新技术，旧瓶装新酒</text>
+      <text x="60" y="116" font-size="12" fill="#4b4b4b">• 模型变强会自动吸收 harness</text>
+      <text x="60" y="140" font-size="12" fill="#4b4b4b">• "只是 retry logic 换个名字"</text>
+      <text x="60" y="180" font-size="11" font-style="italic" fill="#7f1d1d">— HN 顶贴</text>
+
+      <rect x="400" y="30" width="320" height="180" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="1"/>
+      <text x="560" y="60" text-anchor="middle" font-size="14" font-weight="600" fill="#059669">支持：是抽象层</text>
+      <text x="420" y="92" font-size="12" fill="#4b4b4b">• Archon PR 接受率 6.7% → 70%</text>
+      <text x="420" y="116" font-size="12" fill="#4b4b4b">• Deep Agents 52.8% → 66.5%</text>
+      <text x="420" y="140" font-size="12" fill="#4b4b4b">• Cursor 把 harness 编进模型权重</text>
+      <text x="420" y="180" font-size="11" font-style="italic" fill="#065f46">— 实证 + Cursor 工程博客</text>
+    </svg>
+  </div>
+
+  <h3>6.4 马克的判断（与 Anthropic 一致）</h3>
+  <blockquote><p>"<strong>不是噱头，但不是终局</strong>；模型进化会吞掉一部分 harness，但 harness 会<strong>变形以解锁更复杂任务</strong>。"</p></blockquote>
+  <p>Anthropic Managed Agents 那句话最妙：</p>
+  <blockquote><p>"<strong>Harness encode assumptions that go stale as models improve.</strong>"<br/>（Harness 编码的是<strong>会随模型升级而过期的假设</strong>。）</p></blockquote>
+  <p>它本就<strong>该是会过期的脚手架</strong>。</p>
+
+  <blockquote><p>💡 <strong>关键认知</strong>：判断一个 AI 概念是不是炒作，可以问三个问题：<br/>① 它能否<strong>改善实证指标</strong>（不只是新词）？<br/>② 它能否<strong>沉淀团队经验</strong>（不只是个人技巧）？<br/>③ 它能否<strong>经受模型升级冲击</strong>（不只是某代模型的临时补丁）？<br/>Harness Engineering 在前两点上是 yes，第三点上是 "yes，但形态会变"——<strong>因此它是过渡期的必修课，不是终局答案</strong>。</p></blockquote>
+</section>
+
+<section>
+  <h2>七、结语：从工具到方法论</h2>
+  <p>马克在视频末尾给出了一个升维的总结：</p>
+  <ul>
+    <li><strong>Prompt Engineering</strong> 教会我们"<strong>怎么和模型说话</strong>"；</li>
+    <li><strong>Context Engineering</strong> 教会我们"<strong>给模型什么饭吃</strong>"；</li>
+    <li><strong>Harness Engineering</strong> 教会我们"<strong>让模型生活在什么样的环境里</strong>"。</li>
+  </ul>
+  <p>这三层是同一个方法论的三层皮：随着模型能力上升，工程师关注的边界<strong>不断外移</strong>——从一句话、到一个窗口、再到整个执行系统。下一个会是什么？也许是 <strong>Society Engineering</strong>——多个 agent 之间的社会规则与协作协议。</p>
+</section>
+
+<section>
+  <h2>附录：专有名词速查（12 个）</h2>
+  <table>
+    <thead><tr><th>名词</th><th>全称</th><th>一句话白话</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Agent Harness</strong></td><td>Agent 外壳</td><td>模型外面让它能干活的所有东西</td></tr>
+      <tr><td><strong>Agent Loop / nO Loop</strong></td><td>智能体循环</td><td><code>while tool_call: 执行 → 观察 → 再调模型</code></td></tr>
+      <tr><td><strong>Tool Use / Atomic Tools</strong></td><td>工具调用 / 原子工具</td><td>Read / Write / Bash / Grep 等原语</td></tr>
+      <tr><td><strong>Context Window / Context Rot</strong></td><td>上下文窗口 / 上下文腐烂</td><td>越填越脏，信号噪声比下降</td></tr>
+      <tr><td><strong>Context Anxiety</strong></td><td>上下文焦虑</td><td>模型感觉快满就草草收尾</td></tr>
+      <tr><td><strong>Compaction vs Context Reset</strong></td><td>压缩 vs 重置</td><td>摘要续写 vs 清空重启</td></tr>
+      <tr><td><strong>Ralph Loop</strong></td><td>Ralph 循环</td><td>Initializer + Coder 双 Agent 接力</td></tr>
+      <tr><td><strong>Subagent / Fork / Worktree</strong></td><td>子代理 / 分叉 / 工作树</td><td>并行隔离上下文</td></tr>
+      <tr><td><strong>Sandbox & Permissions</strong></td><td>沙箱与权限</td><td>执行边界与审批门</td></tr>
+      <tr><td><strong>Verification Loop</strong></td><td>验证回路</td><td>test / lint + 视觉 + LLM-as-judge</td></tr>
+      <tr><td><strong>Checkpoint / Session Log</strong></td><td>检查点 / 会话日志</td><td>append-only 事件流，崩溃可恢复</td></tr>
+      <tr><td><strong>AGENTS.md / CLAUDE.md</strong></td><td>项目级 agent 规范文件</td><td>团队规则注入</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer>
+  笔记生成日期：2026-06-09 · 基于 B 站视频 BV12LR1B3EUt · 风格：腾讯云商务蓝
+</footer>
+
+</div>
+</body>
+</html>
