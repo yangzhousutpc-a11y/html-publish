@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Context Engineering 学习笔记</title>
+<style>
+:root{--blue:#0052d9;--deep:#003cab;--light:#edf4ff;--border:#d4e3fc;--bg:#f3f4f6;--text:#242424;--muted:#4b4b4b;}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif;line-height:1.72;} a{color:var(--blue);text-decoration:none} a:hover{text-decoration:underline}.hero{background:linear-gradient(135deg,#001a45 0%,#0052d9 58%,#0077ff 100%);color:#fff;padding:52px 24px 38px}.hero-inner{max-width:1040px;margin:0 auto}.kicker{display:inline-block;padding:6px 12px;border:1px solid rgba(255,255,255,.35);border-radius:999px;color:#dbeafe;font-size:13px;margin-bottom:18px}.hero h1{font-size:38px;line-height:1.2;margin:0 0 18px;font-weight:900;letter-spacing:-.02em}.hero p{max-width:820px;margin:0;color:#dbeafe;font-size:16px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:28px}.stat{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:14px;padding:16px}.stat b{display:block;color:#66b1ff;font-size:24px}.stat span{font-size:12px;color:#dbeafe}.wrap{max-width:1040px;margin:0 auto;padding:26px 20px 42px}.content{background:#fff;border:1px solid #e5e6eb;border-radius:18px;padding:34px 42px;box-shadow:0 12px 32px rgba(0,40,100,.08)}h1{font-size:28px;margin:42px 0 18px;color:#003cab;border-bottom:2px solid #d4e3fc;padding-bottom:10px}h2{font-size:22px;margin:34px 0 14px;color:#0052d9}h3{font-size:18px;margin:24px 0 10px;color:#242424}p{margin:12px 0}ul{padding-left:24px}li{margin:6px 0}strong{color:#003cab}hr{border:0;border-top:1px solid #e5e6eb;margin:28px 0}blockquote{margin:18px 0;padding:16px 18px;border-left:5px solid #0052d9;background:#edf4ff;border-radius:10px;color:#003cab}.insight{border-left-color:#f59e0b;background:#fffbeb;color:#78350f}.quote{border-left-color:#0052d9;background:#f8fbff}table{width:100%;border-collapse:collapse;margin:18px 0;border:1px solid #d4e3fc;border-radius:10px;overflow:hidden;display:table}th{background:#edf4ff;color:#003cab;text-align:left;font-weight:800}th,td{border:1px solid #d4e3fc;padding:10px 12px;vertical-align:top}tr:nth-child(even) td{background:#fafcff}pre{background:#0d1b2a;color:#e6f2ff;border-radius:12px;padding:16px 18px;overflow:auto;font-size:13px;line-height:1.6}code{font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace}.svg-card{margin:20px 0 26px;padding:16px 18px;background:linear-gradient(180deg,#edf4ff 0%,#f8fbff 100%);border:1px solid #d4e3fc;border-radius:16px}.svg-title{margin:0 0 12px;color:#003cab;font-weight:800;font-size:14px}.footer{max-width:1040px;margin:0 auto 36px;padding:0 20px;color:#777;font-size:13px;text-align:center}@media(max-width:760px){.hero h1{font-size:30px}.stats{grid-template-columns:repeat(2,1fr)}.content{padding:26px 20px}table{font-size:13px}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="hero-inner">
+    <div class="kicker">B站学习笔记 · 马克的技术工作坊</div>
+    <h1>Context Engineering：概念与技术实现深度解析</h1>
+    <p>这份笔记围绕“模型到底应该看见什么”展开：从 Context / Context Window 的基本概念，到上下文污染、干扰、混乱、冲突，再到保存、选择、压缩、隔离四类工程动作。</p>
+    <div class="stats">
+      <div class="stat"><b>15:16</b><span>视频时长</span></div>
+      <div class="stat"><b>8</b><span>核心图解</span></div>
+      <div class="stat"><b>10</b><span>关键认知</span></div>
+      <div class="stat"><b>24</b><span>专有名词</span></div>
+    </div>
+  </div>
+</header>
+<main class="wrap">
+  <article class="content">
+<h2 id="_1">内容综述</h2>
+<p>这期视频讲的是一个比“写好提示词”更底层的问题：<strong>模型到底应该看见什么</strong>。如果把大模型想成一个函数，你给它输入，它给你输出；但这个输入不是无限大的，能放进去的所有指令、资料、历史对话、工具结果，都要挤在一个叫 <strong>Context Window（上下文窗口）</strong> 的地方。</p>
+<p><strong>Context Engineering（上下文工程）</strong>解决的不是“怎么把 Prompt 写得更漂亮”，而是“怎么把下一步真正需要的信息放进窗口里”。这件事对 Agent 特别重要，因为 Agent 会反复思考、调用工具、读文件、搜索网页、执行代码，工具结果越滚越多，最后很容易出现上下文污染、干扰、混乱和冲突。</p>
+<p>视频的主体可以归纳成四个动作：<strong>保存 Context、选择 Context、压缩 Context、隔离 Context</strong>。保存是把重要信息放到窗口外；选择是每一步只拿相关材料；压缩是把冗长材料提炼成高信号摘要；隔离是用多 Agent、沙箱或状态字段，把不同任务的上下文分开管理。</p>
+<hr />
+<h1 id="context">第一部分：Context 不是“聊天记录”，而是模型的工作台</h1>
+<div class="svg-card">
+<p class="svg-title">📐 图1：Context 是模型当前工作台，不只是聊天记录</p>
+<svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<defs><marker id="a1" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0 0,10 4,0 8" fill="#0052d9"/></marker></defs>
+
+<rect x="30" y="28" width="740" height="260" rx="18" fill="#f8fbff" stroke="#d4e3fc" stroke-width="2"/>
+<text x="400" y="62" text-anchor="middle" font-size="18" font-weight="800" fill="#003cab">一次 LLM 调用前，所有材料都要进入 Context Window</text>
+<g font-size="12" font-weight="650">
+<rect x="58" y="92" width="122" height="48" rx="9" fill="#edf4ff" stroke="#0052d9"/><text x="119" y="122" text-anchor="middle" fill="#0052d9">系统指令</text>
+<rect x="58" y="158" width="122" height="48" rx="9" fill="#edf4ff" stroke="#0052d9"/><text x="119" y="188" text-anchor="middle" fill="#0052d9">用户问题</text>
+<rect x="58" y="224" width="122" height="48" rx="9" fill="#edf4ff" stroke="#0052d9"/><text x="119" y="254" text-anchor="middle" fill="#0052d9">历史对话</text>
+<rect x="220" y="92" width="122" height="48" rx="9" fill="#f0f7ff" stroke="#0077ff"/><text x="281" y="122" text-anchor="middle" fill="#0077ff">外部知识</text>
+<rect x="220" y="158" width="122" height="48" rx="9" fill="#f0f7ff" stroke="#0077ff"/><text x="281" y="188" text-anchor="middle" fill="#0077ff">工具列表</text>
+<rect x="220" y="224" width="122" height="48" rx="9" fill="#f0f7ff" stroke="#0077ff"/><text x="281" y="254" text-anchor="middle" fill="#0077ff">工具结果</text>
+</g>
+<line x1="360" y1="182" x2="430" y2="182" stroke="#0052d9" stroke-width="2.2" marker-end="url(#a1)"/>
+<rect x="444" y="92" width="178" height="180" rx="16" fill="#0052d9"/>
+<text x="533" y="132" text-anchor="middle" font-size="16" font-weight="800" fill="#fff">Context Window</text>
+<text x="533" y="162" text-anchor="middle" font-size="12" fill="#cfe2ff">有限 token 空间</text>
+<text x="533" y="188" text-anchor="middle" font-size="12" fill="#fff" font-weight="700">不是越多越好</text>
+<text x="533" y="214" text-anchor="middle" font-size="12" fill="#fff" font-weight="700">而是刚好够用</text>
+<line x1="632" y1="182" x2="690" y2="182" stroke="#0052d9" stroke-width="2.2" marker-end="url(#a1)"/>
+<circle cx="724" cy="182" r="36" fill="#edf4ff" stroke="#0052d9" stroke-width="2"/>
+<text x="724" y="178" text-anchor="middle" font-size="14" font-weight="800" fill="#0052d9">LLM</text><text x="724" y="198" text-anchor="middle" font-size="10" fill="#4b4b4b">当前输出</text>
+
+</svg>
+</div>
+
+<h2 id="context_1">一、Context：模型这一次能看到的全部东西</h2>
+<p><strong>一句话</strong>：Context 就是模型生成答案时“摆在桌面上的全部材料”。</p>
+<p>很多人会把 Context 理解成“上文”或“聊天记录”，这个理解太窄了。对一个 AI 应用来说，Context 至少包括：</p>
+<ul>
+<li>系统指令：你是谁、要遵守什么规则、输出什么风格；</li>
+<li>用户输入：用户这一次真正问了什么；</li>
+<li>历史对话：前面聊过什么，有哪些承诺和约束；</li>
+<li>外部知识：文档、网页、数据库、FAQ、代码片段；</li>
+<li>工具列表：模型现在能调用哪些工具；</li>
+<li>工具结果：搜索结果、API 返回、代码执行输出、文件内容；</li>
+<li>记忆信息：用户偏好、项目约定、历史经验；</li>
+<li>输出格式要求：比如必须输出 JSON、表格、报告或代码补丁。</li>
+</ul>
+<p>换句话说，Context 不是一句 Prompt，而是一个“临时工作台”。模型只能基于工作台上已经摆出来的东西做判断；没有摆出来的信息，它通常不会凭空可靠地知道。</p>
+<pre><code class="language-text">用户问题 + 系统指令 + 历史对话 + 外部资料 + 工具结果 + 记忆
+                         ↓
+                  Context Window
+                         ↓
+                       LLM
+                         ↓
+                    当前这一步输出
+</code></pre>
+<blockquote class="insight">
+<p>💡 <strong>关键认知</strong>：Prompt 是你对模型说的话，Context 是模型这一步能看见的整个世界。只优化 Prompt，不管理 Context，就像只改会议主持词，却不准备会议材料。</p>
+</blockquote>
+<h2 id="context-window">二、Context Window：不是无限仓库，而是有限内存</h2>
+<div class="svg-card">
+<p class="svg-title">📐 图2：大上下文窗口不等于可以无脑堆料</p>
+<svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<defs><marker id="a2" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0 0,10 4,0 8" fill="#0052d9"/></marker></defs>
+
+<rect x="42" y="48" width="320" height="220" rx="16" fill="#fff1f2" stroke="#dc2626" stroke-width="2"/>
+<text x="202" y="82" text-anchor="middle" font-size="17" fill="#dc2626" font-weight="800">❌ 无脑堆上下文</text>
+<rect x="74" y="112" width="96" height="38" rx="8" fill="#fecaca"/><text x="122" y="136" text-anchor="middle" font-size="11" fill="#7f1d1d">旧文档</text>
+<rect x="192" y="112" width="96" height="38" rx="8" fill="#fecaca"/><text x="240" y="136" text-anchor="middle" font-size="11" fill="#7f1d1d">无关网页</text>
+<rect x="122" y="164" width="96" height="38" rx="8" fill="#fecaca"/><text x="170" y="188" text-anchor="middle" font-size="11" fill="#7f1d1d">历史噪声</text>
+<rect x="236" y="164" width="96" height="38" rx="8" fill="#fecaca"/><text x="284" y="188" text-anchor="middle" font-size="11" fill="#7f1d1d">重复结果</text>
+<text x="202" y="236" text-anchor="middle" font-size="12" fill="#991b1b">成本高 · 延迟高 · 注意力被稀释</text>
+<line x1="380" y1="160" x2="420" y2="160" stroke="#0052d9" stroke-width="2.2" marker-end="url(#a2)"/>
+<rect x="438" y="48" width="320" height="220" rx="16" fill="#f0fdf4" stroke="#059669" stroke-width="2"/>
+<text x="598" y="82" text-anchor="middle" font-size="17" fill="#059669" font-weight="800">✅ 高信号上下文包</text>
+<rect x="482" y="116" width="232" height="44" rx="10" fill="#dcfce7" stroke="#059669"/><text x="598" y="144" text-anchor="middle" font-size="13" fill="#065f46" font-weight="700">当前任务相关证据</text>
+<rect x="482" y="180" width="232" height="44" rx="10" fill="#edf4ff" stroke="#0052d9"/><text x="598" y="208" text-anchor="middle" font-size="13" fill="#0052d9" font-weight="700">明确约束 + 来源 + 时间</text>
+
+</svg>
+</div>
+
+<p><strong>一句话</strong>：Context Window 是模型一次调用最多能处理多少 token 的上限。</p>
+<p>视频里用一个很直观的说法解释 token：它是文本被拆出来的最小单位，可能是一个字、一个词，也可能是一个标点。粗略理解，<strong>1 个 token 约等于 0.75 个英文单词，或 1.5 个汉字</strong>。</p>
+<p>比如 Gemini 2.5 Pro 的上下文窗口可以达到 100 万 token，听上去很大，接近几本书的长度。于是很多人会自然产生一个想法：既然窗口这么大，那是不是把所有资料都塞进去，让模型自己找重点就行？</p>
+<p>这正是 Context Engineering 要反对的“偷懒做法”。窗口大，只代表“能塞”；不代表“塞进去就会用得好”。</p>
+<table>
+<thead>
+<tr>
+<th>做法</th>
+<th>表面好处</th>
+<th>实际问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>把所有资料都塞进去</td>
+<td>简单，不用做检索和筛选</td>
+<td>成本高、延迟高、模型分心、重点被稀释</td>
+</tr>
+<tr>
+<td>只塞用户问题</td>
+<td>便宜、快</td>
+<td>缺少背景，容易泛泛而谈或幻觉</td>
+</tr>
+<tr>
+<td>按任务动态构造 Context</td>
+<td>信息密度高</td>
+<td>需要工程设计：检索、排序、压缩、隔离</td>
+</tr>
+</tbody>
+</table>
+<blockquote class="insight">
+<p>💡 <strong>关键认知</strong>：大上下文窗口像大桌子，不是垃圾场。桌子越大，越需要会摆东西；否则东西越多，越找不到重点。</p>
+</blockquote>
+<hr />
+<h1 id="prompt-engineering-context-engineering">第二部分：从 Prompt Engineering 到 Context Engineering</h1>
+<div class="svg-card">
+<p class="svg-title">📐 图3：Prompt Engineering 与 Context Engineering 的分工</p>
+<svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<defs><marker id="a3" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0 0,10 4,0 8" fill="#0052d9"/></marker></defs>
+
+<rect x="44" y="46" width="328" height="220" rx="18" fill="#edf4ff" stroke="#0052d9" stroke-width="2"/>
+<text x="208" y="82" text-anchor="middle" font-size="18" font-weight="800" fill="#0052d9">Prompt Engineering</text>
+<text x="208" y="112" text-anchor="middle" font-size="13" fill="#003cab">把“话”说清楚</text>
+<text x="78" y="154" font-size="12" fill="#333">• 角色设定、输出格式、Few-shot</text>
+<text x="78" y="184" font-size="12" fill="#333">• 推理步骤、语气、边界约束</text>
+<text x="208" y="232" text-anchor="middle" font-size="13" fill="#003cab" font-weight="800">更像写一份好题目</text>
+<rect x="428" y="46" width="328" height="220" rx="18" fill="#f0fdf4" stroke="#059669" stroke-width="2"/>
+<text x="592" y="82" text-anchor="middle" font-size="18" font-weight="800" fill="#059669">Context Engineering</text>
+<text x="592" y="112" text-anchor="middle" font-size="13" fill="#065f46">把“材料”准备对</text>
+<text x="462" y="154" font-size="12" fill="#333">• 检索、记忆、工具结果、状态</text>
+<text x="462" y="184" font-size="12" fill="#333">• 压缩、隔离、优先级与版本</text>
+<text x="592" y="232" text-anchor="middle" font-size="13" fill="#065f46" font-weight="800">更像准备正确资料包</text>
+
+</svg>
+</div>
+
+<h2 id="prompt-engineering-context-engineering_1">一、Prompt Engineering 解决“怎么问”，Context Engineering 解决“让模型看什么”</h2>
+<p><strong>一句话</strong>：Prompt Engineering 是话术设计，Context Engineering 是信息环境设计。</p>
+<p>Prompt Engineering 的关注点通常是：</p>
+<ul>
+<li>角色怎么设定；</li>
+<li>指令怎么写；</li>
+<li>示例怎么给；</li>
+<li>输出格式怎么约束；</li>
+<li>语气和步骤怎么提示。</li>
+</ul>
+<p>这些当然有用，但它解决不了一个根本问题：<strong>如果模型没有正确材料，再漂亮的 Prompt 也只能让它更自信地猜。</strong></p>
+<p>Context Engineering 的关注点更靠近工程系统：</p>
+<ul>
+<li>哪些文档要被检索出来；</li>
+<li>哪些历史对话应该保留；</li>
+<li>哪些工具结果应该注入；</li>
+<li>哪些旧信息应该压缩或丢弃；</li>
+<li>哪些上下文应该只给子 Agent 看，不给主 Agent 看；</li>
+<li>哪些信息不能混在一起，避免冲突或泄露。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Prompt Engineering</th>
+<th>Context Engineering</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>核心问题</td>
+<td>怎么把指令写清楚</td>
+<td>怎么让模型拿到正确材料</td>
+</tr>
+<tr>
+<td>主要对象</td>
+<td>Prompt 文本</td>
+<td>指令、知识、工具结果、记忆、状态</td>
+</tr>
+<tr>
+<td>典型手段</td>
+<td>角色设定、Few-shot、格式约束</td>
+<td>RAG、Memory、压缩、多 Agent、状态管理</td>
+</tr>
+<tr>
+<td>失败原因</td>
+<td>指令含糊</td>
+<td>材料缺失、太多、错误、冲突</td>
+</tr>
+<tr>
+<td>更像什么</td>
+<td>写一份好题目</td>
+<td>给考生准备正确资料包</td>
+</tr>
+</tbody>
+</table>
+<blockquote class="insight">
+<p>💡 <strong>关键认知</strong>：Prompt Engineering 是“问得好”，Context Engineering 是“喂得准”。Agent 真正落地时，后者往往决定 80% 的效果。</p>
+</blockquote>
+<h2 id="karpathy-cpuram">二、Karpathy 的 CPU/RAM 类比</h2>
+<p>LangChain 文章引用 Andrej Karpathy 的类比：</p>
+<blockquote class="quote">
+<p><strong>Context engineering is the delicate art and science of filling the context window with just the right information for the next step.</strong></p>
+</blockquote>
+<p>中文可以翻成：上下文工程是一门精细的艺术与科学，它要在 Agent 的每一步，把“刚刚好”的信息放进上下文窗口。</p>
+<p>这个定义里最重要的词不是 information，而是 <strong>just the right information</strong>。不是更多，也不是更少，而是“下一步刚好需要”。</p>
+<p>可以这样理解：</p>
+<pre><code class="language-text">传统程序：CPU 处理 RAM 里的数据
+AI Agent：LLM 处理 Context Window 里的信息
+
+操作系统要管理内存：加载、缓存、淘汰、隔离
+Agent 系统要管理 Context：保存、选择、压缩、隔离
+</code></pre>
+<p>如果把 LLM 看成 CPU，把 Context Window 看成 RAM，那么 Context Engineering 就像“内存管理”。没有内存管理，复杂程序跑不稳；没有上下文管理，复杂 Agent 也跑不稳。</p>
+<hr />
+<h1 id="agent">第三部分：为什么长上下文会让 Agent 变差</h1>
+<div class="svg-card">
+<p class="svg-title">📐 图4：长上下文的四类失败模式</p>
+<svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<defs><marker id="a4" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0 0,10 4,0 8" fill="#0052d9"/></marker></defs>
+
+<rect x="56" y="46" width="306" height="92" rx="14" fill="#fff1f2" stroke="#dc2626" stroke-width="1.8"/>
+<text x="78" y="78" font-size="15" fill="#dc2626" font-weight="800">1. Context Poisoning</text><text x="78" y="106" font-size="12" fill="#4b4b4b">错误被写进上下文，后续持续放大</text>
+<rect x="438" y="46" width="306" height="92" rx="14" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.8"/>
+<text x="460" y="78" font-size="15" fill="#b45309" font-weight="800">2. Context Distraction</text><text x="460" y="106" font-size="12" fill="#4b4b4b">无关信息太多，注意力被稀释</text>
+<rect x="56" y="178" width="306" height="92" rx="14" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
+<text x="78" y="210" font-size="15" fill="#4f46e5" font-weight="800">3. Context Confusion</text><text x="78" y="238" font-size="12" fill="#4b4b4b">多余材料影响风格、判断和路径</text>
+<rect x="438" y="178" width="306" height="92" rx="14" fill="#ecfeff" stroke="#0891b2" stroke-width="1.8"/>
+<text x="460" y="210" font-size="15" fill="#0e7490" font-weight="800">4. Context Clash</text><text x="460" y="238" font-size="12" fill="#4b4b4b">上下文互相矛盾，不知道信谁</text>
+
+</svg>
+</div>
+
+<p>Agent 和普通聊天最大的区别是：它不是问一次答一次，而是会持续执行任务。</p>
+<p>典型 Agent 轨迹如下：</p>
+<pre><code class="language-text">思考 → 调用搜索 → 读取网页 → 总结 → 调用数据库 → 生成草稿 → 执行代码 → 修复错误 → 输出结果
+</code></pre>
+<p>每一步都会产生新 Context。工具返回很长，网页内容很长，代码报错很长，历史决策也越来越多。如果不管理，Context 会像滚雪球一样变大。</p>
+<h2 id="context-poisoning">一、Context Poisoning：上下文污染</h2>
+<p><strong>一句话</strong>：错误信息一旦进入 Context，后面每一步都可能被它带偏。</p>
+<p>比如 Agent 第一次搜索时误读了一个字段，把“订单已取消”总结成“订单已支付”。如果这个错误总结被写进 Memory，后续所有回答都会继续引用这个假事实。</p>
+<p>污染最麻烦的地方是：它会伪装成“已有上下文”。模型看到它时，并不会自动知道这是错的。</p>
+<blockquote class="insight">
+<p>💡 <strong>关键认知</strong>：上下文污染比一次回答错误更危险，因为它会变成后续推理的地基。地基错了，楼越盖越歪。</p>
+</blockquote>
+<h2 id="context-distraction">二、Context Distraction：上下文干扰</h2>
+<p><strong>一句话</strong>：材料太多时，模型会被无关信息分散注意力。</p>
+<p>这就像你让一个新人客服回答“这个订单为什么没发货”，却把公司全部产品手册、所有历史邮件、全量客户聊天记录都给他。信息是多了，但任务变难了。</p>
+<p>模型不是数据库查询引擎，它不会天然总能在海量噪声里稳定抓住重点。长上下文会增加成本和延迟，也会降低答案稳定性。</p>
+<h2 id="context-confusion">三、Context Confusion：上下文混乱</h2>
+<p><strong>一句话</strong>：多余信息不一定是错的，但会让模型用错材料。</p>
+<p>比如用户问“帮我按上次销售周报的格式写一版”，Context 里却同时塞入了技术方案、招聘 JD、客户投诉模板。模型可能会混合风格，最后生成一个四不像。</p>
+<h2 id="context-clash">四、Context Clash：上下文冲突</h2>
+<p><strong>一句话</strong>：不同上下文互相打架时，模型不知道该信谁。</p>
+<p>常见冲突包括：</p>
+<ul>
+<li>系统指令要求短回答，用户要求详细报告；</li>
+<li>旧记忆说用户喜欢 A，新消息说这次要 B；</li>
+<li>一个文档说价格是 99，另一个文档说价格是 129；</li>
+<li>工具 A 返回成功，工具 B 返回失败。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>失败模式</th>
+<th>核心问题</th>
+<th>典型后果</th>
+<th>应对方向</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Context Poisoning</td>
+<td>错误进入上下文</td>
+<td>后续推理持续错误</td>
+<td>写入前验证、来源标注</td>
+</tr>
+<tr>
+<td>Context Distraction</td>
+<td>信息太多</td>
+<td>忽略重点、成本升高</td>
+<td>选择、排序、裁剪</td>
+</tr>
+<tr>
+<td>Context Confusion</td>
+<td>多余信息影响回答</td>
+<td>风格/判断跑偏</td>
+<td>精简 Context、分任务加载</td>
+</tr>
+<tr>
+<td>Context Clash</td>
+<td>信息互相矛盾</td>
+<td>输出不稳定</td>
+<td>优先级、版本、权威源</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="context-engineering_1">第四部分：Context Engineering 的四个基本动作</h1>
+<div class="svg-card">
+<p class="svg-title">📐 图5：四个动作构成上下文工程闭环</p>
+<svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<defs><marker id="a5" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0 0,10 4,0 8" fill="#0052d9"/></marker></defs>
+
+<circle cx="400" cy="160" r="66" fill="#0052d9"/><text x="400" y="153" text-anchor="middle" font-size="16" font-weight="800" fill="#fff">Just the right</text><text x="400" y="177" text-anchor="middle" font-size="16" font-weight="800" fill="#fff">Context</text>
+<rect x="56" y="50" width="238" height="80" rx="14" fill="#edf4ff" stroke="#0052d9" stroke-width="2"/><text x="78" y="82" font-size="15" fill="#0052d9" font-weight="800">Write / 保存</text><text x="78" y="108" font-size="12" fill="#4b4b4b">计划、记忆、状态写到外部</text>
+<rect x="506" y="50" width="238" height="80" rx="14" fill="#f0fdf4" stroke="#059669" stroke-width="2"/><text x="528" y="82" font-size="15" fill="#059669" font-weight="800">Select / 选择</text><text x="528" y="108" font-size="12" fill="#4b4b4b">召回相关知识、工具、记忆</text>
+<rect x="56" y="210" width="238" height="80" rx="14" fill="#fffbeb" stroke="#f59e0b" stroke-width="2"/><text x="78" y="242" font-size="15" fill="#b45309" font-weight="800">Compress / 压缩</text><text x="78" y="268" font-size="12" fill="#4b4b4b">摘要、裁剪、字段化</text>
+<rect x="506" y="210" width="238" height="80" rx="14" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/><text x="528" y="242" font-size="15" fill="#4f46e5" font-weight="800">Isolate / 隔离</text><text x="528" y="268" font-size="12" fill="#4b4b4b">多 Agent、沙箱、状态字段</text>
+<line x1="294" y1="90" x2="344" y2="124" stroke="#0052d9" stroke-width="2" marker-end="url(#a5)"/><line x1="506" y1="90" x2="456" y2="124" stroke="#0052d9" stroke-width="2" marker-end="url(#a5)"/><line x1="294" y1="250" x2="344" y2="196" stroke="#0052d9" stroke-width="2" marker-end="url(#a5)"/><line x1="506" y1="250" x2="456" y2="196" stroke="#0052d9" stroke-width="2" marker-end="url(#a5)"/>
+
+</svg>
+</div>
+
+<h2 id="context_2">一、保存 Context：把重要信息放到窗口外</h2>
+<p><strong>一句话</strong>：保存不是把所有东西一直塞给模型，而是把有价值的信息放在外部，需要时再取。</p>
+<p>视频把第一类实现方法概括为“保存 Context”。LangChain 文章里对应的是 <strong>Write Context</strong>。</p>
+<p>常见保存对象有两类：</p>
+<ol>
+<li><strong>Scratchpad（草稿纸）</strong>：当前任务内的临时记录，比如计划、待办、关键观察、中间结论；</li>
+<li><strong>Memory（记忆）</strong>：跨任务、跨会话的长期信息，比如用户偏好、项目约定、成功/失败经验。</li>
+</ol>
+<pre><code class="language-text">不保存：
+所有计划、工具结果、观察都堆在 Context Window 里
+→ 超长、易丢、易乱
+
+保存后：
+关键状态写到外部 state / file / database / memory
+→ 当前窗口只放下一步需要的内容
+</code></pre>
+<p>保存 Context 的关键不是“记得越多越好”，而是要有写入标准：</p>
+<ul>
+<li>这条信息未来还会用到吗？</li>
+<li>它是否经过验证？</li>
+<li>它的来源和更新时间是什么？</li>
+<li>它应该对所有任务可见，还是只对当前任务可见？</li>
+</ul>
+<blockquote class="insight">
+<p>💡 <strong>关键认知</strong>：Memory 不是收藏夹，而是会影响模型判断的“事实库”。写进去之前要谨慎，否则就是主动制造上下文污染。</p>
+</blockquote>
+<h2 id="context_3">二、选择 Context：每一步只拿相关材料</h2>
+<div class="svg-card">
+<p class="svg-title">📐 图6：RAG 是 Context Selection 的典型实现</p>
+<svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<defs><marker id="a6" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0 0,10 4,0 8" fill="#0052d9"/></marker></defs>
+
+<rect x="42" y="120" width="120" height="62" rx="12" fill="#edf4ff" stroke="#0052d9" stroke-width="2"/><text x="102" y="146" text-anchor="middle" font-size="13" font-weight="800" fill="#0052d9">用户问题</text><text x="102" y="166" text-anchor="middle" font-size="10" fill="#4b4b4b">具体任务</text>
+<line x1="168" y1="151" x2="214" y2="151" stroke="#0052d9" stroke-width="2" marker-end="url(#a6)"/>
+<rect x="224" y="78" width="136" height="148" rx="12" fill="#fff" stroke="#d4e3fc" stroke-width="2"/><text x="292" y="108" text-anchor="middle" font-size="13" font-weight="800" fill="#003cab">检索器</text><text x="292" y="136" text-anchor="middle" font-size="11" fill="#4b4b4b">向量搜索</text><text x="292" y="158" text-anchor="middle" font-size="11" fill="#4b4b4b">关键词过滤</text><text x="292" y="180" text-anchor="middle" font-size="11" fill="#4b4b4b">权限/版本/重排</text>
+<line x1="366" y1="151" x2="414" y2="151" stroke="#0052d9" stroke-width="2" marker-end="url(#a6)"/>
+<rect x="424" y="78" width="150" height="148" rx="12" fill="#f0fdf4" stroke="#059669" stroke-width="2"/><text x="499" y="108" text-anchor="middle" font-size="13" font-weight="800" fill="#059669">相关材料包</text><text x="499" y="140" text-anchor="middle" font-size="11" fill="#065f46">产品 FAQ</text><text x="499" y="164" text-anchor="middle" font-size="11" fill="#065f46">订单状态</text><text x="499" y="188" text-anchor="middle" font-size="11" fill="#065f46">处理规则</text>
+<line x1="580" y1="151" x2="628" y2="151" stroke="#0052d9" stroke-width="2" marker-end="url(#a6)"/>
+<rect x="638" y="108" width="120" height="86" rx="12" fill="#0052d9"/><text x="698" y="140" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">LLM 回答</text><text x="698" y="164" text-anchor="middle" font-size="10" fill="#cfe2ff">基于材料</text><text x="698" y="182" text-anchor="middle" font-size="10" fill="#cfe2ff">引用依据</text>
+
+</svg>
+</div>
+
+<p><strong>一句话</strong>：选择 Context 就是从外部世界取回“当前这一步最相关”的信息。</p>
+<p>这一步最常见的实现是 <strong>RAG（Retrieval-Augmented Generation，检索增强生成）</strong>。用户问问题时，系统先去知识库里找相关文档片段，再把这些片段塞进 Context Window，让模型基于材料回答。</p>
+<p>但选择 Context 不只等于 RAG，还包括：</p>
+<ul>
+<li>选择哪些 Memory 被加载；</li>
+<li>选择哪些工具描述暴露给模型；</li>
+<li>选择哪些历史对话保留；</li>
+<li>选择哪些项目规则、代码文件、数据库记录进入当前步骤；</li>
+<li>选择静态 Context 和动态 Context 的比例。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>选择对象</th>
+<th>静态选择</th>
+<th>动态选择</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>指令</td>
+<td>系统提示词、角色规则</td>
+<td>根据任务切换不同规则</td>
+</tr>
+<tr>
+<td>知识</td>
+<td>固定业务说明、产品手册</td>
+<td>RAG 检索相关文档</td>
+</tr>
+<tr>
+<td>工具</td>
+<td>默认工具列表</td>
+<td>根据任务检索相关工具</td>
+</tr>
+<tr>
+<td>记忆</td>
+<td>固定用户偏好</td>
+<td>根据问题召回相关记忆</td>
+</tr>
+<tr>
+<td>历史</td>
+<td>最近几轮对话</td>
+<td>按主题/实体筛选历史</td>
+</tr>
+</tbody>
+</table>
+<blockquote class="insight">
+<p>💡 <strong>关键认知</strong>：RAG 的本质不是“搜索一下”，而是 Context Selection：在模型回答前，决定它应该看哪几块材料。</p>
+</blockquote>
+<h2 id="context-token">三、压缩 Context：用更少 token 保留更高信号</h2>
+<div class="svg-card">
+<p class="svg-title">📐 图7：压缩 Context：从低密度原文到高密度状态</p>
+<svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<defs><marker id="a7" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0 0,10 4,0 8" fill="#0052d9"/></marker></defs>
+
+<rect x="50" y="58" width="274" height="210" rx="16" fill="#fff7ed" stroke="#f97316" stroke-width="2"/><text x="187" y="92" text-anchor="middle" font-size="16" font-weight="800" fill="#c2410c">原始上下文</text><text x="82" y="128" font-size="11" fill="#4b4b4b">• 100 条聊天原文</text><text x="82" y="156" font-size="11" fill="#4b4b4b">• 大段系统日志</text><text x="82" y="184" font-size="11" fill="#4b4b4b">• 重复工具字段</text><text x="82" y="212" font-size="11" fill="#4b4b4b">• 旧政策和噪声</text><text x="187" y="246" text-anchor="middle" font-size="12" fill="#9a3412">token 多，信号稀</text>
+<line x1="340" y1="164" x2="460" y2="164" stroke="#0052d9" stroke-width="2.4" marker-end="url(#a7)"/><text x="400" y="146" text-anchor="middle" font-size="12" fill="#0052d9" font-weight="800">摘要 / 裁剪 / 字段化</text>
+<rect x="476" y="58" width="274" height="210" rx="16" fill="#edf4ff" stroke="#0052d9" stroke-width="2"/><text x="613" y="92" text-anchor="middle" font-size="16" font-weight="800" fill="#0052d9">压缩后状态</text><text x="506" y="128" font-size="11" fill="#333">客户：企业客户，偏好邮件</text><text x="506" y="156" font-size="11" fill="#333">问题：订单 8472 未发货</text><text x="506" y="184" font-size="11" fill="#333">依据：库存不足，预计周五补货</text><text x="506" y="212" font-size="11" fill="#333">下一步：查询物流并反馈</text><text x="613" y="246" text-anchor="middle" font-size="12" fill="#003cab">token 少，约束清楚</text>
+
+</svg>
+</div>
+
+<p><strong>一句话</strong>：压缩不是简单变短，而是把低密度材料变成高密度材料。</p>
+<p>当工具结果、聊天历史、网页资料太长时，直接塞给模型会浪费窗口。压缩 Context 有三类常见做法：</p>
+<ol>
+<li><strong>摘要压缩</strong>：把长对话、长文档、长工具输出总结成短摘要；</li>
+<li><strong>结构化抽象</strong>：把自然语言变成字段、标签、任务状态、决策记录；</li>
+<li><strong>修剪裁剪</strong>：删除过早、无关、重复、格式噪声很高的信息。</li>
+</ol>
+<p>比如一个客服 Agent 不需要每次都看到用户过去 100 条聊天原文，它可能只需要：</p>
+<pre><code class="language-text">用户画像：企业客户，偏好邮件沟通
+当前问题：订单 8472 未发货
+历史约束：上次承诺 2 个工作日内反馈
+待办事项：查询物流系统，确认是否缺货
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>压缩方式</th>
+<th>适合场景</th>
+<th>风险</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>摘要 Summarization</td>
+<td>长对话、长搜索结果</td>
+<td>细节丢失、总结偏差</td>
+</tr>
+<tr>
+<td>修剪 Trimming</td>
+<td>旧消息、重复内容</td>
+<td>删掉关键约束</td>
+</tr>
+<tr>
+<td>结构化抽象</td>
+<td>任务状态、客户画像</td>
+<td>字段设计不完整</td>
+</tr>
+<tr>
+<td>专用压缩模型</td>
+<td>高频企业流程</td>
+<td>成本和维护复杂度更高</td>
+</tr>
+</tbody>
+</table>
+<blockquote class="insight">
+<p>💡 <strong>关键认知</strong>：压缩 Context 的目标不是“少”，而是“信号密度更高”。该保留的约束、数字、例外和来源，不能被摘要吃掉。</p>
+</blockquote>
+<h2 id="context_4">四、隔离 Context：别让所有任务共用一个脑袋</h2>
+<div class="svg-card">
+<p class="svg-title">📐 图8：隔离 Context：多 Agent、沙箱与状态字段</p>
+<svg viewBox="0 0 800 365" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<defs><marker id="a8" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0 0,10 4,0 8" fill="#0052d9"/></marker></defs>
+
+<rect x="310" y="42" width="180" height="78" rx="16" fill="#0052d9"/><text x="400" y="74" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">主 Agent</text><text x="400" y="98" text-anchor="middle" font-size="11" fill="#cfe2ff">只接收关键结论</text>
+<line x1="340" y1="124" x2="216" y2="174" stroke="#0052d9" stroke-width="2" marker-end="url(#a8)"/><line x1="400" y1="124" x2="400" y2="174" stroke="#0052d9" stroke-width="2" marker-end="url(#a8)"/><line x1="460" y1="124" x2="584" y2="174" stroke="#0052d9" stroke-width="2" marker-end="url(#a8)"/>
+<rect x="70" y="178" width="190" height="88" rx="14" fill="#edf4ff" stroke="#0052d9" stroke-width="2"/><text x="165" y="210" text-anchor="middle" font-size="13" font-weight="800" fill="#0052d9">子 Agent A</text><text x="165" y="236" text-anchor="middle" font-size="11" fill="#4b4b4b">只看论文/网页资料</text>
+<rect x="305" y="178" width="190" height="88" rx="14" fill="#f0fdf4" stroke="#059669" stroke-width="2"/><text x="400" y="210" text-anchor="middle" font-size="13" font-weight="800" fill="#059669">子 Agent B</text><text x="400" y="236" text-anchor="middle" font-size="11" fill="#4b4b4b">只看产品/客户案例</text>
+<rect x="540" y="178" width="190" height="88" rx="14" fill="#eef2ff" stroke="#4f46e5" stroke-width="2"/><text x="635" y="210" text-anchor="middle" font-size="13" font-weight="800" fill="#4f46e5">沙箱 / 环境</text><text x="635" y="236" text-anchor="middle" font-size="11" fill="#4b4b4b">保存代码、图片、大对象</text>
+<rect x="132" y="294" width="536" height="46" rx="12" fill="#f8fbff" stroke="#d4e3fc"/><text x="400" y="323" text-anchor="middle" font-size="13" fill="#003cab" font-weight="800">关注点分离：每个上下文窗口都更干净</text>
+
+</svg>
+</div>
+
+<p><strong>一句话</strong>：隔离 Context 就是把不同任务、不同角色、不同状态拆开，避免互相污染。</p>
+<p>隔离最典型的方式是 <strong>Multi-Agent</strong>。比如做深度研究时，一个子 Agent 负责找论文，一个负责找产品案例，一个负责找代码实现，最后主 Agent 只接收它们压缩后的结论。</p>
+<p>这样做的好处是：</p>
+<ul>
+<li>每个子 Agent 的上下文窗口更干净；</li>
+<li>不同主题不会互相干扰；</li>
+<li>可以并行探索；</li>
+<li>主 Agent 不需要阅读所有原始材料。</li>
+</ul>
+<p>隔离也可以发生在执行环境里。比如代码执行、图片处理、音频处理、大型表格分析，都可以放在沙箱或程序状态中，最后只把结果摘要返回给 LLM。</p>
+<pre><code class="language-text">主 Agent：只看任务目标、关键结论、最终冲突
+子 Agent A：只看论文资料
+子 Agent B：只看产品案例
+子 Agent C：只看代码仓库
+沙箱环境：保存大文件、中间变量、执行状态
+</code></pre>
+<blockquote class="insight">
+<p>💡 <strong>关键认知</strong>：不是所有信息都应该给同一个模型看。隔离上下文，本质是在给 Agent 系统划分“办公室”和“资料权限”。</p>
+</blockquote>
+<hr />
+<h1 id="_2">第五部分：把四个动作放进一个真实系统</h1>
+<h2 id="context_5">一、以智能客服为例：Context 应该怎么流动</h2>
+<p>视频里提到一个很容易理解的场景：如果要做一个智能客服，希望它能回答用户关于公司产品的问题，不能只给它一句“你是客服，请回答用户问题”。</p>
+<p>一个更像样的 Context Engineering 流程应该是：</p>
+<pre><code class="language-text">用户问题
+  ↓
+识别意图与实体：产品名、订单号、问题类型
+  ↓
+选择 Context：检索产品文档、FAQ、订单状态、用户历史
+  ↓
+压缩 Context：只保留相关条款、时间、异常原因、处理规则
+  ↓
+隔离 Context：订单系统结果、知识库结果、投诉历史分开处理
+  ↓
+生成回答：引用依据，给出下一步动作
+  ↓
+保存 Context：记录本次承诺、用户偏好、未完成事项
+</code></pre>
+<p>如果没有这套流程，客服 Agent 很容易出现三种问题：</p>
+<ul>
+<li>用户问具体订单，它回答通用政策；</li>
+<li>用户问新版产品，它引用旧版文档；</li>
+<li>用户之前已经投诉过，它完全不知道历史背景。</li>
+</ul>
+<h2 id="_3">二、工程实现时可以用一张检查表</h2>
+<p>做 AI Agent 时，可以把每次 LLM 调用前的 Context 当成一个“资料包”，用下面这张表检查。</p>
+<table>
+<thead>
+<tr>
+<th>检查项</th>
+<th>要问的问题</th>
+<th>对应动作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>目标清楚吗</td>
+<td>这一步到底要模型做什么？</td>
+<td>Prompt / 指令</td>
+</tr>
+<tr>
+<td>材料相关吗</td>
+<td>当前资料是否直接服务这一步？</td>
+<td>Select</td>
+</tr>
+<tr>
+<td>材料可信吗</td>
+<td>来源、时间、版本是否可靠？</td>
+<td>Write 前验证</td>
+</tr>
+<tr>
+<td>材料太长吗</td>
+<td>有没有重复、噪声、低价值内容？</td>
+<td>Compress</td>
+</tr>
+<tr>
+<td>材料冲突吗</td>
+<td>有没有新旧版本、口径不一致？</td>
+<td>优先级 / 规则</td>
+</tr>
+<tr>
+<td>边界清楚吗</td>
+<td>哪些信息不该混进来？</td>
+<td>Isolate</td>
+</tr>
+<tr>
+<td>结果要记吗</td>
+<td>本次输出是否影响未来任务？</td>
+<td>Write</td>
+</tr>
+</tbody>
+</table>
+<blockquote class="insight">
+<p>💡 <strong>关键认知</strong>：每次调用 LLM 前，都应该问一句：“这一步的 Context 是不是刚好够用？”不是“能不能再塞一点”。</p>
+</blockquote>
+<h2 id="_4">三、一个最小可落地架构</h2>
+<p>如果只做一个实用版本，不需要一上来就多 Agent。最小可落地架构可以是：</p>
+<ol>
+<li><strong>State</strong>：保存任务目标、当前阶段、关键约束、待办；</li>
+<li><strong>Retriever</strong>：从知识库、文档、历史记录里选择相关材料；</li>
+<li><strong>Compressor</strong>：对长材料做摘要、字段化、去重；</li>
+<li><strong>Prompt Builder</strong>：把指令、用户问题、相关材料组装成 Context；</li>
+<li><strong>Verifier</strong>：检查输出是否引用了材料、是否遗漏约束；</li>
+<li><strong>Memory Writer</strong>：把经过确认的偏好、承诺、结论写回记忆。</li>
+</ol>
+<pre><code class="language-text">External Sources ──→ Retriever ──→ Compressor ──→ Prompt Builder ──→ LLM
+       ↑                                                        ↓
+       └────────────── Memory Writer ← Verifier ← Output ──────┘
+</code></pre>
+<p>这个架构不花哨，但抓住了 Context Engineering 的主线：<strong>外部保存、按需选择、进入前压缩、必要时写回</strong>。</p>
+<hr />
+<h1 id="_5">第六部分：学习这期视频后，应该记住什么</h1>
+<p>Context Engineering 的核心不是一个新名词，而是一种工程视角：<strong>LLM 的能力，要通过正确的信息环境才能发挥出来。</strong></p>
+<p>如果说 Prompt Engineering 是“把需求说清楚”，那么 Context Engineering 是“把证据、状态、工具和边界准备好”。对简单聊天来说，Prompt 可能够用；对 Agent、RAG、企业知识库、智能客服、代码助手来说，Context 才是主战场。</p>
+<p>最后可以用四句话收束：</p>
+<ol>
+<li><strong>保存</strong>：重要信息不要全堆在窗口里，写到外部状态和记忆；</li>
+<li><strong>选择</strong>：每一步只拿相关材料，RAG 是选择的一种实现；</li>
+<li><strong>压缩</strong>：长材料先提炼，提高信号密度，保留关键约束；</li>
+<li><strong>隔离</strong>：不同任务、角色、工具结果分开处理，避免互相污染。</li>
+</ol>
+<blockquote class="insight">
+<p>💡 <strong>关键认知</strong>：上下文工程的目标不是让模型“知道更多”，而是让模型在每一步“刚好知道该知道的”。</p>
+</blockquote>
+<hr />
+<h2 id="24">附录：专有名词速查（24个）</h2>
+<table>
+<thead>
+<tr>
+<th>名词</th>
+<th>全称</th>
+<th>一句话白话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Context</td>
+<td>Context</td>
+<td>模型这一步能看到的全部输入材料</td>
+</tr>
+<tr>
+<td>Context Window</td>
+<td>Context Window</td>
+<td>模型一次调用能容纳的最大 token 空间</td>
+</tr>
+<tr>
+<td>Token</td>
+<td>Token</td>
+<td>文本被模型切分后的最小处理单位</td>
+</tr>
+<tr>
+<td>Context Engineering</td>
+<td>Context Engineering</td>
+<td>管理哪些信息进入上下文窗口的工程方法</td>
+</tr>
+<tr>
+<td>Prompt Engineering</td>
+<td>Prompt Engineering</td>
+<td>设计提示词写法、角色和输出格式的方法</td>
+</tr>
+<tr>
+<td>Agent</td>
+<td>AI Agent</td>
+<td>能多步思考、调用工具并完成任务的 AI 系统</td>
+</tr>
+<tr>
+<td>RAG</td>
+<td>Retrieval-Augmented Generation</td>
+<td>先检索资料，再让模型基于资料生成答案</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>Memory</td>
+<td>跨任务或跨会话保存的用户偏好、事实和经验</td>
+</tr>
+<tr>
+<td>Scratchpad</td>
+<td>Scratchpad</td>
+<td>Agent 当前任务用的临时草稿纸</td>
+</tr>
+<tr>
+<td>State</td>
+<td>Runtime State</td>
+<td>程序运行时保存的结构化任务状态</td>
+</tr>
+<tr>
+<td>Tool Call</td>
+<td>Tool Call</td>
+<td>模型调用搜索、数据库、代码执行等外部工具</td>
+</tr>
+<tr>
+<td>Tool Feedback</td>
+<td>Tool Feedback</td>
+<td>工具调用返回给模型的结果</td>
+</tr>
+<tr>
+<td>Write Context</td>
+<td>Write Context</td>
+<td>把有价值信息写到窗口外部保存</td>
+</tr>
+<tr>
+<td>Select Context</td>
+<td>Select Context</td>
+<td>从外部材料中挑选相关信息放进窗口</td>
+</tr>
+<tr>
+<td>Compress Context</td>
+<td>Compress Context</td>
+<td>把长上下文压缩为更短、更高信号的信息</td>
+</tr>
+<tr>
+<td>Isolate Context</td>
+<td>Isolate Context</td>
+<td>把上下文拆分到不同 Agent、环境或字段中</td>
+</tr>
+<tr>
+<td>Context Poisoning</td>
+<td>Context Poisoning</td>
+<td>错误信息进入上下文并污染后续推理</td>
+</tr>
+<tr>
+<td>Context Distraction</td>
+<td>Context Distraction</td>
+<td>上下文太多导致模型注意力被分散</td>
+</tr>
+<tr>
+<td>Context Confusion</td>
+<td>Context Confusion</td>
+<td>多余上下文不恰当地影响输出</td>
+</tr>
+<tr>
+<td>Context Clash</td>
+<td>Context Clash</td>
+<td>上下文内部存在互相矛盾的信息</td>
+</tr>
+<tr>
+<td>Summarization</td>
+<td>Summarization</td>
+<td>用摘要方式压缩长内容</td>
+</tr>
+<tr>
+<td>Trimming</td>
+<td>Trimming</td>
+<td>按规则删除旧消息、冗余和无关内容</td>
+</tr>
+<tr>
+<td>Multi-Agent</td>
+<td>Multi-Agent</td>
+<td>多个子 Agent 分工处理不同上下文</td>
+</tr>
+<tr>
+<td>Sandbox</td>
+<td>Sandbox</td>
+<td>隔离执行代码或保存大对象的运行环境</td>
+</tr>
+</tbody>
+</table>
+  </article>
+</main>
+<div class="footer">生成日期：2026-06-11 · 主题风格：腾讯云商务蓝 · 来源视频：BV11zbPzVEUe</div>
+</body>
+</html>
