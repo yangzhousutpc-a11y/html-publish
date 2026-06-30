@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>会议产品竞品分析</title>
+  <style>
+    :root {
+      --brand: #141414;
+      --brand-2: #4B5563;
+      --accent: #C1121F;
+      --bg-page: #F7F4EF;
+      --bg-soft: #FFFDF8;
+      --line: rgba(20, 20, 20, .14);
+      --text: #1B1B1B;
+      --muted: #5E5A52;
+      --radius: 0px;
+      --font-sans: "Source Han Serif SC", "Noto Serif SC", "Songti SC", Georgia, "Times New Roman", serif;
+      --font-ui: -apple-system, BlinkMacSystemFont, system-ui, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --up: #D4001A;
+      --down: #16A34A;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; overflow-x: hidden; }
+    body {
+      color: var(--text);
+      background:
+        linear-gradient(90deg, rgba(20,20,20,.035) 1px, transparent 1px) 0 0 / 56px 56px,
+        var(--bg-page);
+      font-family: var(--font-sans);
+      line-height: 1.74;
+    }
+    a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(193, 18, 31, .25); }
+    a:hover { border-bottom-color: var(--accent); }
+    .container {
+      width: min(1160px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 38px 0 56px;
+    }
+    .masthead {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: end;
+      border-bottom: 2px solid var(--brand);
+      padding-bottom: 13px;
+      margin-bottom: 34px;
+      font-family: var(--font-ui);
+      color: var(--brand);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(320px, .92fr);
+      gap: 34px;
+      align-items: stretch;
+      min-height: 520px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 38px;
+    }
+    .issue {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      margin: 0 0 22px;
+      color: var(--accent);
+      font-family: var(--font-ui);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .issue span {
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent);
+      color: var(--bg-soft);
+      border-radius: 999px;
+    }
+    h1, h2, h3, h4, p, blockquote { margin-top: 0; }
+    h1 {
+      margin-bottom: 20px;
+      font-size: clamp(42px, 6vw, 78px);
+      line-height: 1.02;
+      letter-spacing: 0;
+      max-width: 780px;
+      font-weight: 760;
+    }
+    .dek {
+      max-width: 720px;
+      color: var(--muted);
+      font-size: clamp(17px, 1.7vw, 21px);
+      line-height: 1.78;
+      margin-bottom: 26px;
+    }
+    .hero-note {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 28px;
+    }
+    .note-card {
+      background: var(--bg-soft);
+      border: 1px solid var(--line);
+      padding: 16px;
+    }
+    .note-card h3 {
+      margin: 0 0 8px;
+      font-family: var(--font-ui);
+      font-size: 13px;
+      line-height: 1.25;
+      color: var(--brand);
+    }
+    .note-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .cover-panel {
+      position: relative;
+      background: var(--bg-soft);
+      border: 1px solid var(--line);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100%;
+    }
+    .cover-panel::before {
+      content: "";
+      position: absolute;
+      inset: 16px;
+      border: 1px solid rgba(20,20,20,.08);
+      pointer-events: none;
+    }
+    .model {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 12px;
+    }
+    .model-row {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 14px;
+      align-items: start;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 12px;
+    }
+    .model-row h3 {
+      margin: 0;
+      font-family: var(--font-ui);
+      font-size: 13px;
+      color: var(--accent);
+    }
+    .model-row p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.56;
+    }
+    .cover-number {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 24px;
+    }
+    .metric {
+      border-top: 2px solid var(--brand);
+      padding-top: 10px;
+    }
+    .metric strong {
+      display: block;
+      font-family: var(--font-ui);
+      font-size: clamp(24px, 3vw, 34px);
+      line-height: 1;
+      color: var(--brand);
+      letter-spacing: 0;
+    }
+    .metric p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .section {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      gap: 36px;
+      padding: 46px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .section-kicker {
+      position: sticky;
+      top: 20px;
+      align-self: start;
+    }
+    .section-kicker h2 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.2;
+      letter-spacing: 0;
+      font-weight: 760;
+    }
+    .section-kicker p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-family: var(--font-ui);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+    .prose p {
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.82;
+      margin-bottom: 15px;
+    }
+    .pullquote {
+      margin: 24px 0;
+      padding: 17px 20px;
+      border-left: 4px solid var(--accent);
+      background: rgba(193,18,31,.045);
+      color: var(--brand);
+      font-size: clamp(20px, 2vw, 26px);
+      line-height: 1.46;
+      font-weight: 700;
+    }
+    .chapter-nav {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin: 24px 0 0;
+    }
+    .chapter-nav a {
+      display: block;
+      min-height: 86px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      background: var(--bg-soft);
+      color: var(--brand);
+      border-bottom: 1px solid var(--line);
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 750;
+      line-height: 1.35;
+    }
+    .chapter-nav span {
+      display: block;
+      color: var(--accent);
+      font-size: 11px;
+      margin-bottom: 8px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .card {
+      background: var(--bg-soft);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+    .card h3 {
+      margin: 0 0 10px;
+      font-family: var(--font-ui);
+      font-size: 16px;
+      line-height: 1.35;
+      color: var(--brand);
+    }
+    .card p, .card li {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .card ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+    .evidence-table,
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--bg-soft);
+      border: 1px solid var(--line);
+      font-family: var(--font-ui);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    th, td {
+      vertical-align: top;
+      text-align: left;
+      padding: 12px 13px;
+      border: 1px solid var(--line);
+    }
+    th {
+      color: var(--brand);
+      background: rgba(20,20,20,.035);
+      font-weight: 780;
+      white-space: nowrap;
+    }
+    td { color: var(--muted); }
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      margin: 18px 0 8px;
+    }
+    .product-spread {
+      display: grid;
+      gap: 22px;
+    }
+    .product-card {
+      display: grid;
+      grid-template-columns: 190px minmax(0, 1fr);
+      gap: 22px;
+      background: var(--bg-soft);
+      border: 1px solid var(--line);
+      padding: 22px;
+    }
+    .product-card h3 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.1;
+      color: var(--brand);
+    }
+    .product-card .tag {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 4px 8px;
+      border: 1px solid rgba(193,18,31,.25);
+      color: var(--accent);
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 750;
+    }
+    .split {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .split h4 {
+      margin: 0 0 8px;
+      font-family: var(--font-ui);
+      font-size: 13px;
+      color: var(--brand);
+    }
+    .split p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.68;
+    }
+    .trend-list {
+      counter-reset: trend;
+      display: grid;
+      gap: 14px;
+    }
+    .trend {
+      counter-increment: trend;
+      display: grid;
+      grid-template-columns: 50px minmax(0, 1fr);
+      gap: 16px;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+    }
+    .trend::before {
+      content: counter(trend, decimal-leading-zero);
+      color: var(--accent);
+      font-family: var(--font-ui);
+      font-weight: 800;
+      font-size: 16px;
+    }
+    .trend h3 {
+      margin: 0 0 7px;
+      font-family: var(--font-ui);
+      font-size: 17px;
+      color: var(--brand);
+    }
+    .trend p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.74;
+    }
+    .scenario {
+      border-left: 2px solid var(--brand);
+      padding-left: 16px;
+    }
+    .scenario h3 {
+      margin-bottom: 6px;
+      color: var(--brand);
+    }
+    .source-list {
+      columns: 2;
+      column-gap: 36px;
+      padding-left: 22px;
+      font-family: var(--font-ui);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+    .source-list li {
+      break-inside: avoid;
+      margin-bottom: 8px;
+      color: var(--muted);
+    }
+    .method {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border: 1px solid var(--line);
+      background: var(--bg-soft);
+      color: var(--muted);
+      font-family: var(--font-ui);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    .footer {
+      padding: 26px 0 0;
+      color: var(--muted);
+      font-family: var(--font-ui);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+    @media (max-width: 960px) {
+      .hero,
+      .section,
+      .product-card {
+        grid-template-columns: 1fr;
+      }
+      .section-kicker { position: static; }
+      .chapter-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-3, .grid-2, .split { grid-template-columns: 1fr; }
+      .source-list { columns: 1; }
+    }
+    @media (max-width: 680px) {
+      .container { width: min(100% - 28px, 1160px); padding-top: 24px; }
+      .masthead { grid-template-columns: 1fr; gap: 6px; }
+      h1 { font-size: clamp(36px, 11vw, 58px); }
+      .hero-note, .cover-number, .chapter-nav { grid-template-columns: 1fr; }
+      .cover-panel { min-height: auto; }
+      .section { padding: 34px 0; gap: 18px; }
+      th, td { padding: 10px; }
+    }
+    @page { margin: 14mm; }
+    @media print {
+      body { background: #fff; }
+      .container { width: 100%; padding: 0; }
+      .section, .card, .product-card, table, .cover-panel { break-inside: avoid; }
+      a { color: #111; border-bottom: 0; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header class="masthead">
+      <p>Competitive Analysis Journal</p>
+      <p>Generated 2026-06-30 · Sources 27 · Theme ⑤ Research Journal</p>
+    </header>
+
+    <section class="hero" id="top">
+      <div>
+        <p class="issue"><span>R</span>Product Competition Review</p>
+        <h1>会议产品竞争进入“会后结果”阶段</h1>
+        <p class="dek">腾讯会议、飞书会议、钉钉会议不是完全同维竞争。腾讯会议更像独立云会议基础设施，飞书会议把会议沉淀为知识资产，钉钉会议则依托组织数字化入口。</p>
+        <div class="hero-note">
+          <article class="note-card">
+            <h3>短期判断</h3>
+            <p>外部高保障会议、营销活动和大型培训仍优先腾讯会议。</p>
+          </article>
+          <article class="note-card">
+            <h3>中期变量</h3>
+            <p>AI 会议纪要、自动待办和知识问答会改变产品价值。</p>
+          </article>
+          <article class="note-card">
+            <h3>长期格局</h3>
+            <p>企业将更常见地采用“内部套件会议 + 外部专业会议”。</p>
+          </article>
+        </div>
+      </div>
+      <aside class="cover-panel" aria-label="三家产品定位摘要">
+        <div class="model">
+          <div class="model-row">
+            <h3>腾讯会议</h3>
+            <p>专业云会议与会务基础设施，优势集中在大规模、跨组织、Rooms、Webinar 和会议保障。</p>
+          </div>
+          <div class="model-row">
+            <h3>飞书会议</h3>
+            <p>飞书套件内的智能会议和知识沉淀工具，优势在会议内容进入文档、任务和知识库。</p>
+          </div>
+          <div class="model-row">
+            <h3>钉钉会议</h3>
+            <p>钉钉组织数字化体系内的会议协作入口，优势在组织覆盖、流程集成和混合云部署。</p>
+          </div>
+        </div>
+        <div class="cover-number">
+          <div class="metric"><strong>4亿+</strong><p>腾讯会议官网披露用户规模</p></div>
+          <div class="metric"><strong>2600万+</strong><p>公开报道钉钉企业组织数</p></div>
+          <div class="metric"><strong>163亿</strong><p>艾瑞预测 2026 年协同办公市场规模</p></div>
+        </div>
+      </aside>
+    </section>
+
+    <nav class="chapter-nav" aria-label="章节导航">
+      <a href="#market"><span>01</span>市场背景</a>
+      <a href="#position"><span>02</span>产品定位</a>
+      <a href="#capability"><span>03</span>能力与定价</a>
+      <a href="#products"><span>04</span>单品优劣势</a>
+      <a href="#future"><span>05</span>趋势与选型</a>
+    </nav>
+
+    <section class="section" id="market">
+      <aside class="section-kicker">
+        <h2>市场背景</h2>
+        <p>视频会议市场已分化为“独立云会议层”和“协同办公套件层”。</p>
+      </aside>
+      <div class="prose">
+        <p>独立云会议层强调高清音视频、稳定连接、大规模会议、网络研讨会、会议室系统、跨企业互通和会务保障。腾讯会议在这一层最强。</p>
+        <p>协同办公套件层强调会议与 IM、日历、文档、任务、知识库、审批和业务系统联动。飞书会议和钉钉会议主要在这一层竞争。</p>
+        <blockquote class="pullquote">单纯比较“谁的视频会议功能更多”并不充分。用户真正购买的是一套工作方式。</blockquote>
+        <div class="table-wrap">
+          <table class="evidence-table">
+            <thead>
+              <tr>
+                <th>市场证据</th>
+                <th>公开数据</th>
+                <th>含义</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>协同办公规模</td>
+                <td>艾瑞估算 2023 年中国协同办公平台市场规模为 102 亿元，预计 2026 年增长至 163 亿元。</td>
+                <td>市场仍在增长，但基础功能付费空间有限，AI 与行业方案更关键。</td>
+              </tr>
+              <tr>
+                <td>协同办公覆盖</td>
+                <td>第三方媒体援引 QuestMobile 数据称，2025 年三大协同办公产品合计市场覆盖率约 92%。</td>
+                <td>套件入口将持续分流独立会议工具的内部会议场景。</td>
+              </tr>
+              <tr>
+                <td>腾讯会议商业化</td>
+                <td>媒体报道称腾讯会议 2024 年四季度收入同比增长超过 40%，AI 功能月活达到 1500 万。</td>
+                <td>专业会议工具仍可通过 AI、容量和企业服务增强商业化。</td>
+              </tr>
+              <tr>
+                <td>钉钉组织基础</td>
+                <td>媒体报道钉钉企业组织数超过 2600 万、付费组织数超过 19 万。</td>
+                <td>钉钉会议的最大优势是组织关系和业务流程入口。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="position">
+      <aside class="section-kicker">
+        <h2>产品定位</h2>
+        <p>三家产品的护城河来自不同生态位，而不是单点功能差异。</p>
+      </aside>
+      <div class="prose">
+        <div class="table-wrap">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>维度</th>
+                <th>腾讯会议</th>
+                <th>飞书会议</th>
+                <th>钉钉会议</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>核心定位</td>
+                <td>专业云会议与会务基础设施</td>
+                <td>飞书套件内的智能会议与知识沉淀工具</td>
+                <td>钉钉组织数字化体系内的会议协作入口</td>
+              </tr>
+              <tr>
+                <td>主要入口</td>
+                <td>独立 App、Web、会议号、企业组织、Rooms</td>
+                <td>飞书日历、群聊、文档、妙记、飞书会议室</td>
+                <td>钉钉日历、群聊、组织、工作台、会议室</td>
+              </tr>
+              <tr>
+                <td>典型客户</td>
+                <td>跨企业沟通、金融路演、医药会议、教育、大型活动</td>
+                <td>研发、产品、咨询、新消费、项目制团队、知识密集型组织</td>
+                <td>中小企业、教育、制造、政企、已有钉钉组织的企业</td>
+              </tr>
+              <tr>
+                <td>核心卖点</td>
+                <td>稳定、容量、外部协作、Webinar、Rooms、SIP/H.323</td>
+                <td>会议内容结构化、AI 纪要、文档/任务/知识库闭环</td>
+                <td>组织覆盖、企业管理、AI 助理、应用平台、混合云</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="capability">
+      <aside class="section-kicker">
+        <h2>能力与定价</h2>
+        <p>基础会议能力趋同，差异集中在 AI、会议室、开放能力和采购模型。</p>
+      </aside>
+      <div class="prose">
+        <div class="grid-3">
+          <article class="card">
+            <h3>腾讯会议：专业会务能力更完整</h3>
+            <p>官网展示视频会议、网络研讨会、会议室 Rooms、MRA、开放平台和应用市场；网络研讨会最高支持 5 万人同时在线。</p>
+          </article>
+          <article class="card">
+            <h3>飞书会议：套件协同更自然</h3>
+            <p>视频会议与日历、文档、妙记、任务和知识库结合，会议内容更容易变成可复用资料。</p>
+          </article>
+          <article class="card">
+            <h3>钉钉会议：组织与部署能力强</h3>
+            <p>官网展示共享、标注、分组讨论、等候室、水印、会议 AI、SDK 和混合云部署。</p>
+          </article>
+        </div>
+        <div class="table-wrap">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>维度</th>
+                <th>腾讯会议</th>
+                <th>飞书会议</th>
+                <th>钉钉会议</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>AI 能力</td>
+                <td>AI 小助手、元宝纪要/AI 托管、智能录制、实时转写、多语言翻译。</td>
+                <td>智能会议纪要、会中实时总结、待办提炼、原文溯源、妙记转写。</td>
+                <td>会议 AI、智能纪要、实时字幕、实时翻译、AI 听记和问答。</td>
+              </tr>
+              <tr>
+                <td>企业管理</td>
+                <td>商业版/企业版管理后台，高级账号、资源统计、分配和复用。</td>
+                <td>依赖飞书管理后台，可查看视频会议和会议 AI 相关数据。</td>
+                <td>组织权限、后台质量检测、安全策略、API/SDK 和混合云。</td>
+              </tr>
+              <tr>
+                <td>公开定价</td>
+                <td>专业版年付折合 82.34 元/月/账号；商业版年付折合 115.84 元/月/账号；企业版联系销售。</td>
+                <td>官网版本页显示商业专业版 80 元/人/月；媒体称标准/专业/旗舰为 50/80/120 元/人/月。</td>
+                <td>免费版；会员版优惠价 84 元/月/人起；企业版展示为 600 元/月/会议室起。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="products">
+      <aside class="section-kicker">
+        <h2>单品分析</h2>
+        <p>每个产品都有清晰优势，也有无法靠单点功能弥补的结构性短板。</p>
+      </aside>
+      <div class="product-spread">
+        <article class="product-card">
+          <div>
+            <h3>腾讯会议</h3>
+            <p class="tag">独立云会议基础设施</p>
+          </div>
+          <div class="split">
+            <div>
+              <h4>优势</h4>
+              <p>外部会议和大规模会议能力最强，覆盖 220+ 国家及地区，拥有 Webinar、Rooms、MRA、SIP/H.323、开放平台和专家支持服务。采购颗粒度清晰，适合按会议需求拆分预算。</p>
+            </div>
+            <div>
+              <h4>短板</h4>
+              <p>会议后任务、文档、知识和业务系统闭环不如飞书和钉钉自然；专业版、商业版、企业版与增值项组合较复杂。</p>
+            </div>
+          </div>
+        </article>
+        <article class="product-card">
+          <div>
+            <h3>飞书会议</h3>
+            <p class="tag">会议内容知识资产化</p>
+          </div>
+          <div class="split">
+            <div>
+              <h4>优势</h4>
+              <p>会议与日历、群聊、文档、妙记、知识库、任务和多维表格连接，适合把会议加工为纪要、待办、结构化信息和知识问答。</p>
+            </div>
+            <div>
+              <h4>短板</h4>
+              <p>外部网络效应弱于腾讯会议；单独购买会议不划算；企业若已有其他协同体系，迁移成本较高。</p>
+            </div>
+          </div>
+        </article>
+        <article class="product-card">
+          <div>
+            <h3>钉钉会议</h3>
+            <p class="tag">组织数字化会议入口</p>
+          </div>
+          <div class="split">
+            <div>
+              <h4>优势</h4>
+              <p>组织覆盖广，与组织架构、审批、考勤、工作台和业务应用天然连接；API、SDK、RTC 和混合云部署适合业务系统嵌入。</p>
+            </div>
+            <div>
+              <h4>短板</h4>
+              <p>产品能力多但复杂；外部会议品牌心智弱于腾讯会议；AI 纪要需要权限、模板和业务流程治理才能真正闭环。</p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="future">
+      <aside class="section-kicker">
+        <h2>趋势与选型</h2>
+        <p>未来竞争焦点是会议之后的业务结果，而不是会议本身。</p>
+      </aside>
+      <div class="prose">
+        <div class="trend-list">
+          <article class="trend">
+            <div>
+              <h3>AI 会议 Agent 将取代单纯会议纪要</h3>
+              <p>下一阶段会自动识别议题、归档材料、生成行动项、分派任务、更新项目状态，并追踪未完成事项。</p>
+            </div>
+          </article>
+          <article class="trend">
+            <div>
+              <h3>会议室和硬件会重新成为增长点</h3>
+              <p>声源定位、多人分镜、会议室发言人识别、无线投屏、白板和会议室管理会成为混合办公中的新入口。</p>
+            </div>
+          </article>
+          <article class="trend">
+            <div>
+              <h3>收费从“时长/人数”转向“AI、存储、管理、行业方案”</h3>
+              <p>基础会议会越来越接近标配，真正的付费点是 AI 额度、长期存储、合规审计、行业模板和专家服务。</p>
+            </div>
+          </article>
+          <article class="trend">
+            <div>
+              <h3>套件化与专业化会长期并存</h3>
+              <p>外部会议、公共活动、大容量场景和会议室互联仍需要专业独立品牌；内部协同则依赖套件入口。</p>
+            </div>
+          </article>
+        </div>
+        <div class="grid-3" style="margin-top: 26px;">
+          <article class="card scenario">
+            <h3>对外销售 / 培训 / 大型活动</h3>
+            <p>优先腾讯会议。核心理由是稳定、容量、外部低门槛和会务保障。</p>
+          </article>
+          <article class="card scenario">
+            <h3>研发 / 产品 / 咨询 / 知识沉淀</h3>
+            <p>优先飞书会议。核心理由是会议可自然沉淀为文档、任务和知识库。</p>
+          </article>
+          <article class="card scenario">
+            <h3>组织管理 / 业务嵌入 / 混合云</h3>
+            <p>优先钉钉会议。核心理由是组织关系、后台管理、API/SDK 和部署能力。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="sources">
+      <aside class="section-kicker">
+        <h2>来源与方法</h2>
+        <p>优先使用官网、帮助中心、财报/官方披露、行业报告和主流媒体报道。</p>
+      </aside>
+      <div>
+        <ol class="source-list">
+          <li><a href="https://meeting.tencent.com/">腾讯会议官网</a> — 用户规模、全球覆盖、视频会议、Webinar、Rooms、MRA、AI 能力。</li>
+          <li><a href="https://meeting.tencent.com/buy/">腾讯会议定价与购买</a> — 专业版、商业版、企业版价格和购买入口。</li>
+          <li><a href="https://buy.cloud.tencent.com/price/tm">腾讯云腾讯会议 SaaS 定价</a> — 商业版高级账号和增值项定价。</li>
+          <li><a href="https://main.qcloudimg.com/raw/document/product/pdf/1095_48531_cn.pdf">腾讯会议购买指南 PDF</a> — 大型会议、Rooms 等增值项。</li>
+          <li><a href="https://meeting.tencent.com/news/cjzz250116.html">腾讯会议组织管理文章</a> — 企业组织、高级账号、管理后台。</li>
+          <li><a href="https://meeting.tencent.com/news/wzzx20260113.html">腾讯会议功能更新</a> — 多语言翻译和转写功能更新。</li>
+          <li><a href="https://static.www.tencent.com/uploads/2024/03/20/28fde3c13055712b43ca0598092ece2c.pdf">腾讯 2023 年报 PDF</a> — 生成式 AI 与商业化相关描述。</li>
+          <li><a href="https://www.news.cn/tech/20250319/c9f58d07c3dc463e9a189533fd1337d5/c.html">新华网</a> — 腾讯会议收入增长和 AI 功能月活，媒体口径。</li>
+          <li><a href="https://www.feishu.cn/product/video">飞书会议官网</a> — 飞书会议定位和核心能力。</li>
+          <li><a href="https://www.feishu.cn/service">飞书版本对比</a> — 飞书商业专业版定价和权益。</li>
+          <li><a href="https://www.feishu.cn/hc/zh-CN/articles/360049067600-%E9%A3%9E%E4%B9%A6%E5%AE%9A%E4%BB%B7%E7%89%88%E6%9C%AC%E4%BB%8B%E7%BB%8D">飞书定价版本介绍</a> — 飞书不同版本权益说明。</li>
+          <li><a href="https://www.feishu.cn/hc/zh-CN/articles/368497928122-%E5%BF%AB%E9%80%9F%E7%8E%A9%E8%BD%AC%E8%A7%86%E9%A2%91%E4%BC%9A%E8%AE%AE">飞书视频会议快速上手</a> — 视频会议入门和容量描述。</li>
+          <li><a href="https://www.feishu.cn/hc/zh-CN/articles/360049067808-%E6%8F%90%E9%AB%98%E8%A7%86%E9%A2%91%E4%BC%9A%E8%AE%AE%E5%8F%82%E4%BC%9A%E4%BA%BA%E6%95%B0%E4%B8%8A%E9%99%90">飞书提高视频会议参会人数上限</a> — 会议容量扩展。</li>
+          <li><a href="https://www.feishu.cn/hc/zh-CN/articles/360049067848">飞书管理员查看视频会议使用数据</a> — 管理后台和会议 AI 数据。</li>
+          <li><a href="https://www.feishu.cn/content/article/7577317993749269689">飞书智能会议纪要</a> — 会中总结、会后回顾、待办提炼和知识复用。</li>
+          <li><a href="https://www.feishu.cn/content/article/7594772423082396858">飞书智能会议纪要 AI 功能</a> — 可视化纪要、智能插图等。</li>
+          <li><a href="https://www.feishu.cn/content/article/7600354889516075990">飞书 AI 智能转写</a> — 妙记转写、说话人识别、同步能力。</li>
+          <li><a href="https://www.dingtalk.com/meeting?spm=a213l2.13146415.0.0.7f1571e1drz65d">钉钉会议官网</a> — 钉钉会议功能、定价、AI、Rooms、安全能力。</li>
+          <li><a href="https://alidocs.dingtalk.com/i/p/Y7kmbokZp3pgGLq2/docs/jb9Y4gmKWr7lnGe9sdPd3PYxVGXn6lpz">钉钉会议计费文档</a> — 钉钉会议计费规格。</li>
+          <li><a href="https://alidocs.dingtalk.com/i/p/Y7kmbokZp3pgGLq2/docs/Y7kmbp64OZojzLq2">钉钉会议开放能力文档</a> — API、SDK、RTC、混合云。</li>
+          <li><a href="https://page.dingtalk.com/wow/dingtalk/default/dingtalk/meeting_hybrid_cloud">钉钉会议混合云部署</a> — 混合云和内网部署价值。</li>
+          <li><a href="https://apps.apple.com/cn/app/%E9%92%89%E9%92%89/id930368978">App Store 钉钉页面</a> — 钉钉 AI、会议 AI、全球化能力描述。</li>
+          <li><a href="https://finance.sina.com.cn/stock/zqgd/2025-08-25/doc-infnefti4004087.shtml">新浪财经</a> — 钉钉组织数、付费组织和 AI 应用数，媒体口径。</li>
+          <li><a href="https://pdf.dfcfw.com/pdf/H3_AP202412061641205936_1.pdf">艾瑞协同办公报告 PDF</a> — 市场规模和增长预测。</li>
+          <li><a href="https://www.21jingji.com/article/20251205/herald/7dd1dd58b4c6135a57b884a3e6758ba3.html">21 财经</a> — QuestMobile 口径的协同办公覆盖率和月活数据。</li>
+          <li><a href="https://www.jiemian.com/article/14031508.html">界面新闻</a> — 飞书商业化压力、ARR 增长等媒体观察。</li>
+          <li><a href="https://m.mp.oeeee.com/a/BAAFRD000020240908997820.html">南方都市报</a> — 飞书 ARR、客户和多维表格数据，媒体口径。</li>
+        </ol>
+        <div class="method">
+          <p>研究问题：三家会议产品的官方能力、版本权益和定价分别是什么；三家产品在协同办公市场中的位置、商业化阶段和用户规模有何差异；优势和短板来自功能差异还是生态与商业模式差异；AI、会议室、混合云、外部会议和知识沉淀会如何改变未来竞争。</p>
+          <p>注：会议产品定价、权益和 AI 功能迭代较快；涉及市场份额、ARR、MAU 等非上市公司未直接披露的数据，均按第三方或媒体口径处理。</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>文件版本：2026-06-30 · 主题：⑤ research-journal 现代研究刊物风 · 适用场景：行业研究 / 产品竞争分析 / 客户简报。</p>
+    </footer>
+  </main>
+</body>
+</html>
